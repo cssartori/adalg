@@ -62,6 +62,7 @@ unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsi
 				}else{
 					unsigned int ndu = min(dist[u], dist[v]+g[*ie].weight);
 					if(ndu < dist[u]){
+						dist[u] = ndu;
 						h.update_key(ndu, u);
 					}
 				}

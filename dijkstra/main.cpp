@@ -1,7 +1,7 @@
 #include "dgraph.h"
 #include <cstdio>
 #include <iostream>
-
+#include <boost/graph/dijkstra_shortest_paths.hpp>
 using namespace boost;
 using namespace std;
 
@@ -22,7 +22,14 @@ int main(int argc, char **argv){
 	//compute shortest path
 	int dst = dijkstra_nheap(g, s, t);		
 	//print result
-	printf("%i\n", dst);	
+	printf("My result: %i\n", dst);	
+	
+	
+  	vector<unsigned> dist(n);
+  	vector<unsigned> pred(n);
+  	dijkstra_shortest_paths(g, s, weight_map(get(&EdgeData::weight,g)).distance_map(&dist[0]).predecessor_map(&pred[0]));
+  	cerr << "Distance between " << s << " and " << t << " is " << dist[t] << endl;
+	
  		
 	return 0;
 }
