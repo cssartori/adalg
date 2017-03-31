@@ -95,20 +95,25 @@ int NHeap::getmin(){
 
 //Removes the top-most element, i.e., the minimum
 void NHeap::deletemin(){
-	if(heap.size() > 1){
+	if(heap.size() >= 1){
 		pos_heap.erase(data[0]);
 		heap[0] = heap.back();
 		data[0] = data.back();
 		heap.pop_back();
 		data.pop_back();
-		pos_heap[data[0]] = 0;
-		heapify_down(data[0]);
-	}else if(heap.size() == 1){
-		pos_heap.erase(data[0]);
-		heap.pop_back();
-		data.pop_back();
+		
+		if(heap.size() > 1){
+			pos_heap[data[0]] = 0;
+			heapify_down(data[0]);
+		}
 	}
 }
+
+//true if heap is empty
+bool NHeap::is_empty(){
+	return (heap.size() == 0);
+}
+
 //Return the parent of node i
 int NHeap::parent(int i){
 	return floor((i-1)/n);

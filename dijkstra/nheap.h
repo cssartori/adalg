@@ -28,6 +28,8 @@ public:
 	void update_key(int nkey, int e);
 	//Removes the top-most element, i.e., the minimum
 	void deletemin();
+	//true if heap is empty
+	bool is_empty();
 	//Return the minimum element
 	int getmin();
 	void print();
