@@ -20,6 +20,9 @@ private:
 	int first_child(int i);
 
 public:
+	int n_swaps;
+	
+
 	//Create a new n-heap with an unique item (key, e)
 	NHeap(int n, int key, int e);
 	//Insert a new item in the heap (key, e)

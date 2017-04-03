@@ -52,6 +52,9 @@ int main(int argc, char *argv[]) {
       }
  
  
+ 	//cout << "Num edges = " << num_edges(g) << "\n";
+ 	
+ 
   // (2) print example path
   unsigned src = lrand48()%num_vertices(g);
   unsigned dst = lrand48()%num_vertices(g);
@@ -64,8 +67,8 @@ int main(int argc, char *argv[]) {
   // (3) print out in DIMACS challenge format
   cout << "p sp " << num_vertices(g) << " " << num_edges(g) << endl;
   graph_traits<Graph>::edge_iterator eb, ee;
-  for ( tie(eb, ee)=edges(g); eb != ee; eb++)
-    cout << "a " << source(*eb,g)+1 << " " << target(*eb, g)+1 << " " << g[*eb].weight << endl;
+//  for ( tie(eb, ee)=edges(g); eb != ee; eb++)
+//    cout << "a " << source(*eb,g)+1 << " " << target(*eb, g)+1 << " " << g[*eb].weight << endl;
 }
 
 

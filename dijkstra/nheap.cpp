@@ -23,10 +23,11 @@ void NHeap::insert(int key, int e){
 //Update the key of an item e
 void NHeap::update_key(int nkey, int e){
 	int i = pos_heap[e];
+	int okey = heap[i]; //old key
 	heap[i] = nkey;
-	if(heap[i] < heap[parent(i)]){ //key is smaller than parent's
+	if(okey > heap[i]){ //new key is smaller than previous
 		heapify_up(e);
-	}else{ //check if respects propoperties w.r.t. children
+	}else if (okey < heap[i]){ //new key is bigger than previous: check if respects propoperties w.r.t. children
 		heapify_down(e);
 	}
 }
@@ -38,6 +39,7 @@ void NHeap::heapify_up(int e){
 		return;
 	
 	if(heap[i] < heap[parent(i)]){ //key is smaller than parent's
+		n_swaps++;
 		//swap key
 		int temp = heap[i];
 		heap[i] = heap[parent(i)];
@@ -69,6 +71,8 @@ void NHeap::heapify_down(int e){
 	}
 	if(min == i) //e is not smaller than any of its children
 		return;	
+	
+	n_swaps++;
 	
 	//swap key
 	int temp = heap[min];
