@@ -3,28 +3,29 @@
 #include <vector>
 #include <unordered_map>
 
+
+//template <class HT>
 class NHeap{
 private:
 	std::vector<int> heap; //heap itself, ordering the keys
 	std::vector<int> data; //auxilary vector containing the data of each key
-	std::unordered_map<int, int> pos_heap; //a map to point where in the heap each item is 	
-	int n; //heap dimension : n-heap
+	std::unordered_map<int, unsigned int> pos_heap; //a map to point where in the heap each item is 	
+	unsigned int n; //heap dimension : n-heap
 
 	//Sifts an item e up, when necessary
-	void heapify_up(int key);
+	void heapify_up(unsigned int i);
 	//Sifts an item e down, when necessary
-	void heapify_down(int key);
+	void heapify_down(unsigned int i);
 	//Return the parent of node i
-	int parent(int i);
+	unsigned int parent(unsigned int i);
 	//Return first child of node i
-	int first_child(int i);
+	unsigned int first_child(unsigned int i);
 
 public:
-	int n_swaps;
+	unsigned int n_swaps;
 	
-
 	//Create a new n-heap with an unique item (key, e)
-	NHeap(int n, int key, int e);
+	NHeap(unsigned int n, unsigned int m);
 	//Insert a new item in the heap (key, e)
 	void insert(int key, int e);
 	//Update the key of an item e

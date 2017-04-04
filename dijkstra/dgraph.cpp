@@ -43,11 +43,14 @@ Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m) {
 // Computes the shortest path from node s to t in graph g using Dijkstra's algorithm and n-heaps
 unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsigned int nh){
 
-	NHeap h(nh, 0, s);
+	NHeap h(nh, num_vertices(g));
 	vector<bool> visited(num_vertices(g), false); //no node has been visited yet
 	vector<unsigned int> dist(num_vertices(g), MAX_DIST);
+
 	dist[s] = 0;
+	h.insert(0, s);
 	
+	size_t vc = 1;
 	while(!h.is_empty()){
 		int v = h.getmin(); h.deletemin();
 		visited[v] = true;

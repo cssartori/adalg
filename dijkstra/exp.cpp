@@ -14,13 +14,29 @@ vector<double> e(NUM_EXP+1, 0.0);
 
 
 void test_delete(){
-
+	srand(time(0));
+	
+	NHeap h(2, 1, 1); h.deletemin();
+	
+	for(int i=1;i<=NUM_EXP;i++){
+		int N = pow(2, i) - 1;
+		int n = N;
+		
+		while(n > 0){
+			n--;
+			h.insert(rand()%N, n);
+			
+			
+		}
+		
+		
+	}
+	
 }
 
 void test_update(){
 
-	int i=1;
-	while(i <= 20){
+	for(int i=1;i<=NUM_EXP;i++){
 		int n = pow(2, i) - 1;
 		int k = pow(2, i) + 1;
 		int el = 0;
@@ -52,9 +68,7 @@ void test_update(){
 		
 		swaps[i] = h.n_swaps;
 		times[i] = elapsed_seconds.count();
-		e[i] = pow(2, i)*(log(i)/log(2));
-		
-		i++;
+		e[i] = pow(2, i)*i;
 	}
 
 }
@@ -71,7 +85,8 @@ void test_insert(){
 	int ninserts = 1;
 	std::chrono::time_point<std::chrono::system_clock> start, end;
    	start = std::chrono::system_clock::now();
-	while(n > 0 && i < NUM_EXP+1){
+   	
+	for(int n=pow(2, NUM_EXP)-1;n > 0 && i < NUM_EXP+1;n--){
 		h.insert(n, n);
 		ninserts++;
 		if(pow(2, i)-1 == ninserts){
@@ -83,7 +98,6 @@ void test_insert(){
 			e[i] = e[i-1] + (i-1)*pow(2,i-1); //pow(2,i)*(log(i+1)/log(2));
 			i++;
 		}
-		n--;
 	}
 
 }

@@ -5,10 +5,10 @@
 using namespace std;
 
 //Create a new n-heap with an unique item (key, e)
-NHeap::NHeap(int n, int key, int e){
-	this->heap.push_back(key);
-	this->data.push_back(e);
-	this->pos_heap[e] = 0;
+NHeap::NHeap(unsigned int n, unsigned int m){
+	this->heap.reserve(m);
+	this->data.reserve(m);
+	this->pos_heap.reserve(m);
 	this->n = n;
 }
 
@@ -17,7 +17,7 @@ void NHeap::insert(int key, int e){
 	heap.push_back(key);
 	data.push_back(e);
 	pos_heap[e] = heap.size()-1;
-	heapify_up(e);
+	heapify_up(heap.size()-1);
 }
 
 //Update the key of an item e
@@ -26,20 +26,20 @@ void NHeap::update_key(int nkey, int e){
 	int okey = heap[i]; //old key
 	heap[i] = nkey;
 	if(okey > heap[i]){ //new key is smaller than previous
-		heapify_up(e);
+		heapify_up(i);
 	}else if (okey < heap[i]){ //new key is bigger than previous: check if respects propoperties w.r.t. children
-		heapify_down(e);
+		heapify_down(i);
 	}
 }
 
 //Sifts an item e up, when necessary
-void NHeap::heapify_up(int e){
-	int i = pos_heap[e];
+void NHeap::heapify_up(unsigned int i){
 	if(i == 0)
 		return;
 	
 	if(heap[i] < heap[parent(i)]){ //key is smaller than parent's
 		n_swaps++;
+		
 		//swap key
 		int temp = heap[i];
 		heap[i] = heap[parent(i)];
@@ -52,20 +52,19 @@ void NHeap::heapify_up(int e){
 		data[parent(i)] = temp;
 		
 		//swap position pointer
-		pos_heap[e] = parent(i);
+		pos_heap[temp] = parent(i);
 		pos_heap[dpar] = i;
 
-		heapify_up(data[parent(i)]);
+		heapify_up(parent(i));
 	}
 }
 
 //Sifts an item e down, when necessary
-void NHeap::heapify_down(int e){
-	int i = pos_heap[e];
-	int min = i;
+void NHeap::heapify_down(unsigned int i){
+	unsigned int min = i;
 	
 	//get smallest child
-	for(int j=first_child(i);j<heap.size();j++){
+	for(unsigned int j=first_child(i); j<heap.size() ;j++){
 		if(heap[min] > heap[j])
 			min = j;
 	}
@@ -81,15 +80,15 @@ void NHeap::heapify_down(int e){
 	
 	//swap data
 	int dmin = data[min];
-	temp = data[min];
-	data[min] = data[i];
-	data[i] = temp;
+	temp = data[i];
+	data[i] = data[min];
+	data[min] = temp;
 	
 	//swap position pointer
-	pos_heap[e] = min;
+	pos_heap[temp] = min;
 	pos_heap[dmin] = i;
 	
-	heapify_down(data[min]);
+	heapify_down(min);
 }	
 
 //Return the minimum element
@@ -119,12 +118,12 @@ bool NHeap::is_empty(){
 }
 
 //Return the parent of node i
-int NHeap::parent(int i){
-	return floor((i-1)/n);
+unsigned int NHeap::parent(unsigned int i){
+	return (i-1)/n;
 }
 
 //Return first child of node i
-int NHeap::first_child(int i){
+unsigned int NHeap::first_child(unsigned int i){
 	return n*i+1;
 }
 
