@@ -1,13 +1,13 @@
 #ifndef __NHEAP_H__
 #define __NHEAP_H__
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 class NHeap{
 private:
 	std::vector<int> heap; //heap itself, ordering the keys
 	std::vector<int> data; //auxilary vector containing the data of each key
-	std::map<int, int> pos_heap; //a map to point where in the heap each item is 	
+	std::unordered_map<int, int> pos_heap; //a map to point where in the heap each item is 	
 	int n; //heap dimension : n-heap
 
 	//Sifts an item e up, when necessary
