@@ -16,7 +16,7 @@ vector<double> e(NUM_EXP+1, 0.0);
 void test_delete(){
 	srand(time(0));
 	
-	NHeap h(2, 1, 1); h.deletemin();
+	NHeap h(2);
 	
 	for(int i=1;i<=NUM_EXP;i++){
 		int N = pow(2, i) - 1;
@@ -79,7 +79,9 @@ void test_insert(){
 	int n = pow(2, NUM_EXP)-1; //limit
 	int i=2;
 	
-	NHeap h(2, n, n);
+	NHeap h(2, n);
+	h.insert(n, n);
+	
 	h.n_swaps = 0;
 	n--;
 	int ninserts = 1;

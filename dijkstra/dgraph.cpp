@@ -1,9 +1,25 @@
-#include "nheap.h"
+#include "nheap.hpp"
 #include "dgraph.h"
 #include <vector>
 
 using namespace std;
 using namespace boost;
+
+class Hpair{
+public:
+	unsigned int k;
+	unsigned int n;
+	
+	Hpair(unsigned int k, unsigned int n){
+		this->k = k;
+		this->n = n;
+	};
+	
+	bool operator<(const Hpair& c) const{
+		return this->k < c.k;
+	};
+};
+
 
 // Read a graph in DIMACS format from an input stream and return a Graph
 Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m) {
@@ -16,11 +32,8 @@ Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m) {
   	std::stringstream linestr;
   	linestr.str(line);
   	linestr >> dummy >> dummy >> *n >> *m;
-  	
-  	//init graph
-  	for(unsigned int i=0; i<*n ; i++)
-    	add_vertex(g);
-  	
+
+  	  	
   	unsigned i=0;
   	while (i<*m) {
     	getline(in,line);
@@ -30,7 +43,7 @@ Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m) {
       		char ac;
       		arc >> ac >> u >> v >> w;
      		// process arc (u,v) with weight w      		
-      		Edge e = add_edge(u,v,g).first;
+      		Edge e = add_edge(u-1,v-1,g).first;
 			g[e].weight = w;
       		
       		i++;
@@ -43,35 +56,37 @@ Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m) {
 // Computes the shortest path from node s to t in graph g using Dijkstra's algorithm and n-heaps
 unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsigned int nh){
 
-	NHeap h(nh, num_vertices(g));
+	NHeap<Hpair> h(nh, num_vertices(g));
 	vector<bool> visited(num_vertices(g), false); //no node has been visited yet
 	vector<unsigned int> dist(num_vertices(g), MAX_DIST);
 
 	dist[s] = 0;
-	h.insert(0, s);
+	h.insert(Hpair(0, s));
 	
 	size_t vc = 1;
 	while(!h.is_empty()){
-		int v = h.getmin(); h.deletemin();
+		int v = h.getmin().n; h.deletemin();
 		visited[v] = true;
-		
+		vc++;
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
 			int u = target(*ie, g);
 			if(!visited[u]){
 				if(dist[u] == MAX_DIST){ //distance is "infinity"
 					dist[u] = dist[v] +  g[*ie].weight; //update u distance
-					h.insert(dist[u], u);
+					h.insert(Hpair(dist[u], u));
 				}else{
 					unsigned int ndu = min(dist[u], dist[v]+g[*ie].weight);
 					if(ndu < dist[u]){
+						h.update_key(Hpair(dist[u], u), Hpair(ndu, u));
 						dist[u] = ndu;
-						h.update_key(ndu, u);
 					}
 				}
 			}
 		}			
 	}
+
+	printf("Visited %i\n", vc);
 
 	return dist[t];
 }
