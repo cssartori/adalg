@@ -33,7 +33,10 @@ void test_delete(){
 }
 
 void test_update(){
-
+	
+	vector<int> els;
+	els.reserve(pow(2, NUM_EXP)*2+1);	
+	
 	for(int i=1;i<=NUM_EXP;i++){
 		int n = pow(2, i) - 1;
 		int k = pow(2, i) + 1;
@@ -48,7 +51,6 @@ void test_update(){
 		n = n+1;
 		k = k+1;
 		
-		vector<int> els;
 		for(int x=0;x<n;x++){
 			h.insert(k, el++);
 			els.push_back(el);
@@ -60,7 +62,7 @@ void test_update(){
 	   	start = std::chrono::system_clock::now();	
 		
 		for(int x=0;x<els.size();x++)
-			h.update_key(k--, els[x]);	
+			h.update_key(els[x], k--);	
 		
 	   	end = std::chrono::system_clock::now();
 		std::chrono::duration<double> elapsed_seconds = end-start;			

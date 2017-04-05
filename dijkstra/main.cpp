@@ -12,58 +12,38 @@
 using namespace boost;
 using namespace std;
 
+//void test(Graph& g, unsigned int n, unsigned int nh=2){
+//	srand(time(0));
+//	
+//	const unsigned int NT = n/2;
+//	
+//	unsigned int i = 0;
+//	
+//	while(i < NT){
+//		int s = rand()%n;
+//		int t = rand()%n;
+//	
+//		unsigned int dst = dijkstra_nheap(g, s, t, nh);
+//		printf("%i %i -> %i: m = %lu ", i, s, t, dst);
+//		
+//		vector<unsigned> dist(n);
+//  		vector<unsigned> pred(n);
+//  		dijkstra_shortest_paths(g, s, weight_map(get(&EdgeData::weight,g)).distance_map(&dist[0]).predecessor_map(&pred[0]));
+//  		
+//	  	printf("| b = %lu\n", dist[t]);
+//  		if(dst != dist[t])
+//  			exit(-1);
 
-void test(Graph& g, unsigned int n, unsigned int nh=2){
-	srand(time(0));
-	
-	const unsigned int NT = n/2;
-	
-	unsigned int i = 0;
-	
-	while(i < NT){
-		int s = rand()%n;
-		int t = rand()%n;
-	
-		unsigned int dst = dijkstra_nheap(g, s, t, nh);
-		printf("%i %i -> %i: m = %lu ", i, s, t, dst);
-		
-		vector<unsigned> dist(n);
-  		vector<unsigned> pred(n);
-  		dijkstra_shortest_paths(g, s, weight_map(get(&EdgeData::weight,g)).distance_map(&dist[0]).predecessor_map(&pred[0]));
-  		
-	  	printf("| b = %lu\n", dist[t]);
-  		if(dst != dist[t])
-  			exit(-1);
+//  		i++;	
+//	}
 
-  		i++;	
-	}
-
-	return;
-}
+//	return;
+//}
 
 
 
 int main(int argc, char **argv){
 	
-//	unsigned int n1 = pow(2, 25) - 1;
-//	NHeap h(2, n1);
-//	
-//	
-//	for(int i=0;i<200;i++){
-//		h.insert(200-i, 200-i);
-//	}
-//	
-//	h.update_key(100, 500);
-//	h.update_key(101, 499);
-//	
-//	for(int i=0;i<200;i++){
-//		printf("%i, %i\n", h.getminKey(), h.getmin());
-//		h.deletemin();
-//	}
-//		
-//	int k;
-//	cin >> k;
-
 	if(argc < 3){
 		printf("Usage: %s [source node] [target node]\n", argv[0]);
 		return 0;
@@ -77,29 +57,24 @@ int main(int argc, char **argv){
 	
 	std::chrono::time_point<std::chrono::system_clock> start, end;
 	std::chrono::duration<double> elapsed_seconds;	
-   	start = std::chrono::system_clock::now();	
-	
+
 	//read graph from stdin	
 	Graph g = read_dimacs(std::cin, &n, &m);
-	
-	//test(g, n); 	return 0;
-	
-	end = std::chrono::system_clock::now();
-	elapsed_seconds = end-start;
-	printf("Graph read in %.2f sec.\n", elapsed_seconds.count());
-	
+		
    	start = std::chrono::system_clock::now();
-   	
 	//compute shortest path
 	unsigned int dst = dijkstra_nheap(g, s, t);		
 	//print result
-	printf("My result: %lu\n", dst);	
+	if(dst != MAX_DIST)
+		cout << dst << endl;
+	else
+		cout << "inf" << endl;
 	
 	end = std::chrono::system_clock::now();
 	elapsed_seconds = end-start;	
-
 	printf("Time: %.2f sec.\n", elapsed_seconds.count());
 	
+//	
   	vector<unsigned> dist(n);
   	vector<unsigned> pred(n);
   	dijkstra_shortest_paths(g, s, weight_map(get(&EdgeData::weight,g)).distance_map(&dist[0]).predecessor_map(&pred[0]));

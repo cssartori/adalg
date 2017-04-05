@@ -12,7 +12,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 
-const int MAX_DIST = 1e6; 
+const unsigned int MAX_DIST = 1e8; 
 
 //a vertex's data
 typedef struct {
