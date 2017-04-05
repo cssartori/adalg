@@ -4,30 +4,32 @@
 
 using namespace std;
 
-//Create a new n-heap with an unique item (key, e)
+//Create a new n-heap to support up to m-int-elements with values [0...m-1]
 NHeap::NHeap(unsigned int n, unsigned int m){
 	this->heap.reserve(m);
 	this->data.reserve(m);
-	this->pos_heap.reserve(m);
+	this->pos_heap.assign(m, 0);
 	this->n = n;
 }
 
 //Insert a new item in the heap (key, e)
-void NHeap::insert(int key, int e){
+void NHeap::insert(unsigned int key, unsigned int e){
 	heap.push_back(key);
 	data.push_back(e);
 	pos_heap[e] = heap.size()-1;
+	
 	heapify_up(heap.size()-1);
 }
 
 //Update the key of an item e
-void NHeap::update_key(int nkey, int e){
-	int i = pos_heap[e];
-	int okey = heap[i]; //old key
+void NHeap::update_key(unsigned int e, unsigned int nkey){
+	unsigned int i = pos_heap[e];
+	unsigned int okey = heap[i]; //old key
 	heap[i] = nkey;
-	if(okey > heap[i]){ //new key is smaller than previous
+	
+	if(nkey < okey){ //new key is smaller than previous
 		heapify_up(i);
-	}else if (okey < heap[i]){ //new key is bigger than previous: check if respects propoperties w.r.t. children
+	}else if (nkey > okey){ //new key is bigger than previous: check if respects propoperties w.r.t. children
 		heapify_down(i);
 	}
 }
@@ -41,12 +43,12 @@ void NHeap::heapify_up(unsigned int i){
 		n_swaps++;
 		
 		//swap key
-		int temp = heap[i];
+		unsigned int temp = heap[i];
 		heap[i] = heap[parent(i)];
 		heap[parent(i)] = temp;
 		
 		//swap data
-		int dpar = data[parent(i)];
+		unsigned int dpar = data[parent(i)];
 		temp = data[i];
 		data[i] = data[parent(i)];
 		data[parent(i)] = temp;
@@ -64,8 +66,8 @@ void NHeap::heapify_down(unsigned int i){
 	unsigned int min = i;
 	
 	//get smallest child
-	for(unsigned int j=first_child(i); j<heap.size() ;j++){
-		if(heap[min] > heap[j])
+	for(unsigned int j=first_child(i); j<heap.size() && j-first_child(i) < n;j++){
+		if(heap[j] < heap[min])
 			min = j;
 	}
 	if(min == i) //e is not smaller than any of its children
@@ -74,12 +76,12 @@ void NHeap::heapify_down(unsigned int i){
 	n_swaps++;
 	
 	//swap key
-	int temp = heap[min];
+	unsigned int temp = heap[min];
 	heap[min] = heap[i];
 	heap[i] = temp;
 	
 	//swap data
-	int dmin = data[min];
+	unsigned int dmin = data[min];
 	temp = data[i];
 	data[i] = data[min];
 	data[min] = temp;
@@ -92,14 +94,18 @@ void NHeap::heapify_down(unsigned int i){
 }	
 
 //Return the minimum element
-int NHeap::getmin(){
+unsigned int NHeap::getmin(){
 	return data[0];
+}
+
+//Return the minimum element
+unsigned int NHeap::getminKey(){
+	return heap[0];
 }
 
 //Removes the top-most element, i.e., the minimum
 void NHeap::deletemin(){
 	if(heap.size() >= 1){
-		pos_heap.erase(data[0]);
 		heap[0] = heap.back();
 		data[0] = data.back();
 		heap.pop_back();
@@ -107,7 +113,7 @@ void NHeap::deletemin(){
 		
 		if(heap.size() > 1){
 			pos_heap[data[0]] = 0;
-			heapify_down(data[0]);
+			heapify_down(0);
 		}
 	}
 }

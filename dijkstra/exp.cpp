@@ -27,9 +27,7 @@ void test_delete(){
 			h.insert(rand()%N, n);
 			
 			
-		}
-		
-		
+		}	
 	}
 	
 }
@@ -103,7 +101,9 @@ void test_insert(){
 	}
 
 }
-	
+
+
+
 
 
 int main(int argc, char **argv){

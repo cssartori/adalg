@@ -1,24 +1,9 @@
-#include "nheap.hpp"
+#include "nheap.h"
 #include "dgraph.h"
 #include <vector>
 
 using namespace std;
 using namespace boost;
-
-class Hpair{
-public:
-	unsigned int k;
-	unsigned int n;
-	
-	Hpair(unsigned int k, unsigned int n){
-		this->k = k;
-		this->n = n;
-	};
-	
-	bool operator<(const Hpair& c) const{
-		return this->k < c.k;
-	};
-};
 
 
 // Read a graph in DIMACS format from an input stream and return a Graph
@@ -56,37 +41,37 @@ Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m) {
 // Computes the shortest path from node s to t in graph g using Dijkstra's algorithm and n-heaps
 unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsigned int nh){
 
-	NHeap<Hpair> h(nh, num_vertices(g));
+	NHeap h(nh, num_vertices(g));
 	vector<bool> visited(num_vertices(g), false); //no node has been visited yet
 	vector<unsigned int> dist(num_vertices(g), MAX_DIST);
 
 	dist[s] = 0;
-	h.insert(Hpair(0, s));
+	h.insert(0, s);
 	
 	size_t vc = 1;
 	while(!h.is_empty()){
-		int v = h.getmin().n; h.deletemin();
-		visited[v] = true;
-		vc++;
+		unsigned int v = h.getmin(); h.deletemin();
+		visited[v] = true;	
+//		vc++;
+//		printf("\rProc: %lu", vc);
+//		fflush(stdin);	
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
-			int u = target(*ie, g);
+			unsigned int u = target(*ie, g);
 			if(!visited[u]){
 				if(dist[u] == MAX_DIST){ //distance is "infinity"
 					dist[u] = dist[v] +  g[*ie].weight; //update u distance
-					h.insert(Hpair(dist[u], u));
+					h.insert(dist[u], u);
 				}else{
 					unsigned int ndu = min(dist[u], dist[v]+g[*ie].weight);
 					if(ndu < dist[u]){
-						h.update_key(Hpair(dist[u], u), Hpair(ndu, u));
+						h.update_key(u, ndu);
 						dist[u] = ndu;
 					}
 				}
 			}
 		}			
 	}
-
-	printf("Visited %i\n", vc);
-
+	//printf("\n");
 	return dist[t];
 }

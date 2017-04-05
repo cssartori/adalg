@@ -1,5 +1,5 @@
-//#ifndef __DGRAPH_H__
-//#define __DGRAPH_H__
+#ifndef __DGRAPH_H__
+#define __DGRAPH_H__
 
 /**
  * Code adapted from https://www.inf.ufrgs.br/~MRPRITT/doku.php?id=inf05016:2017-1-trabalhos
@@ -37,4 +37,4 @@ Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m);
 unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsigned int nh=2);
 
 
-//#endif //__DGRAPH_H__
+#endif //__DGRAPH_H__
