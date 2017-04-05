@@ -52,9 +52,7 @@ unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsi
 	while(!h.is_empty()){
 		unsigned int v = h.getmin(); h.deletemin();
 		visited[v] = true;	
-//		vc++;
-//		printf("\rProc: %lu", vc);
-//		fflush(stdin);	
+	
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
 			unsigned int u = target(*ie, g);
@@ -72,6 +70,6 @@ unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsi
 			}
 		}			
 	}
-	//printf("\n");
+	
 	return dist[t];
 }

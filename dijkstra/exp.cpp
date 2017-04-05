@@ -4,19 +4,19 @@
 #include <math.h>
 #include <vector>
 
-const int NUM_EXP = 20;
+const int NUM_EXP = 25;
 
 using namespace std;
 
-vector<int> swaps(NUM_EXP+1, 0);
+vector<unsigned int> swaps(NUM_EXP+1, 0);
 vector<double> times(NUM_EXP+1, 0.0);
-vector<double> e(NUM_EXP+1, 0.0);
+vector<unsigned int> e(NUM_EXP+1, 0.0);
 
 
 void test_delete(){
 	srand(time(0));
 	
-	NHeap h(2);
+	NHeap h(2, pow(2, NUM_EXP)+1);
 	
 	for(int i=1;i<=NUM_EXP;i++){
 		int N = pow(2, i) - 1;
@@ -39,7 +39,8 @@ void test_update(){
 		int k = pow(2, i) + 1;
 		int el = 0;
 		
-		NHeap h(2, k, el++);
+		NHeap h(2, n*2+1);
+		h.insert(k, el++);
 		
 		for(int x=0;x<n-1;x++)
 			h.insert(k, el++);
@@ -66,7 +67,7 @@ void test_update(){
 		
 		swaps[i] = h.n_swaps;
 		times[i] = elapsed_seconds.count();
-		e[i] = pow(2, i)*i;
+		e[i] = i*pow(2, i);
 	}
 
 }
@@ -74,29 +75,30 @@ void test_update(){
 
 void test_insert(){
 
-	int n = pow(2, NUM_EXP)-1; //limit
-	int i=2;
+	unsigned int n = pow(2, NUM_EXP)-1; //limit
+	unsigned int i=2;
 	
 	NHeap h(2, n);
 	h.insert(n, n);
 	
 	h.n_swaps = 0;
 	n--;
-	int ninserts = 1;
+	unsigned int ninserts = 1;
 	std::chrono::time_point<std::chrono::system_clock> start, end;
    	start = std::chrono::system_clock::now();
+   	unsigned int NI = pow(2,i)-1;
    	
-	for(int n=pow(2, NUM_EXP)-1;n > 0 && i < NUM_EXP+1;n--){
+	for(;n > 0 && i < NUM_EXP+1;n--){
 		h.insert(n, n);
 		ninserts++;
-		if(pow(2, i)-1 == ninserts){
+		if(NI == ninserts){
 			swaps[i] = h.n_swaps;
-			//h.n_swaps = 0;
 		   	end = std::chrono::system_clock::now();
 			std::chrono::duration<double> elapsed_seconds = end-start;			
 			times[i] = elapsed_seconds.count();
-			e[i] = e[i-1] + (i-1)*pow(2,i-1); //pow(2,i)*(log(i+1)/log(2));
+			e[i] = (i-1)*pow(2,i-1);
 			i++;
+			NI = ((NI+1)*2)-1;
 		}
 	}
 
@@ -104,16 +106,14 @@ void test_insert(){
 
 
 
-
-
 int main(int argc, char **argv){
 
 	if(argc < 2){
-		printf("usage: %s [test type]\n");
+		printf("usage: %s [test type]\n", argv[0]);
 		return 0;
 	}
 	
-	char tt = argv[1];	
+	char tt = argv[1][0];	
 	
 	if(tt == 'i')
 		test_insert();
@@ -122,9 +122,9 @@ int main(int argc, char **argv){
 	else if(tt == 'd')
 		test_delete();
 	
-			
-	for(int j=0;j<swaps.size();j++){
-		printf("%i\ts = %i | e = %.2f\t\tt=%.2f\n", j, swaps[j], e[j], times[j]);
+	printf("%i \t\t%u\t\t%u\t\t%lf\n", 0, swaps[0], e[0], times[0]);	
+	for(int j=1;j<swaps.size();j++){
+		printf("%i \t\t%u\t\t%u\t\t%lf\n", j, swaps[j]-swaps[j-1], e[j], times[j]-times[j-1]);
 	}	
 
 }

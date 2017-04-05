@@ -15,10 +15,6 @@ private:
 	void heapify_up(unsigned int i);
 	//Sifts an item e down, when necessary
 	void heapify_down(unsigned int i);
-	//Return the parent of node i
-	unsigned int parent(unsigned int i);
-	//Return first child of node i
-	unsigned int first_child(unsigned int i);
 
 public:
 	unsigned int n_swaps;
@@ -37,7 +33,6 @@ public:
 	unsigned int getmin();
 	//Return the key of the minimum element
 	unsigned int getminKey();
-	void print();
 
 };
 

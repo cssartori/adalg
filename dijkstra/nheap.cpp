@@ -39,25 +39,28 @@ void NHeap::heapify_up(unsigned int i){
 	if(i == 0)
 		return;
 	
-	if(heap[i] < heap[parent(i)]){ //key is smaller than parent's
+	unsigned int pi = (i-1)/n; //parent of i 
+	unsigned int hpi = heap[pi];
+	unsigned int hi = heap[i];
+	
+	if(hi < hpi){ //key is smaller than parent's
 		n_swaps++;
 		
 		//swap key
-		unsigned int temp = heap[i];
-		heap[i] = heap[parent(i)];
-		heap[parent(i)] = temp;
+		heap[i] = hpi;
+		heap[pi] = hi;
 		
 		//swap data
-		unsigned int dpar = data[parent(i)];
-		temp = data[i];
-		data[i] = data[parent(i)];
-		data[parent(i)] = temp;
+		unsigned int dpi = data[pi];
+		unsigned int di = data[i];
+		data[i] = dpi;
+		data[pi] = di;
 		
 		//swap position pointer
-		pos_heap[temp] = parent(i);
-		pos_heap[dpar] = i;
+		pos_heap[di] = pi;
+		pos_heap[dpi] = i;
 
-		heapify_up(parent(i));
+		heapify_up(pi);
 	}
 }
 
@@ -65,8 +68,9 @@ void NHeap::heapify_up(unsigned int i){
 void NHeap::heapify_down(unsigned int i){
 	unsigned int min = i;
 	
+	unsigned first_child = n*i+1;	//first child of i
 	//get smallest child
-	for(unsigned int j=first_child(i); j<heap.size() && j-first_child(i) < n;j++){
+	for(unsigned int j=first_child; j<heap.size() && j-first_child < n;j++){
 		if(heap[j] < heap[min])
 			min = j;
 	}
@@ -121,23 +125,4 @@ void NHeap::deletemin(){
 //true if heap is empty
 bool NHeap::is_empty(){
 	return (heap.size() == 0);
-}
-
-//Return the parent of node i
-unsigned int NHeap::parent(unsigned int i){
-	return (i-1)/n;
-}
-
-//Return first child of node i
-unsigned int NHeap::first_child(unsigned int i){
-	return n*i+1;
-}
-
-
-void NHeap::print(){
-
-	for(int i=0;i<heap.size();i++){
-		printf("%i - %i\n",i, heap[i]);
-	}
-
 }
