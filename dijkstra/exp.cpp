@@ -34,26 +34,24 @@ void test_delete(){
 
 void test_update(){
 	
-	vector<int> els;
-	els.reserve(pow(2, NUM_EXP)*2+1);	
-	
-	for(int i=1;i<=NUM_EXP;i++){
-		int n = pow(2, i) - 1;
-		int k = pow(2, i) + 1;
-		int el = 0;
+	for(unsigned int i=1;i<=NUM_EXP;i++){
+		unsigned int n = pow(2, i) - 1;
+		unsigned int k = pow(2, i) + 1;
+		unsigned int el = 0;
 		
 		NHeap h(2, n*2+1);
-		h.insert(k, el++);
-		
-		for(int x=0;x<n-1;x++)
+				
+		for(unsigned int x=0;x<n;x++)
 			h.insert(k, el++);
 		
 		n = n+1;
 		k = k+1;
 		
-		for(int x=0;x<n;x++){
-			h.insert(k, el++);
+		vector<unsigned int> els;
+		for(unsigned int x=0;x<n;x++){
+			h.insert(k, el);
 			els.push_back(el);
+			el++;
 		}
 		
 		h.n_swaps = 0;
@@ -61,15 +59,18 @@ void test_update(){
 		std::chrono::time_point<std::chrono::system_clock> start, end;
 	   	start = std::chrono::system_clock::now();	
 		
-		for(int x=0;x<els.size();x++)
+		for(unsigned int x=0;x<n;x++){
+			//printf("%u - Update %u to key %u\n", els.size()-1, els[x], k--);
 			h.update_key(els[x], k--);	
+			
+		}
 		
 	   	end = std::chrono::system_clock::now();
 		std::chrono::duration<double> elapsed_seconds = end-start;			
 		
 		swaps[i] = h.n_swaps;
 		times[i] = elapsed_seconds.count();
-		e[i] = i*pow(2, i);
+		e[i] = (i)*pow(2, i);
 	}
 
 }
