@@ -42,7 +42,7 @@ void NHeap::heapify_up(unsigned int i){
 	unsigned int pi = (i-1)/n; //parent of i 
 	unsigned int hpi = heap[pi];
 	unsigned int hi = heap[i];
-	
+
 	if(hi < hpi){ //key is smaller than parent's
 		n_swaps++;
 		
@@ -70,15 +70,15 @@ void NHeap::heapify_down(unsigned int i){
 	
 	unsigned first_child = n*i+1;	//first child of i
 	//get smallest child
-	for(unsigned int j=first_child; j<heap.size() && j-first_child < n;j++){
+	for(unsigned int j=first_child; j < heap.size() && j-first_child < n;j++){
 		if(heap[j] < heap[min])
 			min = j;
 	}
 	if(min == i) //e is not smaller than any of its children
 		return;	
-	
+
 	n_swaps++;
-	
+		
 	//swap key
 	unsigned int temp = heap[min];
 	heap[min] = heap[i];

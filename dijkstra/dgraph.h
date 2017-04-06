@@ -37,4 +37,7 @@ Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m);
 unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsigned int nh=2);
 
 
+unsigned int dijkstra_nheap_mem(const Graph& g, unsigned int s, unsigned int t, size_t *mem, unsigned int nh=2);
+
+
 #endif //__DGRAPH_H__

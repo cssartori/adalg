@@ -1,7 +1,7 @@
 
 CC = g++
 
-CFLAGS = -Wall -O3 -std=c++11 
+CFLAGS = -Wall -O3 -std=c++11 -g
 
 INCLUDES = -I ./
 SRCDIR = ./
@@ -10,7 +10,7 @@ LIBS = -lm
 
 # define the C++ source files
 SMAIN = $(SRCDIR)main.cpp $(SRCDIR)nheap.cpp $(SRCDIR)dgraph.cpp
-SEXP = $(SRCDIR)exp.cpp  $(SRCDIR)nheap.cpp
+SEXP = $(SRCDIR)exp.cpp  $(SRCDIR)nheap.cpp $(SRCDIR)dgraph.cpp
 SGEN = $(SRCDIR)gen.cpp
 
 OMAIN = $(SMAIN:.cpp=.o)
