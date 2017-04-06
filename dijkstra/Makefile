@@ -13,6 +13,10 @@ SMAIN = $(SRCDIR)main.cpp $(SRCDIR)nheap.cpp $(SRCDIR)dgraph.cpp
 SEXP = $(SRCDIR)exp.cpp  $(SRCDIR)nheap.cpp
 SGEN = $(SRCDIR)gen.cpp
 
+OMAIN = $(SMAIN:.cpp=.o)
+OEXP = $(SEXP:.cpp=.o)
+OGEN = $(SGEN:.cpp=.o)
+
 # define the executable file 
 MAIN = main
 EXP = exp
@@ -25,21 +29,20 @@ all:    $(MAIN) $(EXP) $(GEN)
 	@echo  Main, Exp and Gen compiled
 
 #$(OBJS) 
-$(MAIN): 
-	$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(SMAIN) $(LIBS)
+$(MAIN): $(OMAIN)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OMAIN) $(LIBS)
 	
-$(EXP): 
-	$(CC) $(CFLAGS) $(INCLUDES) -o $(EXP) $(SEXP) $(LIBS)
+$(EXP): $(OEXP)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(EXP) $(OEXP) $(LIBS)
 
-$(GEN): 
-	$(CC) $(CFLAGS) $(INCLUDES) -o $(GEN) $(SGEN) $(LIBS)
+$(GEN): $(OGEN)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(GEN) $(OGEN) $(LIBS)
 	
-
 .cpp.o: 
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 clean:
-	$(RM) $(SRCDIR)*.o 
+	$(RM) $(MAIN) $(EXP) $(GEN) 
 	$(RM) *.bak 
 
 depend: $(SMAIN)
