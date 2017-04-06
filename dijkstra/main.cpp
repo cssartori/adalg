@@ -60,7 +60,7 @@ int main(int argc, char **argv){
 
 	//read graph from stdin	
 	Graph g = read_dimacs(std::cin, &n, &m);
-		
+			
    	start = std::chrono::system_clock::now();
 	//compute shortest path
 	unsigned int dst = dijkstra_nheap(g, s, t);		
