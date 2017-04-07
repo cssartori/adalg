@@ -36,7 +36,7 @@ Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m);
 // Computes the shortest path from node s to t in graph g using Dijkstra's algorithm and n-heaps
 unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsigned int nh=2);
 
-
+// Implementation of Dijkstra's algorithm with n-heaps in which the amount of memory used is given (used for test purposes)
 unsigned int dijkstra_nheap_mem(const Graph& g, unsigned int s, unsigned int t, size_t *mem, unsigned int nh=2);
 
 

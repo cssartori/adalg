@@ -3,8 +3,8 @@ CC = g++
 
 CFLAGS = -Wall -O3 -std=c++11 -g
 
-INCLUDES = -I ./
-SRCDIR = ./
+INCLUDES = -I include/
+SRCDIR = src/
 
 LIBS = -lm
 
@@ -42,7 +42,7 @@ $(GEN): $(OGEN)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 clean:
-	$(RM) $(MAIN) $(EXP) $(GEN) 
+	$(RM) $(SRCDIR)*.o
 	$(RM) *.bak 
 
 depend: $(SMAIN)

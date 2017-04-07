@@ -1,6 +1,6 @@
-#include "nheap.h"
-#include "dgraph.h"
-#include "mem_used.hpp"
+#include "../include/nheap.h"
+#include "../include/dgraph.h"
+#include "../include/mem_used.hpp"
 #include <vector>
 
 using namespace std;
@@ -19,7 +19,7 @@ Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m) {
   	linestr.str(line);
   	linestr >> dummy >> dummy >> *n >> *m;
 
-	for(int x=0;x<*n;x++)
+	for(unsigned int x=0;x<*n;x++)
 		add_vertex(g);
   	  	
   	unsigned i=0;
@@ -50,7 +50,6 @@ unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsi
 	dist[s] = 0;
 	h.insert(0, s);
 	
-	size_t vc = 1;
 	while(!h.is_empty()){
 		unsigned int v = h.getmin(); h.deletemin();
 		visited[v] = true;	
@@ -77,7 +76,7 @@ unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsi
 }
 
 
-// Computes the shortest path from node s to t in graph g using Dijkstra's algorithm and n-heaps
+// Implementation of Dijkstra's algorithm with n-heaps in which the amount of memory used is given (used for test purposes)
 unsigned int dijkstra_nheap_mem(const Graph& g, unsigned int s, unsigned int t, size_t *mem, unsigned int nh){
 	NHeap h(nh, num_vertices(g));
 	vector<bool> visited(num_vertices(g), false); //no node has been visited yet

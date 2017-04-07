@@ -1,6 +1,6 @@
-#include "nheap.h"
 #include <math.h>
 #include <cstdio>
+#include "../include/nheap.h"
 
 using namespace std;
 

@@ -1,5 +1,3 @@
-#include "dgraph.h"
-#include "nheap.h"
 #include <cstdio>
 #include <iostream>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
@@ -8,6 +6,8 @@
 #include <unordered_map>
 #include <map>
 #include <vector>
+#include "../include/dgraph.h"
+#include "../include/nheap.h"
 
 using namespace boost;
 using namespace std;

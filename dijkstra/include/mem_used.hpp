@@ -38,9 +38,10 @@ size_t memory_used (bool resident=false)
     FILE *file = fopen("/proc/self/statm", "r");
     if (file) {
         unsigned long vm = 0;
-        fscanf (file, "%ul", &vm);  // Just need the first num: vm size
+        int dummy = fscanf (file, "%lu", &vm);  // Just need the first num: vm size
+        dummy++;
         fclose (file);
-       size = (size_t)vm * getpagesize();
+        size = (size_t)vm * getpagesize();
     }
     return size;
 
