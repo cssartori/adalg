@@ -9,9 +9,9 @@ unsigned int NUM_EXP = 20;
 
 using namespace std;
 
-vector<unsigned int> swaps(NUM_EXP+1, 0);
-vector<double> times(NUM_EXP+1, 0.0);
-vector<unsigned int> e(NUM_EXP+1, 0.0);
+vector<unsigned int> swaps;
+vector<double> times;
+vector<unsigned int> e;
 
 std::chrono::time_point<std::chrono::system_clock> tstart, tend;
 std::chrono::duration<double> elapsed_seconds;
@@ -107,7 +107,6 @@ void test_insert(int hd){
 	NHeap h(hd, n);
 	h.insert(n, n);
 	
-	h.n_swaps = 0;
 	n--;
 	unsigned int ninserts = 1;
 
@@ -125,6 +124,7 @@ void test_insert(int hd){
 			e[i] = (i-1)*pow(hd,i-1);
 			i++;
 			NI = ((NI+1)*hd)-1;
+			h.n_swaps = 0;
 		}
 	}
 	
@@ -151,7 +151,8 @@ void test_scale(int hd){
 		
 		tstart = std::chrono::system_clock::now();
 		size_t mu = 0;
-		dijkstra_nheap_mem(g, s, t, &mu, hd);
+		unsigned int n_ins, n_del, n_upd;
+		dijkstra_nheap_test(g, s, t, &n_ins, &n_del, &n_upd, &mu, hd);
 		tend = std::chrono::system_clock::now();
 	
 		elapsed_seconds = tend-tstart;	
@@ -159,7 +160,7 @@ void test_scale(int hd){
 		if(NUM_EXP != 1)
 			printf("%u,", i);
 				
-		printf("%lu,%f\n", mu, elapsed_seconds.count());
+		printf("%u,%u,%u,%u,%u,%lu,%f\n", n, m, n_ins, n_del, n_upd, mu, elapsed_seconds.count());
 	}
 		
 }
@@ -171,6 +172,10 @@ int main(int argc, char **argv){
 	char op = 'z';
 	
 	read_parameters(argc, argv, &op, &hd);
+
+	swaps = vector<unsigned int>(NUM_EXP+1, 0);
+	times = vector<double>(NUM_EXP+1, 0.0);
+	e = vector<unsigned int>(NUM_EXP+1, 0);
 
 	if(op == 'i')
 		test_insert(hd);

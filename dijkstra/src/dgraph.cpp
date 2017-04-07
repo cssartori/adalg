@@ -30,7 +30,7 @@ Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m) {
       		unsigned int u,v,w;
       		char ac;
       		arc >> ac >> u >> v >> w;
-     		// process arc (u,v) with weight w      		
+        		
       		Edge e = add_edge(u-1,v-1,g).first;
 			g[e].weight = w;
       		
@@ -76,18 +76,25 @@ unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsi
 }
 
 
-// Implementation of Dijkstra's algorithm with n-heaps in which the amount of memory used is given (used for test purposes)
-unsigned int dijkstra_nheap_mem(const Graph& g, unsigned int s, unsigned int t, size_t *mem, unsigned int nh){
+// Implementation of Dijkstra's algorithm with n-heaps for testing purposes (collects memory used, number of insertions, deletions and updates)
+unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t, unsigned int *n_ins, unsigned int *n_del, unsigned int *n_upd, size_t *mem, unsigned int nh){
 	NHeap h(nh, num_vertices(g));
 	vector<bool> visited(num_vertices(g), false); //no node has been visited yet
 	vector<unsigned int> dist(num_vertices(g), MAX_DIST);
+	*n_ins = 0;
+	*n_del = 0;
+	*n_upd = 0;
 
 	dist[s] = 0;
-	h.insert(0, s);
-	*mem = memory_used(); //all memory is allocated up to this point	
+	h.insert(0, s); 
+	*n_ins += 1;
+	
+	if(mem != NULL)
+		*mem = memory_used(); //all memory is allocated up to this point	
 		
 	while(!h.is_empty()){
 		unsigned int v = h.getmin(); h.deletemin();
+		*n_del += 1;
 		visited[v] = true;
 		
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
@@ -97,11 +104,13 @@ unsigned int dijkstra_nheap_mem(const Graph& g, unsigned int s, unsigned int t, 
 				if(dist[u] == MAX_DIST){ //distance is "infinity"
 					dist[u] = dist[v] +  g[*ie].weight; //update u distance
 					h.insert(dist[u], u);
+					*n_ins += 1;
 				}else{
 					unsigned int ndu = min(dist[u], dist[v]+g[*ie].weight);
 					if(ndu < dist[u]){
 						h.update_key(u, ndu);
 						dist[u] = ndu;
+						*n_upd += 1;
 					}
 				}
 			}

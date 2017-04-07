@@ -10,6 +10,7 @@ NHeap::NHeap(unsigned int n, unsigned int m){
 	this->data.reserve(m);
 	this->pos_heap.assign(m, 0);
 	this->n = n;
+	this->n_swaps = 0;
 }
 
 //Insert a new item in the heap (key, e)
