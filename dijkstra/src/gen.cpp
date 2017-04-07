@@ -134,7 +134,7 @@ void read_parameters(int argc, char **argv, unsigned int *n, unsigned int *m, do
 		fprintf(stderr, "Either parameter -m or -p should be informed, but not both.\n");
 		usage(argv);
 		exit(-1);
-	} else if(medges && ((*n)*((*n)-1)) < (*m)){
+	} else if(*medges && ((*n)*((*n)-1)) < (*m)){
 		fprintf(stderr, "The number of edges exceeds the maximum for %u nodes (%u edges).\n", *n, ((*n)*((*n)-1)));
 		usage(argv);
 		exit(-1);
