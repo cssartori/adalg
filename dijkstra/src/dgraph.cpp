@@ -84,12 +84,12 @@ unsigned int dijkstra_nheap_mem(const Graph& g, unsigned int s, unsigned int t, 
 
 	dist[s] = 0;
 	h.insert(0, s);
-	*mem = 0;
+	*mem = memory_used(); //all memory is allocated up to this point	
 		
 	while(!h.is_empty()){
 		unsigned int v = h.getmin(); h.deletemin();
 		visited[v] = true;
-		*mem = max(*mem, memory_used());	
+		
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
 			unsigned int u = target(*ie, g);

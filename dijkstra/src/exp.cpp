@@ -181,7 +181,7 @@ int main(int argc, char **argv){
 	else if(op == 's')
 		test_scale(hd);
 	else{
-		printf("Test option %c unknown.\n", op);
+		fprintf(stderr, "Test option %c unknown.\n", op);
 		usage(argv);
 	}
 	
@@ -211,12 +211,12 @@ void read_parameters(int argc, char **argv, char *op, int *hd){
 					NUM_EXP = atoi(argv[i]);
 					break;
 				default:
-					printf("Parameter %c unkown.\n", argv[i][1]);
+					fprintf(stderr, "Parameter %c unkown.\n", argv[i][1]);
 					usage(argv);
 					exit(-1);
 			}
 		}else{
-			printf("Parameter %c unkown.\n", argv[i][1]);
+			fprintf(stderr, "Parameter %c unkown.\n", argv[i][1]);
 			usage(argv);
 			exit(-1);
 		}
@@ -229,6 +229,6 @@ void read_parameters(int argc, char **argv, char *op, int *hd){
 }
 
 void usage(char **argv){
-	printf("usage: %s -t <test type> [-h <heap dimension>] [-n <number of tests>]\n\t-t test type: \t\ti, u, d, s\n\t-h heap dimension: \tnatural numbers\n\t-n number of tests: \tnatural numbers\n", argv[0]);
+	fprintf(stderr, "usage:\n%s -t <test type> [-h <heap dimension>] [-n <number of tests>]\n\t-t test type: \t\ti, u, d, s\n\t-h heap dimension: \tnatural numbers\n\t-n number of tests: \tnatural numbers\n", argv[0]);
 }
 
