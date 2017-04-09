@@ -13,7 +13,7 @@ do
 	
 	./gen -n $n -m $m > "temp.gr"
 	outf="./rcomp/RC-"$n"."$m".dat"
-	./exp -t s -n 100 -h 2 < "temp.gr" > $outf 	
+	./exp -t s -n 50 -h 2 < "temp.gr" > $outf 	
 	
 	echo "Done with "$m
 	echo "Results in file "$outf
