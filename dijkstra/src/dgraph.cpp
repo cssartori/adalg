@@ -120,5 +120,16 @@ unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t,
 	return dist[t];
 }
 
-
+//Returns true if edge between node u and v exists
+bool edge_exist(const Graph& g, unsigned int u, unsigned int v){
+	
+	graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
+	for(tie(ie, fe) = out_edges(u, g); ie != fe; ie++){
+		unsigned int t = target(*ie, g);
+		if(v == t)
+			return true;
+	}
+			
+	return false;
+}
 

@@ -11,14 +11,14 @@ LIBS = -lm
 # define the C++ source files
 SMAIN = $(SRCDIR)main.cpp $(SRCDIR)nheap.cpp $(SRCDIR)dgraph.cpp
 SEXP = $(SRCDIR)exp.cpp  $(SRCDIR)nheap.cpp $(SRCDIR)dgraph.cpp
-SGEN = $(SRCDIR)gen.cpp
+SGEN = $(SRCDIR)gen.cpp $(SRCDIR)nheap.cpp $(SRCDIR)dgraph.cpp
 
 OMAIN = $(SMAIN:.cpp=.o)
 OEXP = $(SEXP:.cpp=.o)
 OGEN = $(SGEN:.cpp=.o)
 
 # define the executable file 
-MAIN = main
+MAIN = dijkstra
 EXP = exp
 GEN = gen
 
@@ -26,7 +26,7 @@ GEN = gen
 .PHONY: depend clean
 
 all:    $(MAIN) $(EXP) $(GEN)
-	@echo  Main, Exp and Gen compiled
+	@echo  Dijkstra, Exp and Gen compiled
 
 #$(OBJS) 
 $(MAIN): $(OMAIN)

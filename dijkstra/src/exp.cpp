@@ -2,6 +2,7 @@
 #include <chrono>
 #include <math.h>
 #include <vector>
+#include <boost/graph/dijkstra_shortest_paths.hpp>
 #include "../include/nheap.h"
 #include "../include/dgraph.h"
 
@@ -16,11 +17,10 @@ vector<unsigned int> e;
 std::chrono::time_point<std::chrono::system_clock> tstart, tend;
 std::chrono::duration<double> elapsed_seconds;
 
-
-void read_parameters(int argc, char **argv, char *op, int *hd);
+void read_parameters(int argc, char **argv, char *op, unsigned int *hd);
 void usage(char **argv);
 
-void test_delete(int hd){
+void test_delete(unsigned int hd){
 	NHeap h(hd, pow(2, NUM_EXP)+1);
 	
 	for(unsigned int i=1;i<=NUM_EXP;i++){
@@ -52,7 +52,7 @@ void test_delete(int hd){
 	}	
 }
 
-void test_update(int hd){
+void test_update(unsigned int hd){
 	
 	for(unsigned int i=1;i<=NUM_EXP;i++){
 		unsigned int n = pow(2, i) - 1;
@@ -99,7 +99,7 @@ void test_update(int hd){
 }
 
 
-void test_insert(int hd){
+void test_insert(unsigned int hd){
 
 	unsigned int n = pow(hd, NUM_EXP)-1; //limit
 	unsigned int i=2;
@@ -135,7 +135,7 @@ void test_insert(int hd){
 }
 
 
-void test_scale(int hd){
+void test_scale(unsigned int hd){
 	
 	unsigned int n,m;
 
@@ -146,8 +146,11 @@ void test_scale(int hd){
 	for(unsigned int i=0;i<NUM_EXP;i++){
 		int s = rand()%n;
 		int t = rand()%n;
-		while(s == t)
-			t = rand()%n;
+		
+//		while(s == t || !edge_exist(g, s, t)){
+//			s = rand()%n;
+//			t = (t+1)%n;
+//		}
 		
 		tstart = std::chrono::system_clock::now();
 		size_t mu = 0;
@@ -165,11 +168,46 @@ void test_scale(int hd){
 		
 }
 
+void test_validate(unsigned int hd){
+	srand(time(0));
+		
+	unsigned int n,m;
+
+	Graph g = read_dimacs(std::cin, &n, &m);
+	if(n <= 1)
+		return;	
+	
+	for(unsigned int i=0;i<NUM_EXP;i++){
+		int s = rand()%n;
+		int t = rand()%n;
+		
+//		while(s == t || !edge_exist(g, s, t)){
+//			s = rand()%n;
+//			t = (t+1)%n;
+//		}
+		
+		unsigned int dst = dijkstra_nheap(g, s, t, hd);
+		
+		vector<unsigned int> dist(n);
+  		vector<unsigned int> pred(n);
+  		dijkstra_shortest_paths(g, s, weight_map(get(&EdgeData::weight,g)).distance_map(&dist[0]).predecessor_map(&pred[0]));
+  		
+  		int valid = 0;
+  		if(dst != dist[t])
+  			valid = -1;
+
+		printf("%u,%u,%u,%i\n", i, dst, dist[t], valid);
+	}
+
+	return;
+}
+
+
 int main(int argc, char **argv){
 	srand(time(0));
 	
-	int hd = 2;
-	char op = 'z';
+	unsigned int hd;
+	char op;
 	
 	read_parameters(argc, argv, &op, &hd);
 
@@ -185,6 +223,8 @@ int main(int argc, char **argv){
 		test_delete(hd);
 	else if(op == 's')
 		test_scale(hd);
+	else if(op == 'v')
+		test_validate(hd);
 	else{
 		fprintf(stderr, "Test option %c unknown.\n", op);
 		usage(argv);
@@ -192,12 +232,14 @@ int main(int argc, char **argv){
 	
 }
 
-void read_parameters(int argc, char **argv, char *op, int *hd){
+void read_parameters(int argc, char **argv, char *op, unsigned int *hd){
 	if(argc < 3){
 		usage(argv);
 		exit(-1);
 	}
 	bool has_type = false;
+	*hd = 2;
+	*op = 'z';
 	
 	for(int i=1;i<argc;i++){
 		if(argv[i][0] == '-'){
@@ -234,6 +276,6 @@ void read_parameters(int argc, char **argv, char *op, int *hd){
 }
 
 void usage(char **argv){
-	fprintf(stderr, "usage:\n%s -t <test type> [-h <heap dimension>] [-n <number of tests>]\n\t-t test type: \t\ti, u, d, s\n\t-h heap dimension: \tnatural numbers\n\t-n number of tests: \tnatural numbers\n", argv[0]);
+	fprintf(stderr, "usage:\n%s -t <test type> [-h <heap dimension>] [-n <number of tests>]\n\t-t test type: \t\ti, u, d, s, v\n\t-h heap dimension: \tnatural numbers\n\t-n number of tests: \tnatural numbers\n", argv[0]);
 }
 

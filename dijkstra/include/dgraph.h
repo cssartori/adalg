@@ -33,11 +33,13 @@ typedef boost::graph_traits <Graph>::edge_descriptor Edge;
 // Read a graph in DIMACS format from an input stream and return a Graph
 Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m);
 
+//Returns true if edge between node u and v exists
+bool edge_exist(const Graph& g, unsigned int u, unsigned int v);
+
 // Computes the shortest path from node s to t in graph g using Dijkstra's algorithm and n-heaps
 unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsigned int nh=2);
 
 // Implementation of Dijkstra's algorithm with n-heaps for testing purposes (collects memory used, number of insertions, deletions and updates)
 unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t, unsigned int *n_ins, unsigned int *n_del, unsigned int *n_upd, size_t *mem=NULL, unsigned int nh=2);
-
 
 #endif //__DGRAPH_H__
