@@ -4,10 +4,7 @@
  */
  
 #include <iostream>
-#include <cassert>
-#include <boost/graph/dijkstra_shortest_paths.hpp>
 #include "../include/dgraph.h"
-
 
 using namespace std;
 using namespace boost;
@@ -27,37 +24,51 @@ int main(int argc, char *argv[]) {
 	Graph g;
 	for(unsigned i=0; i<n; i++)
 		add_vertex(g);
-	
+		
+	srand48(time(0));
+	srand(time(0));
 	if(medges){
-		srand(time(0));
 		unsigned int mc = 0;
-
+        
 		while(mc < m){
-			unsigned int s = rand()%n;
-			unsigned int t = rand()%n;
-			while(t == s){
-				s = rand()%n;
-				t = (t+1)%n;
-			}
-						
-			graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
-			bool edge_exist = false;
-			for(tie(ie, fe) = out_edges(s, g); ie != fe; ie++){
-				unsigned int u = target(*ie, g);
-				if(u == t){
-					edge_exist = true;
-					break;
-				}
-			}
-			
-			if(edge_exist)
-				continue;
-			
-			Edge e = add_edge(s,t,g).first;
-			g[e].weight = rand()%maxweight;
-			
-			mc++;
+			for(unsigned int i=0; i<n; i++){
+    		    for(unsigned int j=rand()%n; j<n; j++){
+      			    if (i != j && drand48() < 0.005 && !edge_exist(g, i, j)){
+      			        mc++;
+        			    Edge e = add_edge(i,j,g).first;
+					    g[e].weight = lrand48()%maxweight;
+      			    }
+      			    if(mc >= m)
+      			        break;
+      		    }
+      	    }
 		}
+		
+		
+//		unsigned int s = rand()%n;
+//			unsigned int t = rand()%n;
+//			while(t == s){
+//				s = rand()%n;
+//				t = (t+1)%n;
+//			}
+//						
+//			graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
+//			bool edge_exist = false;
+//			for(tie(ie, fe) = out_edges(s, g); ie != fe; ie++){
+//				unsigned int u = target(*ie, g);
+//				if(u == t){
+//					edge_exist = true;
+//					break;
+//				}
+//			}
+//			
+//			if(edge_exist)
+//				continue;
+//			
+//			Edge e = add_edge(s,t,g).first;
+//			g[e].weight = rand()%maxweight;
+//			
+//			mc++;
 	}else{
 		srand48(time(0));
 		for(unsigned int i=0; i<n; i++){

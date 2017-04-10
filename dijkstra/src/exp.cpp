@@ -26,7 +26,7 @@ void test_delete(unsigned int hd){
 	for(unsigned int i=1;i<=NUM_EXP;i++){
 		int N = pow(2, i) - 1;
 		int n = N;
-		
+		int k=0;
 		while(n > 0){
 			n--;
 			h.insert(rand()%N, n);
@@ -144,18 +144,19 @@ void test_scale(unsigned int hd){
 		return;	
 
 	for(unsigned int i=0;i<NUM_EXP;i++){
-		int s = rand()%n;
-		int t = rand()%n;
 		
-//		while(s == t || !edge_exist(g, s, t)){
-//			s = rand()%n;
-//			t = (t+1)%n;
-//		}
 		
-		tstart = std::chrono::system_clock::now();
 		size_t mu = 0;
 		unsigned int n_ins, n_del, n_upd;
-		dijkstra_nheap_test(g, s, t, &n_ins, &n_del, &n_upd, &mu, hd);
+		unsigned int d;
+		do{
+    		int s = rand()%n;
+    		int t = rand()%n;
+			tstart = std::chrono::system_clock::now();
+		    d = dijkstra_nheap_test(g, s, t, &n_ins, &n_del, &n_upd, &mu, hd);
+		   // fprintf(stderr, "generating new pair. %i -> %i = %u\n", s, t, d);
+		}while(d == MAX_DIST);
+		
 		tend = std::chrono::system_clock::now();
 	
 		elapsed_seconds = tend-tstart;	
@@ -163,7 +164,7 @@ void test_scale(unsigned int hd){
 		if(NUM_EXP != 1)
 			printf("%u,", i);
 				
-		printf("%u,%u,%u,%u,%u,%lu,%f\n", n, m, n_ins, n_del, n_upd, mu, elapsed_seconds.count());
+		printf("%u,%u,%u,%u,%u,%lu,%f,%u\n", n, m, n_ins, n_del, n_upd, mu, elapsed_seconds.count(), d);
 	}
 		
 }
@@ -181,10 +182,10 @@ void test_validate(unsigned int hd){
 		int s = rand()%n;
 		int t = rand()%n;
 		
-//		while(s == t || !edge_exist(g, s, t)){
-//			s = rand()%n;
-//			t = (t+1)%n;
-//		}
+		while(s == t || !edge_exist(g, s, t)){
+			s = rand()%n;
+			t = (t+1)%n;
+		}
 		
 		unsigned int dst = dijkstra_nheap(g, s, t, hd);
 		

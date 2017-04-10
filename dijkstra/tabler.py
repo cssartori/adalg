@@ -69,7 +69,7 @@ if __name__ == '__main__':
     outf = open(outfname, "w")
     
     for l in lr:
-        outf.write("%i\t%i\t%f\t%f\t%f\t%f\t%f\n" % (l[0], l[1], l[2], l[3], l[4], l[5], l[6]))
+        outf.write("%i\t%i\t%f\t%f\t%f\t%f\t%f\n" % (l[0], l[1], l[2], l[3], l[4], (l[5]/(1024*1024)), l[6]))
     
 
     
