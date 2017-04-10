@@ -25,6 +25,14 @@ int main(int argc, char *argv[]) {
 	for(unsigned i=0; i<n; i++)
 		add_vertex(g);
 		
+	//unsigned int mm = (unsigned int)(pow(n,1.001)*log(n));
+	//m = max(m, mm);
+	p =  pow(n, 0.1)*log(n)/n;	
+	if(m >= (n*(n-1)/2)){
+		p=1;
+		m = n*(n-1)/2;
+	}
+	fprintf(stderr, "p = %f\n",p);
 	srand48(time(0));
 	srand(time(0));
 	if(medges){
@@ -33,7 +41,7 @@ int main(int argc, char *argv[]) {
 		while(mc < m){
 			for(unsigned int i=0; i<n; i++){
     		    for(unsigned int j=rand()%n; j<n; j++){
-      			    if (i != j && drand48() < 0.005 && !edge_exist(g, i, j)){
+      			    if (i != j && drand48() < p && !edge_exist(g, i, j)){
       			        mc++;
         			    Edge e = add_edge(i,j,g).first;
 					    g[e].weight = lrand48()%maxweight;
@@ -43,34 +51,10 @@ int main(int argc, char *argv[]) {
       		    }
       	    }
 		}
-		
-		
-//		unsigned int s = rand()%n;
-//			unsigned int t = rand()%n;
-//			while(t == s){
-//				s = rand()%n;
-//				t = (t+1)%n;
-//			}
-//						
-//			graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
-//			bool edge_exist = false;
-//			for(tie(ie, fe) = out_edges(s, g); ie != fe; ie++){
-//				unsigned int u = target(*ie, g);
-//				if(u == t){
-//					edge_exist = true;
-//					break;
-//				}
-//			}
-//			
-//			if(edge_exist)
-//				continue;
-//			
-//			Edge e = add_edge(s,t,g).first;
-//			g[e].weight = rand()%maxweight;
-//			
-//			mc++;
+
 	}else{
 		srand48(time(0));
+		
 		for(unsigned int i=0; i<n; i++){
     		for(unsigned int j=0; j<n; j++){
       			if (i != j && drand48() < p){
@@ -145,11 +129,11 @@ void read_parameters(int argc, char **argv, unsigned int *n, unsigned int *m, do
 		fprintf(stderr, "Either parameter -m or -p should be informed, but not both.\n");
 		usage(argv);
 		exit(-1);
-	} else if(*medges && ((*n)*((*n)-1)) < (*m)){
+	} /*else if(*medges && ((*n)*((*n)-1)) < (*m)){
 		fprintf(stderr, "The number of edges exceeds the maximum for %u nodes (%u edges).\n", *n, ((*n)*((*n)-1)));
 		usage(argv);
 		exit(-1);
-	}
+	}*/
 		
 }
 

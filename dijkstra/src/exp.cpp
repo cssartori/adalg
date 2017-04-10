@@ -142,20 +142,22 @@ void test_scale(unsigned int hd){
 	Graph g = read_dimacs(std::cin, &n, &m);
 	if(n <= 1)
 		return;	
-
+	int ninf = 0;
 	for(unsigned int i=0;i<NUM_EXP;i++){
 		
 		
 		size_t mu = 0;
 		unsigned int n_ins, n_del, n_upd;
 		unsigned int d;
-		do{
+		//do{
     		int s = rand()%n;
     		int t = rand()%n;
+    		while(s == t)
+    			t = rand()%n;
 			tstart = std::chrono::system_clock::now();
 		    d = dijkstra_nheap_test(g, s, t, &n_ins, &n_del, &n_upd, &mu, hd);
 		   // fprintf(stderr, "generating new pair. %i -> %i = %u\n", s, t, d);
-		}while(d == MAX_DIST);
+		//}while(d == MAX_DIST);
 		
 		tend = std::chrono::system_clock::now();
 	
@@ -165,7 +167,11 @@ void test_scale(unsigned int hd){
 			printf("%u,", i);
 				
 		printf("%u,%u,%u,%u,%u,%lu,%f,%u\n", n, m, n_ins, n_del, n_upd, mu, elapsed_seconds.count(), d);
+		if(d == MAX_DIST)
+			ninf++;
 	}
+	
+	fprintf(stderr, "ninf = %i\n", ninf);
 		
 }
 
