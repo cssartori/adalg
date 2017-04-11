@@ -169,6 +169,8 @@ void test_scale(unsigned int hd){
 		printf("%u,%u,%u,%u,%u,%lu,%f,%u\n", n, m, n_ins, n_del, n_upd, mu, elapsed_seconds.count(), d);
 		if(d == MAX_DIST)
 			ninf++;
+			
+		//fprintf(stderr, "got\n");
 	}
 	
 	fprintf(stderr, "ninf = %i\n", ninf);

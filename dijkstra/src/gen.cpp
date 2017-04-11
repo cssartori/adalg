@@ -43,14 +43,14 @@ int main(int argc, char *argv[]) {
     		    for(unsigned int j=0; j<n; j++){
       			    if (i != j && drand48() < p && !edge_exist(g, i, j)){
       			        mc++;
-       			        fprintf(stderr, "\rmc = %u", mc);
-       			        fflush(stderr);
         			    Edge e = add_edge(i,j,g).first;
 					    g[e].weight = lrand48()%maxweight;
       			    }
       			    if(mc >= m)
       			        break;
       		    }
+      		    fprintf(stderr, "\rmc = %u", mc);
+		        fflush(stderr);
       	    }
 		}
 
