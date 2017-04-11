@@ -149,7 +149,7 @@ void test_scale(unsigned int hd){
 		size_t mu = 0;
 		unsigned int n_ins, n_del, n_upd;
 		unsigned int d;
-		//do{
+		do{
     		int s = rand()%n;
     		int t = rand()%n;
     		while(s == t)
@@ -157,7 +157,7 @@ void test_scale(unsigned int hd){
 			tstart = std::chrono::system_clock::now();
 		    d = dijkstra_nheap_test(g, s, t, &n_ins, &n_del, &n_upd, &mu, hd);
 		   // fprintf(stderr, "generating new pair. %i -> %i = %u\n", s, t, d);
-		//}while(d == MAX_DIST);
+		}while(d == MAX_DIST);
 		
 		tend = std::chrono::system_clock::now();
 	

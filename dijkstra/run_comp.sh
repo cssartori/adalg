@@ -11,10 +11,10 @@ mkdir "rcomp"
 for n in ${N[*]}
 do
 	
-	./gen -n $n -m $m > "temp.gr"
+	./gen -n $n -m $m > "rcomp/temp"$n"-"$m".gr"
 	echo "Created graph with "$n" nodes and "$m" edges"
 	outf="./rcomp/RC-"$n"."$m".dat"
-	./exp -t s -n 50 -h 2 < "temp.gr" > $outf 	
+	./exp -t s -n 50 -h 2 < "rcomp/temp"$n"-"$m".gr" > $outf 	
 	
 	echo "Done with "$n
 	echo "Results in file "$outf

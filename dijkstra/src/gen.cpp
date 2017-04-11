@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 		p=1;
 		m = n*(n-1)/2;
 	}
-	fprintf(stderr, "p = %f\n",p);
+	fprintf(stderr, "p = %f | m = %u\n",p, m);
 	srand48(time(0));
 	srand(time(0));
 	if(medges){
@@ -40,9 +40,11 @@ int main(int argc, char *argv[]) {
         
 		while(mc < m){
 			for(unsigned int i=0; i<n; i++){
-    		    for(unsigned int j=rand()%n; j<n; j++){
+    		    for(unsigned int j=0; j<n; j++){
       			    if (i != j && drand48() < p && !edge_exist(g, i, j)){
       			        mc++;
+       			        fprintf(stderr, "\rmc = %u", mc);
+       			        fflush(stderr);
         			    Edge e = add_edge(i,j,g).first;
 					    g[e].weight = lrand48()%maxweight;
       			    }
