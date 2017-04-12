@@ -1,4 +1,5 @@
 import sys, os, csv, argparse;
+import math;
 from operator import itemgetter
 
 #Prepare the arguments the program shall receive
@@ -124,6 +125,49 @@ def __proc_exp44__(dirname, outfname, rfext):
         outf.write(" %.2Le &" % (l[4]))
    
 
+def __proc_exp55__(dirname, outfname, rfext):
+
+    outf = open(outfname, "w")
+    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
+        lr = []
+        with open(dirname+file, 'rb') as csvfile:
+            csvdata = csv.reader(csvfile, delimiter='\t')
+            print "reading "+file+"\n"
+            for row in csvdata:
+                n = int(row[0])
+                m = int(row[1])
+                I  = float(row[2])
+                D = float(row[3])
+                U = float(row[4])
+                t = float(row[6])
+                
+                if I > n:
+                    print "Error on I for "+file
+                if D > n:
+                    print "Error on D for "+file
+                if U > m:
+                    print "Error on U for "+file
+                
+                tp = t/((m+n)*math.log(n))
+                #print file+"\n"
+                #print ("t = %.2Le | tp = %.2Le | (m+n) = %.2Le | log(%d) = %.2Le\n" % (t, tp, 20971520+n, n, math.log(n)))
+                
+                l = [n, m, tp, t]                
+                lr.append(l) 
+                   
+            lr = sorted(lr, key = lambda x: (x[1]))    
+            
+            outf.write(file+"\n")    
+            for l in lr:
+                outf.write("%i %i %.2Le %.2Le\n" % (l[0], l[1], l[2], l[3]))
+
+            outf.write("--------------------------------\n")
+            
+            for l in lr:
+                outf.write("%i & %i & %.2Le\n" % (l[0], l[1], l[3]))
+                
+            outf.write("================================\n")
+            
 
 
 
@@ -150,6 +194,8 @@ if __name__ == '__main__':
         __proc_exp23__(dirname, outfname, rfext)
     elif exp == 4:
         __proc_exp44__(dirname, outfname, rfext)
+    elif exp == 5:
+        __proc_exp55__(dirname, outfname, rfext)
 
     
    
