@@ -88,6 +88,43 @@ def __proc_exp23__(dirname, outfname, rfext):
         outf.write("%i\t%i\t%f\t%f\t%f\t%f\t%Le\n" % (l[0], l[1], l[2], l[3], l[4], (l[5]/(1024*1024)), l[6]))
    
 
+def __proc_exp44__(dirname, outfname, rfext):
+    lr = []
+    outf = open(outfname, "w")
+    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
+        with open(dirname+file, 'rb') as csvfile:
+            csvdata = csv.reader(csvfile, delimiter='\t')
+            fl = csvdata.next()
+            k = int(fl[0])
+            n = 0
+            m = 0
+            mem  = 0
+            time = 0
+            
+            nexp = 1
+            for row in csvdata:
+                n = int(row[0])
+                m = int(row[1])
+                mem  = float(row[5])
+                time = float(row[6])
+                l = [k, n, m, mem, time]                
+                lr.append(l) 
+           
+            #print ("appending %i %i %i\n" % (k, n, m))
+                
+
+    
+    lr = sorted(lr, key = lambda x: (x[1], x[0]))    
+    outf = open(outfname, "w")
+    nn = 0
+    for l in lr:
+        if(l[1] != nn):
+            nn = l[1]
+            outf.write("\n%i & %i & %.2f &" % (l[1], l[2], l[3]))
+        outf.write(" %.2Le &" % (l[4]))
+   
+
+
 
 
 
@@ -111,6 +148,8 @@ if __name__ == '__main__':
         __proc_exp1__(dirname, outfname, rfext)    
     elif exp == 2 or exp == 3:
         __proc_exp23__(dirname, outfname, rfext)
+    elif exp == 4:
+        __proc_exp44__(dirname, outfname, rfext)
 
     
    

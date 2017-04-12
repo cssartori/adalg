@@ -21,20 +21,44 @@ void read_parameters(int argc, char **argv, char *op, unsigned int *hd);
 void usage(char **argv);
 
 void test_delete(unsigned int hd){
-	NHeap h(hd, pow(hd, NUM_EXP)+1);
+	
 	
 	for(unsigned int i=1;i<=NUM_EXP;i++){
 		int N = ((pow(hd,i)-1)/(hd-1));
 		int n = N;
 		int k=0;
+		int b = 0;
+		int B = 1;
+		int l = 0;
+		
+		NHeap h(hd, N*hd+1);
+		
 		while(n > 0){
+			//printf("inserting %u, %u\n", k, n);
+			h.insert(k, n);
+			b++;
+			if(b == B){
+  			    l++;
+			    B = pow(hd, l);
+			    b=0;
+			    k++;
+			}
 			n--;
-			h.insert(rand()%N, n);
 		}
+        //printf("l=%i\n", l);
+        
+        n = N + 2;
+        N = pow(hd, l)/hd;
+        k += N;
+        for(int x=0;x<N;x++){
+            //printf("inserting %u, %u\n", k, n);
+            h.insert(k--, n++);
+        }
         
         n=0;
-        N = pow(hd, i-1);
+        N = pow(hd, l)/hd;;
 	   	tstart = std::chrono::system_clock::now();
+	   	
 		h.n_swaps = 0;
 		while(n < N){
 			n++;	
@@ -45,8 +69,9 @@ void test_delete(unsigned int hd){
 		elapsed_seconds = tend-tstart;	
 		
 		swaps[i] = h.n_swaps;
-		e[i] = i*pow(hd,i);
+		e[i] = (i-1)*pow(hd,i-1);
 		times[i] = elapsed_seconds.count();
+		//printf("-----------------\n");
 	}
 	
 	printf("%i %u %u %Le %Le\n", 0, swaps[0], e[0], times[0], (long double)0.0);
@@ -106,7 +131,7 @@ void test_update(unsigned int hd){
 
 void test_insert(unsigned int hd){
 
-	unsigned int n = pow(hd, NUM_EXP)-1; //limit
+	unsigned int n = pow(hd, ((pow(hd,NUM_EXP)-1)/(hd-1))+1); //limit
 	unsigned int i=2;
 	
 	NHeap h(hd, n);
