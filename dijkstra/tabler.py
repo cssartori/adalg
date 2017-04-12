@@ -19,34 +19,31 @@ def __getargs__(parser):
     return args
 
 def __proc_exp1__(dirname, outfname, rfext):
-    lr = []
+    
     outf = open(outfname, "w")
     print("reading files") 
     for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
+        lr = []
         print("Reading file "+file)
         with open(dirname+file, 'rb') as csvfile:
-            csvdata = csv.reader(csvfile, delimiter=',')
+            csvdata = csv.reader(csvfile, delimiter=' ')
 
             for row in csvdata:
                 i = int(row[0])
                 nswaps = int(row[1])
-                ne = int(row[2])
-                time = float(row[3])  
+                time = float(row[3])
+                tpe = float(row[4])  
                 
-                tpe = 0.0
-                if ne != 0:
-                    tpe = time/ne
-                
-                l = [i, nswaps, ne, time, tpe]           
+                l = [i, nswaps, time, tpe]           
                 lr.append(l)
 
 	
 	    lr = sorted(lr, key=itemgetter(0))
 	    outf.write("----"+dirname+file+"----\n")    
         for l in lr:
-            outf.write("%i\t%i\t%i\t%f\t%f\n" % (l[0], l[1], l[2], l[3], l[4]))
+            outf.write("%i %Le\n" % (l[0], l[3]))
 
-   	    outf.write("------------------------\n")
+        outf.write("------------------------\n")
 
 
 
