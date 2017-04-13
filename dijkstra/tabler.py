@@ -42,8 +42,8 @@ def __proc_exp1__(dirname, outfname, rfext):
 	    lr = sorted(lr, key=itemgetter(0))
 	    outf.write("----"+dirname+file+"----\n")    
         for l in lr:
-            outf.write("%i %Le\n" % (l[0], l[3]))
-
+            #outf.write("%i %Le\n" % (l[0], l[3]))
+            outf.write("%i & %i & %.2Le\n" % (l[0], l[1], l[2]))
         outf.write("------------------------\n")
 
 
@@ -87,7 +87,45 @@ def __proc_exp23__(dirname, outfname, rfext):
     
     for l in lr:
         outf.write("%i\t%i\t%f\t%f\t%f\t%f\t%Le\n" % (l[0], l[1], l[2], l[3], l[4], (l[5]/(1024*1024)), l[6]))
+
    
+def __proc_exp11__(dirname, outfname, rfext):
+    lr = []
+    outf = open(outfname, "w")
+    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
+        print "reading "+file
+        with open(dirname+file, 'rb') as csvfile:
+            csvdata = csv.reader(csvfile, delimiter=' ')
+            fl = csvdata.next()
+            k = int(fl[0])
+            ns = 0
+            e = 0
+            t  = 0
+            idt = 0
+            
+            nexp = 1
+            for row in csvdata:
+                idt = int(row[0])
+                ns = int(row[1])
+                e = int(row[2])
+                t  = float(row[3])
+                l = [k, idt, ns, e, t]                
+                lr.append(l) 
+           
+            #print ("appending %i %i %i\n" % (k, n, m))
+                
+
+    
+    lr = sorted(lr, key = lambda x: (x[1], x[0]))    
+    outf = open(outfname, "w")
+    nn = -1
+    for l in lr:
+        if(l[1] != nn):
+            nn = l[1]
+            outf.write("\n%i & " % (l[1]))
+            
+        outf.write(" %i & %i & %.2Le &" % (l[3], l[2], l[4]))
+
 
 def __proc_exp44__(dirname, outfname, rfext):
     lr = []
@@ -148,14 +186,14 @@ def __proc_exp55__(dirname, outfname, rfext):
                 if U > m:
                     print "Error on U for "+file
                 
-                tp = t/((m+n)*math.log(n))
-                #print file+"\n"
-                #print ("t = %.2Le | tp = %.2Le | (m+n) = %.2Le | log(%d) = %.2Le\n" % (t, tp, 20971520+n, n, math.log(n)))
+                tp = (t/((m*math.log(n))+(n*math.log(n))))
+                print file+"\n"
+                print ("t = %.2Le | tp = %.2Le | (m+n)log(n) = %.2Le | log(%d) = %.2Le\n" % (t, tp, (m*math.log(n))+(n*math.log(n)), n, math.log(n)))
                 
                 l = [n, m, tp, t]                
                 lr.append(l) 
                    
-            lr = sorted(lr, key = lambda x: (x[1]))    
+            lr = sorted(lr, key = lambda x: (x[0]))    
             
             outf.write(file+"\n")    
             for l in lr:
@@ -196,6 +234,8 @@ if __name__ == '__main__':
         __proc_exp44__(dirname, outfname, rfext)
     elif exp == 5:
         __proc_exp55__(dirname, outfname, rfext)
+    elif exp == 11:
+        __proc_exp11__(dirname, outfname, rfext)
 
     
    

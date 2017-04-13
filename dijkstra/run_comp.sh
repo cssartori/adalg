@@ -1,26 +1,18 @@
 #!/bin/bash
 
-N=(2048 4096 8192 16384 32768 65536 131072 262144 524288 1048576)
-M=(256 512 1024 2048 4096 8192 16384 32768 65536 131072 262144 524288 1048576)
-
-n=1048576
-m=20971521
-
-# 1048576 2097152 4194304 8388608 16777216 33554432 67108864
-
-mkdir "rcomp"
-
-for m in ${M[*]}
+for hd in {10,16}
 do
-	
-	./gen -n $n -m $m > "rcomp/temp"$n"-"$m".gr"
-	echo "Created graph with "$n" nodes and "$m" edges"
-	outf="./rcomp/RC-"$n"."$m".dat"
-	./exp -t s -n 50 -h 2 < "rcomp/temp"$n"-"$m".gr" > $outf 	
-	
-	echo "Done with "$m
-	echo "Results in file "$outf
-		
-done
+	dirname="chd_"$hd
+	mkdir $dirname
 
-rm "temp.gr"
+	for filename in ./ci/t/*.gr
+	do
+		outf=$(echo $filename| cut -d'/' -f 4)
+	   	outf=$(echo $outf| cut -d'.' -f  1)
+	   	outf=$dirname"/"$outf".dat"  
+		./exp -t s -n 50 -h $hd < $filename > $outf		
+	   	echo "Done with "$filename
+		echo "Results in file "$outf
+		
+	done
+done

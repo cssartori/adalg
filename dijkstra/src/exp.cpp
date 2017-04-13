@@ -36,31 +36,32 @@ void test_delete(unsigned int hd){
 		while(n > 0){
 			//printf("inserting %u, %u\n", k, n);
 			h.insert(k, n);
-			b++;
-			if(b == B){
-  			    l++;
-			    B = pow(hd, l);
-			    b=0;
-			    k++;
-			}
+//			b++;
+//			if(b == B){
+//  			    l++;
+//			    B = pow(hd, l);
+//			    b=0;
+//			    k++;
+//			}
+            k++;
 			n--;
 		}
         //printf("l=%i\n", l);
         
-        n = N + 2;
-        N = pow(hd, l)/hd;
-        k += N;
-        for(int x=0;x<N;x++){
-            //printf("inserting %u, %u\n", k, n);
-            h.insert(k--, n++);
-        }
-        
-        n=0;
-        N = pow(hd, l)/hd;;
+//        n = N + 2;
+//        N = pow(hd, l)/2;
+//        k += N;
+//        for(int x=0;x<N;x++){
+//            //printf("inserting %u, %u\n", k, n);
+//            h.insert(k--, n++);
+//        }
+//        
+//        n=0;
+//        N = pow(hd, l)/2;;
 	   	tstart = std::chrono::system_clock::now();
 	   	
 		h.n_swaps = 0;
-		while(n < N){
+		while(!h.is_empty()){
 			n++;	
 			h.deletemin();
 		}
@@ -69,7 +70,7 @@ void test_delete(unsigned int hd){
 		elapsed_seconds = tend-tstart;	
 		
 		swaps[i] = h.n_swaps;
-		e[i] = (i-1)*pow(hd,i-1);
+		e[i] = (i-1)*N-1;//pow(hd,i);
 		times[i] = elapsed_seconds.count();
 		//printf("-----------------\n");
 	}
@@ -166,7 +167,7 @@ void test_insert(unsigned int hd){
 }
 
 
-void test_scale(unsigned int hd){
+void test_scale(unsigned int hd, bool is_scale){
 	
 	unsigned int n,m;
 
@@ -179,24 +180,25 @@ void test_scale(unsigned int hd){
 		
 		size_t mu = 0;
 		unsigned int n_ins, n_del, n_upd;
+		long double time;
 		unsigned int d;
 		do{
     		int s = rand()%n;
     		int t = rand()%n;
     		while(s == t)
     			t = rand()%n;
-			tstart = std::chrono::system_clock::now();
-		    d = dijkstra_nheap_test(g, s, t, &n_ins, &n_del, &n_upd, &mu, hd);
-		}while(d == MAX_DIST);
+			//tstart = std::chrono::system_clock::now();
+		    d = dijkstra_nheap_test(g, s, t, &n_ins, &n_del, &n_upd, &time, &mu, hd);
+		}while(d == MAX_DIST && is_scale);
 		
-		tend = std::chrono::system_clock::now();
+		//tend = std::chrono::system_clock::now();
 	
-		elapsed_seconds = tend-tstart;	
+		//elapsed_seconds = tend-tstart;	
 		
 		if(NUM_EXP != 1)
 			printf("%u,", i);
 				
-		printf("%u,%u,%u,%u,%u,%lu,%Le,%u\n", n, m, n_ins, n_del, n_upd, mu, elapsed_seconds.count(), d);
+		printf("%u,%u,%u,%u,%u,%lu,%Le,%u\n", n, m, n_ins, n_del, n_upd, mu, time, d);
 		if(d == MAX_DIST)
 			ninf++;
 			
@@ -261,7 +263,9 @@ int main(int argc, char **argv){
 	else if(op == 'd')
 		test_delete(hd);
 	else if(op == 's')
-		test_scale(hd);
+		test_scale(hd, true);
+	else if(op == 'c')
+	    test_scale(hd, false);
 	else if(op == 'v')
 		test_validate(hd);
 	else{
@@ -315,6 +319,6 @@ void read_parameters(int argc, char **argv, char *op, unsigned int *hd){
 }
 
 void usage(char **argv){
-	fprintf(stderr, "usage:\n%s -t <test type> [-h <heap dimension>] [-n <number of tests>]\n\t-t test type: \t\ti, u, d, s, v\n\t-h heap dimension: \tnatural numbers\n\t-n number of tests: \tnatural numbers\n", argv[0]);
+	fprintf(stderr, "usage:\n%s -t <test type> [-h <heap dimension>] [-n <number of tests>]\n\t-t test type: \t\ti, u, d, s, c, v\n\t-h heap dimension: \tnatural numbers\n\t-n number of tests: \tnatural numbers\n", argv[0]);
 }
 

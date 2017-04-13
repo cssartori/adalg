@@ -25,18 +25,43 @@ int main(int argc, char *argv[]) {
 	for(unsigned i=0; i<n; i++)
 		add_vertex(g);
 		
-	//unsigned int mm = (unsigned int)(pow(n,1.001)*log(n));
+	unsigned int mm = (unsigned int)n*log(n)+n;
 	//m = max(m, mm);
+	m = mm;
 	p =  pow(n, 0.1)*log(n)/n;	
 	if(m >= (n*(n-1)/2)){
 		p=1;
 		m = n*(n-1)/2;
 	}
+	
 	fprintf(stderr, "p = %f | m = %u\n",p, m);
 	srand48(time(0));
 	srand(time(0));
 	if(medges){
 		unsigned int mc = 0;
+
+//        unsigned i=0;
+//        unsigned max_edges = min(m, n-1);
+//        unsigned ec = 0;
+//        while(ec < max_edges){
+//            Edge e = add_edge(i,i+1,g).first;
+//            g[e].weight = lrand48()%maxweight;
+//            ec++;
+//            i++;
+//        }
+//        //m = m + rand()%m;
+
+//        while(ec < m && ec <= (n*(n-1))/2){
+//            unsigned u = rand()%n;
+//            unsigned v = rand()%n;
+//            while(u == v || edge_exist(g, u, v))
+//                v = rand()%n;
+//                
+//            Edge e = add_edge(u, v,g).first;
+//            g[e].weight = lrand48()%(maxweight/2);
+//            
+//            ec++;
+//        }
         
 		while(mc < m){
 			for(unsigned int i=0; i<n; i++){
