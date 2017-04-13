@@ -2,6 +2,7 @@
 #include "../include/dgraph.h"
 #include "../include/mem_used.hpp"
 #include <vector>
+#include <chrono>
 
 using namespace std;
 using namespace boost;
@@ -77,8 +78,11 @@ unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsi
 
 
 // Implementation of Dijkstra's algorithm with n-heaps for testing purposes (collects memory used, number of insertions, deletions and updates)
-unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t, unsigned int *n_ins, unsigned int *n_del, unsigned int *n_upd, size_t *mem, unsigned int nh){
+unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t, unsigned int *n_ins, unsigned int *n_del, unsigned int *n_upd, long double *time, size_t *mem, unsigned int nh){
+
 	NHeap h(nh, num_vertices(g));
+	std::chrono::time_point<std::chrono::system_clock> tstart, tend;
+    std::chrono::duration<long double> elapsed_seconds;
 	vector<bool> visited(num_vertices(g), false); //no node has been visited yet
 	vector<unsigned int> dist(num_vertices(g), MAX_DIST);
 	*n_ins = 0;
@@ -92,6 +96,7 @@ unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t,
 	if(mem != NULL)
 		*mem = memory_used(); //all memory is allocated up to this point	
 		
+	tstart = std::chrono::system_clock::now();	
 	while(!h.is_empty()){
 		unsigned int v = h.getmin(); h.deletemin();
 		*n_del += 1;
@@ -116,6 +121,9 @@ unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t,
 			}
 		}
 	}
+	tend = std::chrono::system_clock::now();
+	elapsed_seconds = tend-tstart;	
+	*time = elapsed_seconds.count();
 	
 	return dist[t];
 }
