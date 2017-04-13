@@ -11,7 +11,7 @@ using namespace boost;
  
 const unsigned maxweight = 1000;
 
-void read_parameters(int argc, char **argv, unsigned int *n, unsigned int *m, double *p, bool *medges); 
+void read_parameters(int argc, char **argv, unsigned int *n, double *p, bool *medges); 
 void usage(char **argv); 
  
 int main(int argc, char *argv[]) { 	  
@@ -19,49 +19,26 @@ int main(int argc, char *argv[]) {
 	double p;
 	bool medges;
 	  
-	read_parameters(argc, argv, &n, &m, &p, &medges);
+	read_parameters(argc, argv, &n, &p, &medges);
 	 
 	Graph g;
 	for(unsigned i=0; i<n; i++)
 		add_vertex(g);
-		
-	unsigned int mm = (unsigned int)n*log(n)+n;
-	//m = max(m, mm);
-	m = mm;
-	p =  pow(n, 0.1)*log(n)/n;	
-	if(m >= (n*(n-1)/2)){
-		p=1;
-		m = n*(n-1)/2;
-	}
 	
-	fprintf(stderr, "p = %f | m = %u\n",p, m);
 	srand48(time(0));
 	srand(time(0));
 	if(medges){
+	    m = (unsigned int)n*log(n)+n;
+	    p =  pow(n, 0.1)*log(n)/n;	
+	    
+	    //in case number of edges is bigger than the maximum
+	    if(m >= (n*(n-1)/2)){
+		    p=1;
+		    m = n*(n-1)/2;
+	    }
+	
+	    //edge created counter
 		unsigned int mc = 0;
-
-//        unsigned i=0;
-//        unsigned max_edges = min(m, n-1);
-//        unsigned ec = 0;
-//        while(ec < max_edges){
-//            Edge e = add_edge(i,i+1,g).first;
-//            g[e].weight = lrand48()%maxweight;
-//            ec++;
-//            i++;
-//        }
-//        //m = m + rand()%m;
-
-//        while(ec < m && ec <= (n*(n-1))/2){
-//            unsigned u = rand()%n;
-//            unsigned v = rand()%n;
-//            while(u == v || edge_exist(g, u, v))
-//                v = rand()%n;
-//                
-//            Edge e = add_edge(u, v,g).first;
-//            g[e].weight = lrand48()%(maxweight/2);
-//            
-//            ec++;
-//        }
         
 		while(mc < m){
 			for(unsigned int i=0; i<n; i++){
@@ -74,8 +51,10 @@ int main(int argc, char *argv[]) {
       			    if(mc >= m)
       			        break;
       		    }
-      		    fprintf(stderr, "\rmc = %u", mc);
-		        fflush(stderr);
+      		    if(mc >= m)
+      		        break;
+      		    //fprintf(stderr, "\rmc = %u", mc);
+		        //fflush(stderr);
       	    }
 		}
 
@@ -106,8 +85,7 @@ int main(int argc, char *argv[]) {
 
 
 
-
-void read_parameters(int argc, char **argv, unsigned int *n, unsigned int *m, double *p, bool *medges){
+void read_parameters(int argc, char **argv, unsigned int *n, double *p, bool *medges){
 	if(argc < 5){
 		usage(argv);
 		exit(-1);
@@ -115,7 +93,6 @@ void read_parameters(int argc, char **argv, unsigned int *n, unsigned int *m, do
 	
 	bool has_n = false;
 	int edge_p = 0; //only one of the edge parameters should be informed
-	
 	
 	for(int i=1;i<argc;i++){
 		if(argv[i][0] == '-'){
@@ -126,8 +103,6 @@ void read_parameters(int argc, char **argv, unsigned int *n, unsigned int *m, do
 					has_n = true;
 					break;
 				case 'm':
-					i++;
-					*m = atoi(argv[i]);
 					edge_p++;
 					*medges = true;
 					break;
@@ -156,16 +131,12 @@ void read_parameters(int argc, char **argv, unsigned int *n, unsigned int *m, do
 		fprintf(stderr, "Either parameter -m or -p should be informed, but not both.\n");
 		usage(argv);
 		exit(-1);
-	} /*else if(*medges && ((*n)*((*n)-1)) < (*m)){
-		fprintf(stderr, "The number of edges exceeds the maximum for %u nodes (%u edges).\n", *n, ((*n)*((*n)-1)));
-		usage(argv);
-		exit(-1);
-	}*/
+	} 
 		
 }
 
 void usage(char **argv){
-	fprintf(stderr, "usage:\n%s -n <number of nodes> [-m <number of edges> 'or' -p <probability of creating edge>]\n\t-n number of nodes: \t\tnatural numbers\n\t-m number of edges: \t\tnatural numbers\n\t-p prob. of creating edge: \treal numbers [0...1]\n", argv[0]);
+	fprintf(stderr, "usage:\n%s -n <number of nodes> [-m 'or' -p <probability of creating edge>]\n\t-n number of nodes: \t\tnatural numbers\n\t-m edge estimation: \t\tflag, no parameter needed\n\t-p prob. of creating edge: \treal numbers [0...1]\n", argv[0]);
 }
 
 

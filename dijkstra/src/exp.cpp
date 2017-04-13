@@ -20,44 +20,23 @@ std::chrono::duration<long double> elapsed_seconds;
 void read_parameters(int argc, char **argv, char *op, unsigned int *hd);
 void usage(char **argv);
 
+
+
 void test_delete(unsigned int hd){
-	
-	
+
 	for(unsigned int i=1;i<=NUM_EXP;i++){
 		int N = ((pow(hd,i)-1)/(hd-1));
 		int n = N;
 		int k=0;
-		int b = 0;
-		int B = 1;
-		int l = 0;
 		
 		NHeap h(hd, N*hd+1);
 		
 		while(n > 0){
-			//printf("inserting %u, %u\n", k, n);
 			h.insert(k, n);
-//			b++;
-//			if(b == B){
-//  			    l++;
-//			    B = pow(hd, l);
-//			    b=0;
-//			    k++;
-//			}
             k++;
 			n--;
 		}
-        //printf("l=%i\n", l);
-        
-//        n = N + 2;
-//        N = pow(hd, l)/2;
-//        k += N;
-//        for(int x=0;x<N;x++){
-//            //printf("inserting %u, %u\n", k, n);
-//            h.insert(k--, n++);
-//        }
-//        
-//        n=0;
-//        N = pow(hd, l)/2;;
+
 	   	tstart = std::chrono::system_clock::now();
 	   	
 		h.n_swaps = 0;
@@ -70,22 +49,21 @@ void test_delete(unsigned int hd){
 		elapsed_seconds = tend-tstart;	
 		
 		swaps[i] = h.n_swaps;
-		e[i] = (i-1)*N-1;//pow(hd,i);
+		e[i] = (i-1)*N-1;
 		times[i] = elapsed_seconds.count();
-		//printf("-----------------\n");
 	}
 	
-	printf("%i %u %u %Le %Le\n", 0, swaps[0], e[0], times[0], (long double)0.0);
+	printf("%i %u %u %Le %Le %i\n", 0, swaps[0], e[0], times[0], (long double)0.0, hd);
 	for(unsigned int j=1;j<swaps.size();j++){
-		printf("%i %u %u %Le %Le\n", j, swaps[j], e[j], times[j]-times[j-1], (times[j]-times[j-1])/e[j]);
+		printf("%i %u %u %Le %Le %i\n", j, swaps[j], e[j], times[j]-times[j-1], (times[j]-times[j-1])/e[j], hd);
 	}	
 }
 
 void test_update(unsigned int hd){
 	
 	for(unsigned int i=1;i<=NUM_EXP;i++){
-		unsigned int n = ((pow(hd,i)-1)/(hd-1));//pow(hd, i) - 1;
-		unsigned int k = ((pow(hd,i)-1)/(hd-1))*hd+1;//pow(hd, i) + 1;
+		unsigned int n = ((pow(hd,i)-1)/(hd-1));
+		unsigned int k = ((pow(hd,i)-1)/(hd-1))*hd+1;
 		unsigned int el = 0;
 		
 		NHeap h(hd, n*hd+1);
@@ -104,8 +82,7 @@ void test_update(unsigned int hd){
 			el++;
 		}
 		
-		
-		//update
+		//start updating
 		h.n_swaps = 0;
 		k = n;
 
@@ -123,9 +100,9 @@ void test_update(unsigned int hd){
 		e[i] = (i)*pow(hd, i);
 	}
 
-	printf("%i %u %u %Le %Le\n", 0, swaps[0], e[0], times[0], (long double)0.0);	
+	printf("%i %u %u %Le %Le %i\n", 0, swaps[0], e[0], times[0], (long double)0.0, hd);	
 	for(unsigned int j=1;j<swaps.size();j++){
-		printf("%i %u %u %Le %Le\n", j, swaps[j], e[j], times[j]-times[j-1], (times[j]-times[j-1])/e[j]);
+		printf("%i %u %u %Le %Le %i\n", j, swaps[j], e[j], times[j]-times[j-1], (times[j]-times[j-1])/e[j], hd);
 	}		
 }
 
@@ -159,10 +136,10 @@ void test_insert(unsigned int hd){
 		}
 	}
 	
-	printf("%i %u %u %Le %Le\n", 0, swaps[0], e[0], times[0], (long double)0.0);
-	printf("%i %u %u %Le %Le\n", 1, swaps[1], e[1], times[1], (long double)0.0);	
+	printf("%i %u %u %Le %Le %i\n", 0, swaps[0], e[0], times[0], (long double)0.0, hd);
+	printf("%i %u %u %Le %Le %i\n", 1, swaps[1], e[1], times[1], (long double)0.0, hd);	
 	for(unsigned int j=2;j<swaps.size();j++){
-		printf("%i %u %u %Le %Le\n", j, swaps[j], e[j], times[j]-times[j-1], (times[j]-times[j-1])/e[j]);
+		printf("%i %u %u %Le %Le %i\n", j, swaps[j], e[j], times[j]-times[j-1], (times[j]-times[j-1])/e[j], hd);
 	}	
 }
 
@@ -176,33 +153,26 @@ void test_scale(unsigned int hd, bool is_scale){
 		return;	
 	int ninf = 0;
 	for(unsigned int i=0;i<NUM_EXP;i++){
-		
-		
 		size_t mu = 0;
 		unsigned int n_ins, n_del, n_upd;
 		long double time;
 		unsigned int d;
+		
 		do{
     		int s = rand()%n;
     		int t = rand()%n;
     		while(s == t)
     			t = rand()%n;
-			//tstart = std::chrono::system_clock::now();
+
 		    d = dijkstra_nheap_test(g, s, t, &n_ins, &n_del, &n_upd, &time, &mu, hd);
-		}while(d == MAX_DIST && is_scale);
-		
-		//tend = std::chrono::system_clock::now();
-	
-		//elapsed_seconds = tend-tstart;	
+		}while(d == MAX_DIST && is_scale);	
 		
 		if(NUM_EXP != 1)
 			printf("%u,", i);
 				
-		printf("%u,%u,%u,%u,%u,%lu,%Le,%u\n", n, m, n_ins, n_del, n_upd, mu, time, d);
+		printf("%u,%u,%u,%u,%u,%lu,%Le,%u,%i\n", n, m, n_ins, n_del, n_upd, mu, time, d, hd);
 		if(d == MAX_DIST)
 			ninf++;
-			
-		//fprintf(stderr, "got\n");
 	}
 	
 	fprintf(stderr, "ninf = %i\n", ninf);
@@ -237,7 +207,7 @@ void test_validate(unsigned int hd){
   		if(dst != dist[t])
   			valid = -1;
 
-		printf("%u,%u,%u,%i\n", i, dst, dist[t], valid);
+		printf("%u,%u,%u,%i,%i\n", i, dst, dist[t], valid, hd);
 	}
 
 	return;

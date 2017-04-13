@@ -77,7 +77,7 @@ unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsi
 }
 
 
-// Implementation of Dijkstra's algorithm with n-heaps for testing purposes (collects memory used, number of insertions, deletions and updates)
+// Implementation of Dijkstra's algorithm with n-heaps for testing purposes (collects memory used, number of insertions, deletions, updates and execution time)
 unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t, unsigned int *n_ins, unsigned int *n_del, unsigned int *n_upd, long double *time, size_t *mem, unsigned int nh){
 
 	NHeap h(nh, num_vertices(g));
@@ -95,8 +95,9 @@ unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t,
 	
 	if(mem != NULL)
 		*mem = memory_used(); //all memory is allocated up to this point	
+	
+	tstart = std::chrono::system_clock::now();
 		
-	tstart = std::chrono::system_clock::now();	
 	while(!h.is_empty()){
 		unsigned int v = h.getmin(); h.deletemin();
 		*n_del += 1;
@@ -121,6 +122,7 @@ unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t,
 			}
 		}
 	}
+	
 	tend = std::chrono::system_clock::now();
 	elapsed_seconds = tend-tstart;	
 	*time = elapsed_seconds.count();

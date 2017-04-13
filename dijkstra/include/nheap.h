@@ -1,15 +1,30 @@
 #ifndef __NHEAP_H__
 #define __NHEAP_H__
+
+/**
+ * Implementation of a n-heap data structure, where n is the maximum number of 
+ * children each node my have. It is specially suited to work with integer input
+ * values, such as Graph's node index and distances for Dijkstra's algorithm.
+ *
+ * Carlo S. Sartori - 2017/1
+ * CMP588 - Advanced Algorithms, UFRGS, Prof. Marcus Ritt
+ */
+
 #include <vector>
 #include <unordered_map>
 
 
 class NHeap{
 private:
-	std::vector<unsigned int> heap; //heap itself, ordering the keys
-	std::vector<unsigned int> data; //auxilary vector containing the data of each key
-	std::vector<unsigned int> pos_heap; //a map to point where in the heap each item is - could be a map
-	unsigned int n; //heap dimension : n-heap
+    //heap itself, ordering the keys
+	std::vector<unsigned int> heap;
+	//auxilary vector containing the satelite data of each key 
+	std::vector<unsigned int> data;
+	//a map to point where in the heap each item is - more generally a map 
+	std::vector<unsigned int> pos_heap; 
+	//heap dimension : n-heap
+	unsigned int n; 
+
 
 	//Sifts an item e up, when necessary
 	void heapify_up(unsigned int i);
@@ -17,6 +32,7 @@ private:
 	void heapify_down(unsigned int i);
 
 public:
+    //variable to hold the number of swaps executed by the heap
 	unsigned int n_swaps;
 	
 	//Create a new n-heap to support up to m-int-elements with values [0...m-1]

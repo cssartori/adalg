@@ -159,7 +159,7 @@ def __proc_exp44__(dirname, outfname, rfext):
     for l in lr:
         if(l[1] != nn):
             nn = l[1]
-            outf.write("\n%i & %i & %.2f &" % (l[1], l[2], l[3]))
+            outf.write("\n%i & %i &" % (l[1], l[2]))
         outf.write(" %.2Le &" % (l[4]))
    
 
@@ -187,17 +187,20 @@ def __proc_exp55__(dirname, outfname, rfext):
                     print "Error on U for "+file
                 
                 tp = (t/((m*math.log(n))+(n*math.log(n))))
-                print file+"\n"
-                print ("t = %.2Le | tp = %.2Le | (m+n)log(n) = %.2Le | log(%d) = %.2Le\n" % (t, tp, (m*math.log(n))+(n*math.log(n)), n, math.log(n)))
+                pI = I/n
+                pD = D/n
+                pU = U/m
+                #print file+"\n"
+                #print ("t = %.2Le | tp = %.2Le | (m+n)log(n) = %.2Le | log(%d) = %.2Le\n" % (t, tp, (m*math.log(n))+(n*math.log(n)), n, math.log(n)))
                 
-                l = [n, m, tp, t]                
+                l = [n, m, tp, t, pI, pD, pU]                
                 lr.append(l) 
                    
             lr = sorted(lr, key = lambda x: (x[0]))    
             
             outf.write(file+"\n")    
             for l in lr:
-                outf.write("%i %i %.2Le %.2Le\n" % (l[0], l[1], l[2], l[3]))
+                outf.write("%i %i %.2Le %.2Le %.2Le %.2Le %.2Le\n" % (l[0], l[1], l[2], l[3], l[4], l[5], l[6]))
 
             outf.write("--------------------------------\n")
             
