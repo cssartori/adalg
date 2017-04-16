@@ -120,10 +120,10 @@ void test_update(unsigned int hd){
 
 void test_insert(unsigned int hd){
 
-	unsigned int n = pow(hd, ((pow(hd,NUM_EXP)-1)/(hd-1))+1); //limit
+	unsigned int n = ((pow(hd,NUM_EXP)-1)/(hd-1)); //limit
 	unsigned int i=2;
-	
-	NHeap h(hd, n);
+
+	NHeap h(hd, n+1);
 	h.insert(n, n);
 	
 	n--;
