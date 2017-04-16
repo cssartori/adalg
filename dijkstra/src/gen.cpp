@@ -28,15 +28,15 @@ int main(int argc, char *argv[]) {
 	srand48(time(0));
 	srand(time(0));
 	if(medges){
-	    m = (unsigned int)n*log(n)+n;
-	    p =  pow(n, 0.1)*log(n)/n;	
+	    m = (unsigned int)((n*log10(n))+n);
+	    p =  pow(n, 0.2)*log10(n)/n;	
 	    
 	    //in case number of edges is bigger than the maximum
-	    if(m >= (n*(n-1)/2)){
+	    if(m >= (n*(n-1))){
 		    p=1;
-		    m = n*(n-1)/2;
+		    m = n*(n-1);
 	    }
-	
+	    fprintf(stderr, "p = %f | n = %u | nlogn = %f | m = %u\n", p, n, log(n), m);
 	    //edge created counter
 		unsigned int mc = 0;
         
@@ -53,8 +53,8 @@ int main(int argc, char *argv[]) {
       		    }
       		    if(mc >= m)
       		        break;
-      		    //fprintf(stderr, "\rmc = %u", mc);
-		        //fflush(stderr);
+      		    fprintf(stderr, "\rmc = %u", mc);
+		        fflush(stderr);
       	    }
 		}
 
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 
 
 void read_parameters(int argc, char **argv, unsigned int *n, double *p, bool *medges){
-	if(argc < 5){
+	if(argc < 4){
 		usage(argv);
 		exit(-1);
 	}
