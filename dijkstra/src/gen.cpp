@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 	srand48(time(0));
 	srand(time(0));
 	if(medges){
-	    m = (unsigned int)((n*log10(n))+n);
+	    m = (unsigned int)(((n*log10(n))+n));
 	    p =  pow(n, 0.2)*log10(n)/n;	
 	    
 	    //in case number of edges is bigger than the maximum

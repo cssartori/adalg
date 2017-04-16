@@ -152,7 +152,7 @@ def __proc_dir_graph_scale__(dirname, outfname, rfext):
 
     for l in lr:
         # k n m I D U pI pD pU mem t t/O
-        outf.write("%i %u %u %u %u %u %f %f %f %f %Le %Le\n" % (l[0], l[1], l[2], l[3], l[4], l[5], float(l[3]/l[1]), float(l[4]/l[1]), float(l[5]/l[2]), float(l[6]/(1024*1024)), l[7], l[7]/((l[2]+l[1])*math.log(l[1]))))
+        outf.write("%i %u %u %u %u %u %u %f %f %f %f %Le %Le\n" % (l[0], math.log(l[1], 2), l[1], l[2], l[3], l[4], l[5], float(l[3]/l[1]), float(l[4]/l[1]), float(l[5]/l[2]), float(l[6]/(1024*1024)), l[7], l[7]/((l[2]+l[1])*math.log(l[1]))))
         
     outf.close()
 
