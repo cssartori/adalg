@@ -7,8 +7,7 @@ def __prepareargs__():
     parser = argparse.ArgumentParser(description='Creates result tables for N-Heap Dijkstra implementation')
     parser.add_argument('-d', nargs=1, type=str, help='directory with results', required=True)
     parser.add_argument('-o', nargs=1, type=str, help='output file name', required=True)
-    parser.add_argument('-x', nargs=1, type=int, help='experiment identifier (insert, update, delete=1, comp1=2, comp2=3, scale=4)', required=True)
-    parser.add_argument('-g', nargs=1, type=str, help='output file for graphic plotting', required=False, default = None)
+    parser.add_argument('-x', nargs=1, type=int, help='experiment identifier (<insert, update, delete> = 1, <complex, scale>Graph = 2, <complex, scale>Table=3)', required=True)
     parser.add_argument('-e', nargs=1, type=str, help='result files extension (default = \'.dat\')', required=False, default = ['.dat'])
 
         
@@ -18,6 +17,208 @@ def __prepareargs__():
 def __getargs__(parser):
     args = vars(parser.parse_args())
     return args
+
+
+def __proc_exp_heap__(cdata):
+    lr = []
+    
+    for row in cdata:
+        i = int(row[0])
+        k = int(row[1])
+        nswaps = int(row[2])
+        time = float(row[3])
+        tpe = float(row[4])  
+                
+        l = [i, k, nswaps, time, tpe]           
+        lr.append(l)
+
+	return lr
+
+
+def __proc_file_heap__(filename):
+    lr = []
+    with open(filename, 'rb') as cfile:
+            cdata = csv.reader(cfile, delimiter=',')
+            lr = __proc_exp_heap__(cdata)
+
+    return lr
+
+
+def __proc_dir_heap__(dirname, outfname, rfext):
+    outf = open(outfname, "w")
+    
+    print("reading files")
+    
+    lr = [] 
+    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
+        print("Reading file "+file)
+        
+        lf = __proc_file_heap__(dirname+file)
+        for l in lf:
+            lr.append(l)
+        
+        
+        # Generate graph file
+        lf = sorted(lf, key = lambda x: (x[0])) #sort by experiment
+        gfname = "G"+file.split(".")[0]+".dat"
+        outg = open(dirname+gfname, "w")
+        for l in lf:
+            outg.write("%i %i %i %Le %Le\n" % (l[0], l[1], l[2], l[3], l[4]))
+        
+        outg.close()
+        
+        
+    # Generate table file       
+	lr = sorted(lr, key = lambda x: (x[0], x[1])) #sort by experiment and k
+	ne = -1
+    for l in lr:
+        if ne != l[0]:
+            if ne != -1:
+                 outf.write("\\\\")
+            outf.write("\n%i " % (l[0]))
+            ne = l[0]
+                        
+        outf.write(" & %i & %.2Le " % (l[2], l[2]))
+
+    outf.close()
+
+def __proc_avg_exp_scale__(cdata):
+    
+    k = 0
+    n = 0
+    m = 0
+    nins = 0
+    ndel = 0
+    nupd = 0
+    mem = 0
+    time = 0.0              
+    nexp = 0
+    
+    for row in cdata:
+        k = int(row[1])
+        n = int(row[2])
+        m = int(row[3])
+        nins += int(row[4])
+        ndel += int(row[5])
+        nupd += int(row[6])
+        mem  += int(row[7])
+        time += float(row[8])
+        nexp += 1
+        
+        if int(row[4]) > n:
+            print "Error on I row "+str(row[0])
+        if int(row[5]) > n:
+            print "Error on D row "+str(row[0])
+        if int(row[6]) > m:
+            print "Error on U row "+str(row[0])
+                   
+    nins_avg = float(nins/nexp)
+    ndel_avg = float(ndel/nexp)
+    nupd_avg = float(nupd/nexp)
+    mem_avg  = float(mem/nexp)
+    time_avg = float(time/nexp)
+           
+    l = [k, n, m, nins_avg, ndel_avg, nupd_avg, mem_avg, time_avg]
+    
+    return l     
+
+    
+def __proc_file_scale__(filename, op):
+    l = []
+    with open(filename, 'rb') as cfile:
+            if op == "gr":
+                cdata = csv.reader(cfile, delimiter=",")
+                l = __proc_avg_exp_scale__(cdata)
+            else:
+                cdata = csv.reader(cfile, delimiter=" ")
+                l = __proc_tb_exp_scale__(cdata)
+
+    return l
+
+def __proc_dir_graph_scale__(dirname, outfname, rfext):
+    outf = open(outfname, "w")
+    
+    print("reading files")
+    
+    lr = [] 
+    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
+        print("Reading file "+file)
+        
+        lf = __proc_file_scale__(dirname+file, "gr")        
+        lr.append(lf)
+  
+    # Generate graph file       
+	lr = sorted(lr, key = lambda x: (x[1])) #sort by number of vertices
+
+    for l in lr:
+        # k n m I D U pI pD pU mem t t/O
+        outf.write("%i %u %u %u %u %u %f %f %f %f %Le %Le\n" % (l[0], l[1], l[2], l[3], l[4], l[5], float(l[3]/l[1]), float(l[4]/l[1]), float(l[5]/l[2]), float(l[6]/(1024*1024)), l[7], l[7]/((l[2]+l[1])*math.log(l[1]))))
+        
+    outf.close()
+
+
+
+def __proc_tb_exp_scale__(cdata):
+    
+    lr = []
+    k = 0
+    n = 0
+    m = 0
+    mem = 0
+    time = 0.0              
+    
+    for row in cdata:
+        k = int(row[0])
+        n = int(row[1])
+        m = int(row[2])
+        mem  = float(row[9])
+        time = float(row[10])
+        
+        l = [k, n, m, mem, time]
+        lr.append(l)
+    
+    return lr     
+
+
+def __proc_dir_table_scale__(dirname, outfname, rfext):
+    outf = open(outfname, "w")
+    
+    print("reading files")
+    
+    lr = [] 
+    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
+        print("Reading file "+file)
+        
+        lf = __proc_file_scale__(dirname+file, "tb")
+        for l in lf:        
+            lr.append(l)
+    
+      
+    # Generate table file       
+	lr = sorted(lr, key = lambda x: (x[1], x[0])) #sort by number of vertices and k
+    
+    nn = -1
+    for l in lr:
+        if nn != l[1]:
+            if nn != -1:
+                outf.write("\\\\")
+            outf.write("\n%u & %u & %.2f " % (l[1], l[2], l[3]))
+            nn = l[1]
+        
+        outf.write("& %.2Le " % (l[4]))
+        
+    outf.close()
+    
+
+
+
+
+
+
+
+
+
+
 
 def __proc_exp1__(dirname, outfname, rfext):
     
@@ -223,22 +424,18 @@ if __name__ == '__main__':
     dirname  = args['d'][0]
     outfname = args['o'][0]
     exp      = int(args['x'][0])
-    
-    gfname = None
-    if(args['g'] != None):
-        gfname   = args['g'][0]
     rfext    = args['e'][0]
     
     if exp == 1:
-        __proc_exp1__(dirname, outfname, rfext)    
-    elif exp == 2 or exp == 3:
-        __proc_exp23__(dirname, outfname, rfext)
-    elif exp == 4:
-        __proc_exp44__(dirname, outfname, rfext)
-    elif exp == 5:
-        __proc_exp55__(dirname, outfname, rfext)
-    elif exp == 11:
-        __proc_exp11__(dirname, outfname, rfext)
+        __proc_dir_heap__(dirname, outfname, rfext)    
+    elif exp == 2:
+        __proc_dir_graph_scale__(dirname, outfname, rfext)
+    elif exp == 3:
+        __proc_dir_table_scale__(dirname, outfname, rfext)
+#    elif exp == 5:
+#        __proc_exp55__(dirname, outfname, rfext)
+#    elif exp == 11:
+#        __proc_exp11__(dirname, outfname, rfext)
 
     
    
