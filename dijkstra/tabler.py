@@ -129,10 +129,10 @@ def __proc_file_scale__(filename, op):
                     
                 for row in cdata:
                     k = int(row[0])
-                    n = int(row[1])
-                    m = int(row[2])
-                    mem  = float(row[9])
-                    time = float(row[10])
+                    n = int(row[2])
+                    m = int(row[3])
+                    mem  = float(row[10])
+                    time = float(row[11])
                         
                     lt = [k, n, m, mem, time]
                     l.append(lt)
@@ -155,7 +155,7 @@ def __proc_dir_graph_scale__(dirname, outfname, rfext):
 	lr = sorted(lr, key = lambda x: (x[1])) #sort by number of vertices
 
     for l in lr:
-        # k n m I D U pI pD pU mem t t/O
+        # k log2(n) n m I D U pI pD pU mem t t/O
         outf.write("%i %u %u %u %u %u %u %f %f %f %f %Le %Le\n" % (l[0], math.log(l[1], 2), l[1], l[2], l[3], l[4], l[5], float(l[3]/l[1]), float(l[4]/l[1]), float(l[5]/l[2]), float(l[6]/(1024*1024)), l[7], l[7]/((l[2]+l[1])*math.log(l[1]))))
         
     outf.close()
@@ -183,7 +183,8 @@ def __proc_dir_table_scale__(dirname, outfname, rfext):
         if nn != l[1]:
             if nn != -1:
                 outf.write("\\\\")
-            outf.write("\n%u & %u & %.2f " % (l[1], l[2], l[3]))
+            #outf.write("\n%u & %u & %.2f " % (l[1], l[2], l[3]))
+            outf.write("\n%u & %u " % (l[1], l[2]))
             nn = l[1]
         
         outf.write("& %.2Le " % (l[4]))
