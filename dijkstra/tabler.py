@@ -64,6 +64,10 @@ def __proc_dir_heap__(dirname, outfname, rfext):
         
     # Generate table file       
 	lr = sorted(lr, key = lambda x: (x[0], x[1])) #sort by experiment and k
+	avg = dict({})
+	for l in lr:
+	    avg[l[1]] = [0,0.0,0]
+	    
 	ne = -1
     for l in lr:
         if ne != l[0]:
@@ -73,7 +77,13 @@ def __proc_dir_heap__(dirname, outfname, rfext):
             ne = l[0]
                         
         outf.write(" & %i & %.2Le " % (l[2], l[3]))
+        avg[l[1]] = [avg[l[1]][0]+l[2], avg[l[1]][1]+l[3], avg[l[1]][2]+1]
 
+    outf.write("\\\\\n\\textbf{Average} ")
+    for a in avg:
+        outf.write(" & %.2f & %.2Le " % (float(avg[a][0]/avg[a][2]), avg[a][1]/avg[a][2]))
+    
+    outf.write("\\\\")
     outf.close()
 
 
@@ -177,24 +187,39 @@ def __proc_dir_table_scale__(dirname, outfname, rfext):
       
     # Generate table file       
 	lr = sorted(lr, key = lambda x: (x[1], x[0])) #sort by number of vertices and k
+    avg = dict({})
+    for l in lr:
+        avg[l[0]] = 0.0
     
     nn = -1
+    c=0
+    mavg = 0
+    navg = 0
+    memavg = 0
+    
     for l in lr:
         if nn != l[1]:
             if nn != -1:
                 outf.write("\\\\")
+            c += 1
+            navg += l[1]
+            mavg += l[2]
+            memavg += l[3]
             #outf.write("\n%u & %u & %.2f " % (l[1], l[2], l[3]))
-            outf.write("\n%u & %u " % (l[1], l[2]))
+            outf.write("\n%u & %u & %u " % (c, l[1], l[2]))
             nn = l[1]
         
         outf.write("& %.2Le " % (l[4]))
+        avg[l[0]] += l[4]
         
+    #outf.write("\\\\\n\\textbf{Average} & %.2f & %.2f & %.2f " % (navg/c, mavg/c, memavg/c))
+    outf.write("\\\\\n\\textbf{Average} & %.2f & %.2f " % (navg/c, mavg/c))
+    for a in avg:
+        outf.write(" & %.2Le" % (avg[a]/c))
+    
+    outf.write("\\\\")
     outf.close()
     
-
-
-
-
 
 
 
