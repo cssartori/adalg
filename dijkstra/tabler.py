@@ -19,27 +19,21 @@ def __getargs__(parser):
     return args
 
 
-def __proc_exp_heap__(cdata):
-    lr = []
-    
-    for row in cdata:
-        i = int(row[0])
-        k = int(row[1])
-        nswaps = int(row[2])
-        time = float(row[3])
-        tpe = float(row[4])  
-                
-        l = [i, k, nswaps, time, tpe]           
-        lr.append(l)
-
-	return lr
-
 
 def __proc_file_heap__(filename):
     lr = []
+    
     with open(filename, 'rb') as cfile:
-            cdata = csv.reader(cfile, delimiter=',')
-            lr = __proc_exp_heap__(cdata)
+        cdata = csv.reader(cfile, delimiter=',')
+     
+        for row in cdata:
+            i = int(row[0])
+            k = int(row[1])
+            nswaps = int(row[2])
+            time = float(row[4])
+            tpe = float(row[5])             
+            l = [i, k, nswaps, time, tpe]           
+            lr.append(l)
 
     return lr
 
@@ -52,11 +46,11 @@ def __proc_dir_heap__(dirname, outfname, rfext):
     lr = [] 
     for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
         print("Reading file "+file)
-        
+               
         lf = __proc_file_heap__(dirname+file)
+
         for l in lf:
             lr.append(l)
-        
         
         # Generate graph file
         lf = sorted(lf, key = lambda x: (x[0])) #sort by experiment
@@ -78,60 +72,70 @@ def __proc_dir_heap__(dirname, outfname, rfext):
             outf.write("\n%i " % (l[0]))
             ne = l[0]
                         
-        outf.write(" & %i & %.2Le " % (l[2], l[2]))
+        outf.write(" & %i & %.2Le " % (l[2], l[3]))
 
     outf.close()
 
-def __proc_avg_exp_scale__(cdata):
-    
-    k = 0
-    n = 0
-    m = 0
-    nins = 0
-    ndel = 0
-    nupd = 0
-    mem = 0
-    time = 0.0              
-    nexp = 0
-    
-    for row in cdata:
-        k = int(row[1])
-        n = int(row[2])
-        m = int(row[3])
-        nins += int(row[4])
-        ndel += int(row[5])
-        nupd += int(row[6])
-        mem  += int(row[7])
-        time += float(row[8])
-        nexp += 1
-        
-        if int(row[4]) > n:
-            print "Error on I row "+str(row[0])
-        if int(row[5]) > n:
-            print "Error on D row "+str(row[0])
-        if int(row[6]) > m:
-            print "Error on U row "+str(row[0])
-                   
-    nins_avg = float(nins/nexp)
-    ndel_avg = float(ndel/nexp)
-    nupd_avg = float(nupd/nexp)
-    mem_avg  = float(mem/nexp)
-    time_avg = float(time/nexp)
-           
-    l = [k, n, m, nins_avg, ndel_avg, nupd_avg, mem_avg, time_avg]
-    
-    return l     
 
-    
+   
 def __proc_file_scale__(filename, op):
     l = []
     with open(filename, 'rb') as cfile:
             if op == "gr":
                 cdata = csv.reader(cfile, delimiter=",")
-                l = __proc_avg_exp_scale__(cdata)
+                k = 0
+                n = 0
+                m = 0
+                nins = 0
+                ndel = 0
+                nupd = 0
+                mem = 0
+                time = 0.0              
+                nexp = 0
+                
+                for row in cdata:
+                    k = int(row[1])
+                    n = int(row[2])
+                    m = int(row[3])
+                    nins += int(row[4])
+                    ndel += int(row[5])
+                    nupd += int(row[6])
+                    mem  += int(row[7])
+                    time += float(row[8])
+                    nexp += 1
+                    
+                    if int(row[4]) > n:
+                        print "Error on I row "+str(row[0])
+                    if int(row[5]) > n:
+                        print "Error on D row "+str(row[0])
+                    if int(row[6]) > m:
+                        print "Error on U row "+str(row[0])
+                               
+                nins_avg = float(nins/nexp)
+                ndel_avg = float(ndel/nexp)
+                nupd_avg = float(nupd/nexp)
+                mem_avg  = float(mem/nexp)
+                time_avg = float(time/nexp)
+                       
+                l = [k, n, m, nins_avg, ndel_avg, nupd_avg, mem_avg, time_avg]
             else:
                 cdata = csv.reader(cfile, delimiter=" ")
-                l = __proc_tb_exp_scale__(cdata)
+
+                k = 0
+                n = 0
+                m = 0
+                mem = 0
+                time = 0.0              
+                    
+                for row in cdata:
+                    k = int(row[0])
+                    n = int(row[1])
+                    m = int(row[2])
+                    mem  = float(row[9])
+                    time = float(row[10])
+                        
+                    lt = [k, n, m, mem, time]
+                    l.append(lt)
 
     return l
 
@@ -155,29 +159,6 @@ def __proc_dir_graph_scale__(dirname, outfname, rfext):
         outf.write("%i %u %u %u %u %u %u %f %f %f %f %Le %Le\n" % (l[0], math.log(l[1], 2), l[1], l[2], l[3], l[4], l[5], float(l[3]/l[1]), float(l[4]/l[1]), float(l[5]/l[2]), float(l[6]/(1024*1024)), l[7], l[7]/((l[2]+l[1])*math.log(l[1]))))
         
     outf.close()
-
-
-
-def __proc_tb_exp_scale__(cdata):
-    
-    lr = []
-    k = 0
-    n = 0
-    m = 0
-    mem = 0
-    time = 0.0              
-    
-    for row in cdata:
-        k = int(row[0])
-        n = int(row[1])
-        m = int(row[2])
-        mem  = float(row[9])
-        time = float(row[10])
-        
-        l = [k, n, m, mem, time]
-        lr.append(l)
-    
-    return lr     
 
 
 def __proc_dir_table_scale__(dirname, outfname, rfext):
