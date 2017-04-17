@@ -205,15 +205,15 @@ def __proc_dir_table_scale__(dirname, outfname, rfext):
             navg += l[1]
             mavg += l[2]
             memavg += l[3]
-            #outf.write("\n%u & %u & %.2f " % (l[1], l[2], l[3]))
-            outf.write("\n%u & %u & %u " % (c, l[1], l[2]))
+            outf.write("\n%u & %u & %u & %.2f " % (c, l[1], l[2], l[3]))
+            #outf.write("\n%u & %u & %u " % (c, l[1], l[2]))
             nn = l[1]
         
         outf.write("& %.2Le " % (l[4]))
         avg[l[0]] += l[4]
         
-    #outf.write("\\\\\n\\textbf{Average} & %.2f & %.2f & %.2f " % (navg/c, mavg/c, memavg/c))
-    outf.write("\\\\\n\\textbf{Average} & %.2f & %.2f " % (navg/c, mavg/c))
+    outf.write("\\\\\n\\textbf{Average} & %.2f & %.2f & %.2f " % (navg/c, mavg/c, memavg/c))
+    #outf.write("\\\\\n\\textbf{Average} & %.2f & %.2f " % (navg/c, mavg/c))
     for a in avg:
         outf.write(" & %.2Le" % (avg[a]/c))
     
