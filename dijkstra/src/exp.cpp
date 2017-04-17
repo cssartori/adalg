@@ -66,7 +66,7 @@ void test_delete(unsigned int hd){
 	printf("%i,%i,%u,%u,%Le,%Le\n", 0, hd, swaps[0], e[0], times[0], (long double)0.0);
 	printf("%i,%i,%u,%u,%Le,%Le\n", 1, hd, swaps[0], e[0], times[0], (long double)0.0);
 	for(unsigned int j=2;j<swaps.size();j++){
-		printf("%i,%u,%u,%Le,%Le,%i\n", j, swaps[j], e[j], times[j]-times[j-1], (times[j]-times[j-1])/e[j], hd);
+	  printf("%i,%i,%u,%u,%Le,%Le\n", j, hd, swaps[j], e[j], times[j]-times[j-1], (times[j]-times[j-1])/e[j]);
 	}	
 }
 
