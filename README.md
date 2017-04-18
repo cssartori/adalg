@@ -5,6 +5,7 @@ This repository contains the implementation of the Dijkstra Algorithm using the 
 ## Compiling ##
 
 The C++11 code can be compiled using a Makefile inside the repository. Three executables are generated: dijkstra, exp and gen.
+
 * dijkstra: calls the algorithm dijkstra passing two nodes, a source and a target, returning the distance between them;
 * exp: used to run several experiments over the algorithm and data structure, more details can be obtained within the executable;
 * gen: a random graph generator, which generates a graph given a number of nodes, in a way that is is not necessarily complete, but highly connected.
