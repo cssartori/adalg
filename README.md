@@ -9,3 +9,7 @@ The C++11 code can be compiled using a Makefile inside the repository. Three exe
 * dijkstra: calls the algorithm dijkstra passing two nodes, a source and a target, returning the distance between them;
 * exp: used to run several experiments over the algorithm and data structure, more details can be obtained within the executable;
 * gen: a random graph generator, which generates a graph given a number of nodes, in a way that is is not necessarily complete, but highly connected.
+
+## About ##
+Done by Carlo S. Sartori
+Class "CMP 588 - Advanced Algorithms", at UFRGS, 2017/1.
