@@ -12,4 +12,5 @@ The C++11 code can be compiled using a Makefile inside the repository. Three exe
 
 ## About ##
 Done by Carlo S. Sartori
+
 Class "CMP 588 - Advanced Algorithms", at UFRGS, 2017/1.
