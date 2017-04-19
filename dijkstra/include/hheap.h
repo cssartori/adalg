@@ -32,6 +32,7 @@ private:
     Node *h;    //node with minimum key
     unsigned int ne; //number of elements in the heap
     unsigned int nh; //number of hollows in the heap
+    std::map<unsigned int, Item*> pos_h;    
 
     Node* make_heap(){
         return nullptr;
@@ -40,7 +41,91 @@ private:
     Node* make_heap(unsigned int *data, unsigned int key){
         return new Node(data, key, nullptr, this, 0);
     }
+    
+    Node* meld(Node *h1, Node *h2){
+        if(h1 == nullptr)
+            return h2;
+        else if(h2 == nullptr)
+            return h1;
+
+        Node *temp = h1->ns;
+        h1->ns = h2->ns;
+        h2->ns = temp;
+
+        if(h1->key <= h2->key)
+            return h1;
+        else
+            return h2;
+    }
+
+    Node* link(Node *t1, Node *t2){
+        if(t1->key <= t2->key)
+            return make_child(t1, t2);
+        else
+            return make_child(t2, t1);
+    }
+
+    Node* make_child(Node *winner, Node *loser){
+        loser->ns = winner->fc;
+        winner->fc = loser;
+        winner->rank += 1;
+        return winner;
+    }
+    
+    Node* remove_min(Node *hr, unsigned int M){
+        if(hr == nullptr || hr->item == nullptr)
+            return nullptr;
         
+        hr->item = nullptr;
+        
+        std::vector<Node*> R(M, nullptr);
+        Node *r = hr;
+        while(r != hr){
+            Node *rn = r->ns;
+            link_heap(r, &R);
+            r = rn;
+        }
+        
+        //Rebuild heap
+        unsigned int i = 0;
+        //get first not-null reference           
+        while(i <= M && R[i] == nullptr) i++;
+        if(i > M) return nullptr;
+        
+        hr = R[i];
+        hr->ns = hr;
+
+        while(i <= M){
+            R[i]->ns = R[i];
+            hr = meld(hr, R[i]);
+            i++;
+        }
+        
+        return hr;
+    }
+    
+    //link heap removing hollow nodes
+    void link_heap(Node *hr, std::vector<Node*> *R){
+        if(hr->item == nullptr){
+            Node *r = hr->fc;
+            while(r != nullptr){ //go through the list of childs of h
+                Node *rn = r->ns;
+                link_heap(r, R); //link each child to remove hollows
+                r = rn;
+            }
+            delete hr;
+        }else{
+            unsigned int i = hr->rank;
+            //go over each reference in R
+            while((*R)[i] != nullptr){
+                link(hr, (*R)[i]); //link the reference to the heap h
+                (*R)[i] = nullptr;
+                i++;
+            }
+            (*R)[i] = hr;
+        }         
+    }
+
 public:
     HHeap(){
         this->h = make_heap();
@@ -50,10 +135,47 @@ public:
     
     HHeap(unsigned int *data, unsigned int key){
         this->h = make_heap(data, key, nullptr, this, 0);
+        this->pos_h[*data] = this->h->item;
         this->ne = 1;
         this->nh = 0;
     }
 
+    void insert(unsigned int *data, unsigned int key){
+        Node *n = make_heap(data, key);
+        this->h = meld(n, h);
+        this->pos_h[*data] = n->item;
+    }
+    
+    void update_key(unsigned int *data, unsigned int key){
+        Item *e = this->pos_h[*data];
+        if(e != nullptr){
+            Node *u = e->node;
+            Node *v = make_heap(e->data, key);
+            v->rank = std::max(0, u->rank-2);
+            if(u->rank >= 2){
+                v->fc = u->ns->ns;
+                u->ns->ns = nullptr;
+            }
+            u->item = nullptr;
+            this->h = meld(this->h, v);
+        }
+            
+    }
+
+    void delete_node(unsigned int *data){
+        Item *e = this->pos_h[*data];
+        e->node->item = nullptr;
+        if(e->node == this->h)
+            delete_min();
+    }
+    
+    void delete_min(){
+        //TODO: calculate M
+        unsigned int M = 0;
+        this->h = remove_min(this->h, M);
+    }
+
+    
 }
 
 #endif //__H_HEAP__
