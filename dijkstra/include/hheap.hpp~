@@ -1,7 +1,13 @@
 #ifndef __H_HEAP__
 #define __H_HEAP__
 
+#include <map>
+#include <vector>
+
+class Node;
+
 class Item{
+public:
     Node *node;
     unsigned int *data;   
     
@@ -12,6 +18,7 @@ class Item{
 };
 
 class Node{
+public:
     Item *item;
     unsigned int key;
     Node *fc; //first child
@@ -36,11 +43,11 @@ private:
 
     Node* make_heap(){
         return nullptr;
-    }
+    };
 
     Node* make_heap(unsigned int *data, unsigned int key){
-        return new Node(data, key, nullptr, this, 0);
-    }
+        return new Node(data, key, nullptr, this->h, (unsigned int)0);
+    };
     
     Node* meld(Node *h1, Node *h2){
         if(h1 == nullptr)
@@ -56,21 +63,21 @@ private:
             return h1;
         else
             return h2;
-    }
+    };
 
     Node* link(Node *t1, Node *t2){
         if(t1->key <= t2->key)
             return make_child(t1, t2);
         else
             return make_child(t2, t1);
-    }
+    };
 
     Node* make_child(Node *winner, Node *loser){
         loser->ns = winner->fc;
         winner->fc = loser;
         winner->rank += 1;
         return winner;
-    }
+    };
     
     Node* remove_min(Node *hr, unsigned int M){
         if(hr == nullptr || hr->item == nullptr)
@@ -102,7 +109,7 @@ private:
         }
         
         return hr;
-    }
+    };
     
     //link heap removing hollow nodes
     void link_heap(Node *hr, std::vector<Node*> *R){
@@ -124,34 +131,34 @@ private:
             }
             (*R)[i] = hr;
         }         
-    }
+    };
 
 public:
     HHeap(){
         this->h = make_heap();
         this->ne = 0;
         this->nh = 0;
-    }
+    };
     
     HHeap(unsigned int *data, unsigned int key){
-        this->h = make_heap(data, key, nullptr, this, 0);
+        this->h = make_heap(data, key, nullptr, this, (unsigned int)0);
         this->pos_h[*data] = this->h->item;
         this->ne = 1;
         this->nh = 0;
-    }
+    };
 
     void insert(unsigned int *data, unsigned int key){
         Node *n = make_heap(data, key);
         this->h = meld(n, h);
         this->pos_h[*data] = n->item;
-    }
+    };
     
     void update_key(unsigned int *data, unsigned int key){
         Item *e = this->pos_h[*data];
         if(e != nullptr){
             Node *u = e->node;
             Node *v = make_heap(e->data, key);
-            v->rank = std::max(0, u->rank-2);
+            v->rank = std::max((unsigned int)0, u->rank-2);
             if(u->rank >= 2){
                 v->fc = u->ns->ns;
                 u->ns->ns = nullptr;
@@ -160,22 +167,20 @@ public:
             this->h = meld(this->h, v);
         }
             
-    }
+    };
 
     void delete_node(unsigned int *data){
         Item *e = this->pos_h[*data];
         e->node->item = nullptr;
         if(e->node == this->h)
             delete_min();
-    }
+    };
     
     void delete_min(){
         //TODO: calculate M
         unsigned int M = 0;
         this->h = remove_min(this->h, M);
-    }
-
-    
-}
+    };  
+};
 
 #endif //__H_HEAP__
