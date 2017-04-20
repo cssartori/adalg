@@ -43,4 +43,6 @@ unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsi
 // Implementation of Dijkstra's algorithm with n-heaps for testing purposes (collects memory used, number of insertions, deletions, updates and execution time)
 unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t, unsigned int *n_ins, unsigned int *n_del, unsigned int *n_upd, long double *time, size_t *mem=NULL, unsigned int nh=2);
 
+unsigned int dijkstra_hheap(const Graph& g, unsigned int s, unsigned int t, unsigned int nh);
+
 #endif //__DGRAPH_H__

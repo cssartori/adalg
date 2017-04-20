@@ -208,7 +208,7 @@ void test_validate(unsigned int hd){
 			t = (t+1)%n;
 		}
 		
-		unsigned int dst = dijkstra_nheap(g, s, t, hd);
+		unsigned int dst = dijkstra_hheap(g, s, t, hd);
 		
 		vector<unsigned int> dist(n);
   		vector<unsigned int> pred(n);

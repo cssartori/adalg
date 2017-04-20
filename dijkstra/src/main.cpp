@@ -35,7 +35,7 @@ int main(int argc, char **argv){
    		start = std::chrono::system_clock::now();
    		
 	//compute shortest path
-	unsigned int dst = dijkstra_nheap(g, s, t, hd);		
+	unsigned int dst = dijkstra_hheap(g, s, t, hd);		
 	//print result
 	if(dst != MAX_DIST)
 		printf("%u\n", dst);

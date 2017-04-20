@@ -5,15 +5,15 @@ int main(){
     const int N = 100;
     HHeap h;
     
-    unsigned int *u = (unsigned*)malloc(sizeof(unsigned)*N);
+    //unsigned int *u = (unsigned*)malloc(sizeof(unsigned)*N);
     for(int i=0;i<N;i++){
-        u[i] = i;
-        h.insert(&u[i], 5*N-i);
+       // u[i] = i;
+        h.insert(i, 5*N-i);
     }
        
-//    for(int i=0;i<N;i++){
-//        h.update_key(&u[i], i);
-//    }
+    for(int i=0;i<N;i++){
+        h.decrease_key(i, i);
+    }
     
 //    unsigned int *u = (unsigned*)malloc(sizeof(unsigned)*3);
 //    u[0] = 0; u[1] = 1; u[2] = 2;
@@ -31,7 +31,7 @@ int main(){
  //   h.print_roots();
     
     while(!h.is_empty()){
-        printf("%u\n", *h.getmin());
+        printf("%u\n", h.getmin());
         h.delete_min();
     }
     printf("nt = %u\nne = %u\n", h.getnt(), h.getne());
