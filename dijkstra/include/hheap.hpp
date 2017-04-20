@@ -17,6 +17,7 @@ public:
     HHeap(unsigned int *data, unsigned int key){
         this->h = make_heap(data, key);
         this->pos_h[*data] = this->h->item;
+        
         //A new node has been added to the heap
         this->ne = 1;
         this->nt = 1;
@@ -24,12 +25,9 @@ public:
 
     void insert(unsigned int *data, unsigned int key){
         Node *n = make_heap(data, key);
-//        if(n == nullptr)
-//            printf("Inserting null pointer\n");
-//        else
-//            printf("n = (%u,%u) | n = %u | ns = %u | fc = %u\n", *n->item->data, n->key, n, n->ns, n->fc);
         this->h = meld(this->h, n);
         this->pos_h[*data] = n->item;
+        
         //A new node has been added to the heap
         this->ne += 1;
         this->nt += 1;
@@ -43,16 +41,32 @@ public:
     
     void update_key(unsigned int *data, unsigned int key){
         Item *e = this->pos_h[*data];
+        printf("e = (%u, %u)\n", *e->data, e->node->key);
         if(e != nullptr){
             Node *u = e->node;
             Node *v = make_heap(e->data, key);
-            v->rank = std::max((unsigned int)0, u->rank-2);
+            v->rank = std::max(0, u->rank-2);
+            printf("v = (%u,%u) | rank = %u\n", *v->item->data, v->key, v->rank);
             if(u->rank >= 2){
                 v->fc = u->ns->ns;
                 u->ns->ns = nullptr;
             }
+            
+           // printf("*h = (%u,%u)\n", *h->item->data, h->key);
+           // printf("h->ns = (%u,%u) | h->ns->ns = (%u,%u)\n", *h->ns->item->data, h->ns->key, *h->ns->ns->item->data);
+            
+            //make u a hollow node
             u->item = nullptr;
+            pos_h[*v->item->data] = v->item;
+            Item *e1 = pos_h[*data];
+           // printf("e1 = (%u,%u)\n", *e1->data, e1->node->key);
+           // 
             this->h = meld(this->h, v);
+           // printf("h->ns = (%u,%u)\n", *h->ns->item->data, h->ns->key);
+           // printf("h->ns->ns = (%u,%u)\n", *h->ns->ns->item->data,0);
+            if(h == nullptr)
+                printf("h is null in update\n");
+           // printf("h = (%u,%u)\n", *h->item->data, h->key);
             //a hollow node has been added to the heap
             this->nt += 1;
         }
@@ -73,7 +87,7 @@ public:
     };  
 
     bool is_empty(){
-        return this->h == nullptr;
+        return (this->h == nullptr || this->h->item == nullptr);
     }
 
     unsigned int getnt(){
@@ -88,7 +102,10 @@ public:
         Node *ht = this->h;
 
         do{
-            printf("%u\n", *(ht->item->data));
+            if((ht->item != nullptr))
+                printf("(%u,%u)\n", *(ht->item->data), ht->key);
+            else
+                printf("(null,%u)\n", ht->key);
             ht = ht->ns;
         }while(ht != this->h)  ;
     };
@@ -113,9 +130,9 @@ private:
         unsigned int key;
         Node *fc; //first child
         Node *ns; //next sibling
-        unsigned int rank;
+        int rank;
         
-        Node(unsigned int *data, unsigned int key, Node *fc, Node *ns, unsigned int rank){
+        Node(unsigned int *data, unsigned int key, Node *fc, Node *ns, int rank){
             this->item = new Item(this, data);
             this->key = key;
             this->fc = fc;
@@ -135,7 +152,7 @@ private:
     };
 
     Node* make_heap(unsigned int *data, unsigned int key){
-        Node *n = new Node(data, key, nullptr, this->h, (unsigned int)0);
+        Node *n = new Node(data, key, nullptr, this->h, 0);
         n->ns = n;
         return n;
     };
@@ -145,14 +162,14 @@ private:
             return h2;
         else if(h2 == nullptr)
             return h1;
-
+        
+       // printf("h1->ns = %u | h2->ns = %u\n", h1->ns, h2->ns);
+        
         Node *temp = h1->ns;
-       // printf("temp = %u\n", temp);
         h1->ns = h2->ns;
-       // printf("-temp = %u\n", temp);
         h2->ns = temp;
         
-       // printf ("(%u,%u) - > (%u,%u)\n", *h2->item->data, h2->key, *h2->ns->item->data, h2->ns->key);
+        //printf ("(%u,%u) - > (%u,%u)\n", *h2->item->data, h2->key, *h2->ns->item->data, h2->ns->key);
         
         if(h1->key <= h2->key)
             return h1;
@@ -208,8 +225,9 @@ private:
     
     //link heap removing hollow nodes
     void link_heap(Node *hr, std::vector<Node*> *R){
-      //  printf("Link_heap\n");
+        
         if(hr->item == nullptr){
+            //node hr is hollow
             Node *r = hr->fc;
             while(r != nullptr){ //go through the list of childs of h
                 Node *rn = r->ns;
