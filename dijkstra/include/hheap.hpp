@@ -3,43 +3,122 @@
 
 #include <map>
 #include <vector>
-
-class Node;
-
-class Item{
-public:
-    Node *node;
-    unsigned int *data;   
-    
-    Item(Node *node, unsigned int *data){
-        this->node = node;
-        this->data = data;
-    }
-};
-
-class Node{
-public:
-    Item *item;
-    unsigned int key;
-    Node *fc; //first child
-    Node *ns; //next sibling
-    unsigned int rank;
-    
-    Node(unsigned int *data, unsigned int key, Node *fc, Node *ns, unsigned int rank){
-        this->item = new Item(this, data);
-        this->key = key;
-        this->fc = fc;
-        this->ns = ns;
-        this->rank = rank;
-    }  
-};
+#include <math.h>
 
 class HHeap{
+public:
+    
+    HHeap(){
+        this->h = make_heap();
+        this->ne = 0;
+        this->nt = 0;
+    };
+    
+    HHeap(unsigned int *data, unsigned int key){
+        this->h = make_heap(data, key);
+        this->pos_h[*data] = this->h->item;
+        //A new node has been added to the heap
+        this->ne = 1;
+        this->nt = 1;
+    };
+
+    void insert(unsigned int *data, unsigned int key){
+        Node *n = make_heap(data, key);
+        this->h = meld(n, this->h);
+        this->pos_h[*data] = n->item;
+        //A new node has been added to the heap
+        this->ne += 1;
+        this->nt += 1;
+    };
+    
+    unsigned int* getmin(){
+        return this->h->item->data;
+    };
+    
+    void update_key(unsigned int *data, unsigned int key){
+        Item *e = this->pos_h[*data];
+        if(e != nullptr){
+            Node *u = e->node;
+            Node *v = make_heap(e->data, key);
+            v->rank = std::max((unsigned int)0, u->rank-2);
+            if(u->rank >= 2){
+                v->fc = u->ns->ns;
+                u->ns->ns = nullptr;
+            }
+            u->item = nullptr;
+            this->h = meld(this->h, v);
+            //a hollow node has been added to the heap
+            this->nt += 1;
+        }
+            
+    };
+
+    void delete_node(unsigned int *data){
+        //TODO: is this function really necessary
+        Item *e = this->pos_h[*data];
+        e->node->item = nullptr;
+        if(e->node == this->h)
+            delete_min();
+    };
+    
+    void delete_min(){
+        unsigned int M = ceil(log(this->nt)/log(1.6180));
+        this->h = remove_min(this->h, M);
+    };  
+
+    unsigned int getnt(){
+        return this->nt;
+    };
+    
+    unsigned int getne(){
+        return this->ne;
+    };
+
+    void print_roots(){
+        Node *ht = this->h;
+
+        do{
+            printf("%u\n", *(ht->item->data));
+            ht = ht->ns;
+        }while(ht != this->h)  ;
+    };
+
 private:
+    class Node;
+
+    class Item{
+    public:
+        Node *node;
+        unsigned int *data;   
+        
+        Item(Node *node, unsigned int *data){
+            this->node = node;
+            this->data = data;
+        }
+    };
+
+    class Node{
+    public:
+        Item *item;
+        unsigned int key;
+        Node *fc; //first child
+        Node *ns; //next sibling
+        unsigned int rank;
+        
+        Node(unsigned int *data, unsigned int key, Node *fc, Node *ns, unsigned int rank){
+            this->item = new Item(this, data);
+            this->key = key;
+            this->fc = fc;
+            this->ns = ns;
+            this->rank = rank;
+        }  
+    };
+
+  
     Node *h;    //node with minimum key
     unsigned int ne; //number of elements in the heap
-    unsigned int nh; //number of hollows in the heap
-    std::map<unsigned int, Item*> pos_h;    
+    unsigned int nt; //number of total nodes in the heap
+    std::map<unsigned int, Item*> pos_h;  
 
     Node* make_heap(){
         return nullptr;
@@ -56,7 +135,9 @@ private:
             return h1;
 
         Node *temp = h1->ns;
+        printf("temp = %u\n", temp);
         h1->ns = h2->ns;
+        printf("-temp = %u\n", temp);
         h2->ns = temp;
 
         if(h1->key <= h2->key)
@@ -84,14 +165,23 @@ private:
             return nullptr;
         
         hr->item = nullptr;
+        //removed a normal node
+        this->ne -= 1;
         
         std::vector<Node*> R(M, nullptr);
         Node *r = hr;
-        while(r != hr){
+        printf("Starting link_heap loop\n");
+        do{
+            printf("*rn = r->ns\n");
+            if(r == nullptr)
+                printf("r is null\n");
             Node *rn = r->ns;
+            printf("link_heap()\n");
             link_heap(r, &R);
+            printf("r = rn\n");
             r = rn;
-        }
+            printf("Next loop\n");
+        }while(r != hr);
         
         //Rebuild heap
         unsigned int i = 0;
@@ -113,6 +203,7 @@ private:
     
     //link heap removing hollow nodes
     void link_heap(Node *hr, std::vector<Node*> *R){
+        printf("Link_heap\n");
         if(hr->item == nullptr){
             Node *r = hr->fc;
             while(r != nullptr){ //go through the list of childs of h
@@ -121,6 +212,8 @@ private:
                 r = rn;
             }
             delete hr;
+            //removed a hollow node
+            this->nt -= 1;
         }else{
             unsigned int i = hr->rank;
             //go over each reference in R
@@ -132,55 +225,6 @@ private:
             (*R)[i] = hr;
         }         
     };
-
-public:
-    HHeap(){
-        this->h = make_heap();
-        this->ne = 0;
-        this->nh = 0;
-    };
-    
-    HHeap(unsigned int *data, unsigned int key){
-        this->h = make_heap(data, key);
-        this->pos_h[*data] = this->h->item;
-        this->ne = 1;
-        this->nh = 0;
-    };
-
-    void insert(unsigned int *data, unsigned int key){
-        Node *n = make_heap(data, key);
-        this->h = meld(n, h);
-        this->pos_h[*data] = n->item;
-    };
-    
-    void update_key(unsigned int *data, unsigned int key){
-        Item *e = this->pos_h[*data];
-        if(e != nullptr){
-            Node *u = e->node;
-            Node *v = make_heap(e->data, key);
-            v->rank = std::max((unsigned int)0, u->rank-2);
-            if(u->rank >= 2){
-                v->fc = u->ns->ns;
-                u->ns->ns = nullptr;
-            }
-            u->item = nullptr;
-            this->h = meld(this->h, v);
-        }
-            
-    };
-
-    void delete_node(unsigned int *data){
-        Item *e = this->pos_h[*data];
-        e->node->item = nullptr;
-        if(e->node == this->h)
-            delete_min();
-    };
-    
-    void delete_min(){
-        //TODO: calculate M
-        unsigned int M = 0;
-        this->h = remove_min(this->h, M);
-    };  
 };
 
 #endif //__H_HEAP__
