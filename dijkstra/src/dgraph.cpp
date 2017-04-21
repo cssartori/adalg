@@ -131,7 +131,7 @@ unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t,
 }
 
 // Computes the shortest path from node s to t in graph g using Dijkstra's algorithm and n-heaps
-unsigned int dijkstra_hheap(const Graph& g, unsigned int s, unsigned int t, unsigned int nh){
+unsigned int dijkstra_hheap(const Graph& g, unsigned int s, unsigned int t){
 	HHeap h;
 	vector<bool> visited(num_vertices(g), false); //no node has been visited yet
 	vector<unsigned int> dist(num_vertices(g), MAX_DIST);
@@ -163,6 +163,61 @@ unsigned int dijkstra_hheap(const Graph& g, unsigned int s, unsigned int t, unsi
 
 	return dist[t];
 }
+
+// Implementation of Dijkstra's algorithm with n-heaps for testing purposes (collects memory used, number of insertions, deletions, updates and execution time)
+unsigned int dijkstra_hheap_test(const Graph& g, unsigned int s, unsigned int t, unsigned int *n_ins, unsigned int *n_del, unsigned int *n_upd, long double *time, size_t *mem){
+
+	HHeap h(num_vertices(g));
+	std::chrono::time_point<std::chrono::system_clock> tstart, tend;
+    std::chrono::duration<long double> elapsed_seconds;
+	vector<bool> visited(num_vertices(g), false); //no node has been visited yet
+	vector<unsigned int> dist(num_vertices(g), MAX_DIST);
+	*n_ins = 0;
+	*n_del = 0;
+	*n_upd = 0;
+
+	dist[s] = 0;
+	h.insert(s, 0); 
+	*n_ins += 1;
+	
+	//TODO: check amount of memory used by Hollow Heaps
+	if(mem != NULL)
+		*mem = memory_used(); //all memory is allocated up to this point	
+	
+	tstart = std::chrono::system_clock::now();
+		
+	while(!h.is_empty()){
+		unsigned int v = h.getmin(); h.deletemin();
+		*n_del += 1;
+		visited[v] = true;
+		
+		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
+		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
+			unsigned int u = target(*ie, g);
+			if(!visited[u]){
+				if(dist[u] == MAX_DIST){ //distance is "infinity"
+					dist[u] = dist[v] +  g[*ie].weight; //update u distance
+					h.insert(u, dist[u]);
+					*n_ins += 1;
+				}else{
+					unsigned int ndu = min(dist[u], dist[v]+g[*ie].weight);
+					if(ndu < dist[u]){
+						h.decrease_key(u, ndu);
+						dist[u] = ndu;
+						*n_upd += 1;
+					}
+				}
+			}
+		}
+	}
+	
+	tend = std::chrono::system_clock::now();
+	elapsed_seconds = tend-tstart;	
+	*time = elapsed_seconds.count();
+	
+	return dist[t];
+}
+
 
 //Returns true if edge between node u and v exists
 bool edge_exist(const Graph& g, unsigned int u, unsigned int v){

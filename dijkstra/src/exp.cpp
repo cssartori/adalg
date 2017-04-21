@@ -6,7 +6,10 @@
 #include "../include/nheap.h"
 #include "../include/dgraph.h"
 
-unsigned int NUM_EXP = 20;
+static unsigned int NUM_EXP = 20;
+static const int DEFAULT_HDIM = 2; //binary k-heap (2-heap)
+static const char DEFAULT_HTYPE = 'h'; //hollow heaps
+
 
 using namespace std;
 
@@ -17,7 +20,7 @@ vector<unsigned int> e;
 std::chrono::time_point<std::chrono::system_clock> tstart, tend;
 std::chrono::duration<long double> elapsed_seconds;
 
-void read_parameters(int argc, char **argv, char *op, unsigned int *hd);
+void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int *hd);
 void usage(char **argv);
 
 
@@ -155,7 +158,7 @@ void test_insert(unsigned int hd){
 }
 
 
-void test_scale(unsigned int hd, bool is_scale){
+void test_scale(char htype, unsigned int hd, bool is_scale){
 	
 	unsigned int n,m;
 
@@ -168,14 +171,18 @@ void test_scale(unsigned int hd, bool is_scale){
 		unsigned int n_ins, n_del, n_upd;
 		long double time;
 		unsigned int d;
-		
+
 		do{
     		int s = rand()%n;
     		int t = rand()%n;
     		while(s == t)
     			t = rand()%n;
 
-		    d = dijkstra_nheap_test(g, s, t, &n_ins, &n_del, &n_upd, &time, &mu, hd);
+            if(htype == 'h')
+    		    d = dijkstra_hheap_test(g, s, t, &n_ins, &n_del, &n_upd, &time, &mu);
+    		else
+      		    d = dijkstra_nheap_test(g, s, t, &n_ins, &n_del, &n_upd, &time, &mu, hd);
+      		    
 		}while(d == MAX_DIST && is_scale);	
 		
 		if(NUM_EXP != 1)
@@ -190,7 +197,7 @@ void test_scale(unsigned int hd, bool is_scale){
 		
 }
 
-void test_validate(unsigned int hd){
+void test_validate(char htype, unsigned int hd){
 	srand(time(0));
 		
 	unsigned int n,m;
@@ -207,7 +214,11 @@ void test_validate(unsigned int hd){
 			s = rand()%n;
 			t = (t+1)%n;
 		}
-		unsigned int dst = dijkstra_hheap(g, s, t, hd);
+		unsigned int dst;
+		if(htype == 'h')
+		    dst = dijkstra_hheap(g, s, t);
+		else
+		    dst = dijkstra_nheap(g, s, t, hd);
 		
 		vector<unsigned int> dist(n);
   		vector<unsigned int> pred(n);
@@ -228,42 +239,40 @@ void test_validate(unsigned int hd){
 int main(int argc, char **argv){
 	srand(time(0));
 	
-	unsigned int hd;
+	unsigned int hdim;
 	char op;
+	char htype;
 	
-	read_parameters(argc, argv, &op, &hd);
+	read_parameters(argc, argv, &op, &htype, &hdim);
 
 	swaps = vector<unsigned int>(NUM_EXP+1, 0);
 	times = vector<long double>(NUM_EXP+1, 0.0);
 	e = vector<unsigned int>(NUM_EXP+1, 0);
 
 	if(op == 'i')
-		test_insert(hd);
+		test_insert(hdim);
 	else if(op == 'u')
-		test_update(hd);
+		test_update(hdim);
 	else if(op == 'd')
-		test_delete(hd);
+		test_delete(hdim);
 	else if(op == 's')
-		test_scale(hd, true);
+		test_scale(htype, hdim, true);
 	else if(op == 'c')
-	    test_scale(hd, false);
+	    test_scale(htype, hdim, false);
 	else if(op == 'v')
-		test_validate(hd);
-	else{
-		fprintf(stderr, "Test option %c unknown.\n", op);
-		usage(argv);
-	}
+		test_validate(htype, hdim);
 	
 }
 
-void read_parameters(int argc, char **argv, char *op, unsigned int *hd){
+void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int *hdim){
 	if(argc < 3){
 		usage(argv);
 		exit(-1);
 	}
+	
 	bool has_type = false;
-	*hd = 2;
-	*op = 'z';
+	*hdim = DEFAULT_HDIM;
+    *htype = DEFAULT_HTYPE;  
 	
 	for(int i=1;i<argc;i++){
 		if(argv[i][0] == '-'){
@@ -271,23 +280,37 @@ void read_parameters(int argc, char **argv, char *op, unsigned int *hd){
 				case 't':
 					i++;
 					*op = argv[i][0];
+					if(*op != 'i' && *op != 'u' && *op != 'd' && *op != 's' && *op != 'c' && *op != 'v'){
+    					fprintf(stderr, "Unkown test option %c \n", *op);
+                		usage(argv);
+                		exit(-1);
+                    }
 					has_type = true;
 					break;
-				case 'h':
+			    case 'h':
+			        i++;
+			        *htype = argv[i][0];
+			        if(*htype != 'k' && *htype != 'h'){
+	                    fprintf(stderr, "Unkown heap option %c\n", *htype);
+	                    usage(argv);
+	                    exit(-1);
+	                }
+			        break;
+				case 'k':
 					i++;
-					*hd = atoi(argv[i]);
+					*hdim = atoi(argv[i]);
 					break;
 				case 'n':
 					i++;
 					NUM_EXP = atoi(argv[i]);
 					break;
 				default:
-					fprintf(stderr, "Parameter %c unkown.\n", argv[i][1]);
+					fprintf(stderr, "Unkown parameter %s \n", argv[i]);
 					usage(argv);
 					exit(-1);
 			}
 		}else{
-			fprintf(stderr, "Parameter %c unkown.\n", argv[i][1]);
+			fprintf(stderr, "Unkown parameter %s \n", argv[i]);
 			usage(argv);
 			exit(-1);
 		}
@@ -300,6 +323,6 @@ void read_parameters(int argc, char **argv, char *op, unsigned int *hd){
 }
 
 void usage(char **argv){
-	fprintf(stderr, "usage:\n%s -t <test type> [-h <heap dimension>] [-n <number of tests>]\n\t-t test type: \t\ti, u, d, s, c, v\n\t-h heap dimension: \tnatural numbers\n\t-n number of tests: \tnatural numbers\n", argv[0]);
+	fprintf(stderr, "usage:\n%s -t <test type> [-h <heap type>] [-k <k-heap dimension>] [-n <number of tests>]\n\t-t test type: \t\ti, u, d, s, c, v\n\t-heap type: \t\t k for k-heap, h for hollow (default h)\n\t-k heap dimension: \tnatural numbers (default k=2)\n\t-n number of tests: \tnatural numbers (default n=20)\n", argv[0]);
 }
 

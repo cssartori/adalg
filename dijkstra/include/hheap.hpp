@@ -14,13 +14,11 @@ public:
         this->nt = 0;
     };
     
-    HHeap(unsigned int *data, unsigned int key){
-        this->h = make_heap(data, key);
-        this->pos_h[*data] = this->h->item;
-        
-        //A new node has been added to the heap
-        this->ne = 1;
-        this->nt = 1;
+    HHeap(unsigned int sz){
+        this->h = make_heap();
+        this->ne = 0;
+        this->nt = 0;
+        this->pos_h.reserve(sz);
     };
     
     HHeap(unsigned int data, unsigned int key){
@@ -32,17 +30,6 @@ public:
         //A new node has been added to the heap
         this->ne = 1;
         this->nt = 1;
-    };
-    
-    //inserts a new node (data,key) in the heap
-    void insert(unsigned int *data, unsigned int key){
-        Node *n = make_heap(data, key);
-        this->h = meld(this->h, n);
-        this->pos_h[*data] = n->item;
-        
-        //A new node has been added to the heap
-        this->ne += 1;
-        this->nt += 1;
     };
     
     //inserts a new node (data,key) in the heap
@@ -63,28 +50,6 @@ public:
         return *this->h->item->data;
     };
     
-    //decreases the key of a given element of the heap, based on its data
-    void decrease_key(unsigned int *data, unsigned int key){
-        Item *e = this->pos_h[*data];
-        if(e != nullptr){
-            Node *u = e->node;
-            Node *v = make_heap(e->data, key);
-            v->rank = std::max(0, u->rank-2);
-            if(u->rank >= 2){
-                v->fc = u->fc->ns->ns;
-                u->fc->ns->ns = nullptr;
-            }
-
-            //make u a hollow node
-            u->item = nullptr;
-            this->h = meld(this->h, v);
-
-            //a hollow node has been added to the heap
-            this->nt += 1;
-        }
-            
-    };
-
     //decreases the key of a given element of the heap, based on its data
     void decrease_key(unsigned int data, unsigned int key){
         Item *e = this->pos_h[data];
@@ -175,7 +140,8 @@ private:
     Node *h;    //node with minimum key
     unsigned int ne; //number of elements in the heap
     unsigned int nt; //number of total nodes in the heap
-    std::map<unsigned int, Item*> pos_h;  
+    //std::map<unsigned int, Item*> pos_h;  
+    std::vector<Item*> pos_h;
     
     Node* make_heap(){
         return nullptr;
@@ -287,7 +253,8 @@ private:
     void destroy(Item *e, bool a = false){
         if(e != nullptr){
             if(a){
-                pos_h.erase(*e->data);
+                //pos_h.erase(*e->data);
+                pos_h[*e->data] = nullptr;
                 delete e->data;
             }
             

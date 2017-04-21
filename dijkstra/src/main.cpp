@@ -6,21 +6,25 @@
 using namespace boost;
 using namespace std;
 
+static const char DEFAULT_HTYPE = 'h'; //hollow heaps
+static const int DEFAULT_HDIM = 2; //binary k-heap (2-heap)
 
 void usage(char **argv);
-void read_parameters(int argc, char **argv, int *s, int *t, int *hd, bool *time_info);
+void read_parameters(int argc, char **argv, int *s, int *t, char *htype, int *hdim, bool *time_info);
 
 
 int main(int argc, char **argv){
 	//source and target nodes
 	int s;
 	int t;
+	//heap type (k-heap or hollow heap)
+	char htype;
 	//heap dimension
 	int hd;	
 	//time information
 	bool time_info;
 
-	read_parameters(argc, argv, &s, &t, &hd, &time_info);
+	read_parameters(argc, argv, &s, &t, &htype, &hd, &time_info);
 	
 	//graph dimensions
 	unsigned int n, m;
@@ -35,7 +39,12 @@ int main(int argc, char **argv){
    		start = std::chrono::system_clock::now();
    		
 	//compute shortest path
-	unsigned int dst = dijkstra_hheap(g, s, t, hd);		
+	unsigned int dst;
+	if(htype == 'h')
+	    dst = dijkstra_hheap(g, s, t);		
+	else
+	    dst = dijkstra_nheap(g, s, t, hd);
+	    
 	//print result
 	if(dst != MAX_DIST)
 		printf("%u\n", dst);
@@ -52,7 +61,7 @@ int main(int argc, char **argv){
 }
 
 
-void read_parameters(int argc, char **argv, int *s, int *t, int *hd, bool *time_info){
+void read_parameters(int argc, char **argv, int *s, int *t, char *htype, int *hdim, bool *time_info){
 	if(argc < 3){
 		usage(argv);
 		exit(-1);
@@ -60,27 +69,46 @@ void read_parameters(int argc, char **argv, int *s, int *t, int *hd, bool *time_
 	
 	*s = atoi(argv[1]);
 	*t = atoi(argv[2]);
-	*hd = 2;
+	*hdim = DEFAULT_HDIM;
+	*htype = DEFAULT_HTYPE;
 	*time_info = false;
 	
-	if(argc > 3)
-		*hd = atoi(argv[3]);
-	
-	if(argc > 4){
-		char op = argv[4][0];
-		if(op == 't')
-			*time_info = true;
-		else{
-			fprintf(stderr, "Unkown option %c.\n", op);
-			usage(argv);
-			exit(-1);
-		}
-	}
-		
+	if(argc > 3){
+	    for(int i=3;i<argc;i++){
+	        if(argv[i][0]=='-'){
+	            switch(argv[i][1]){
+	                case 'h':
+	                    i++;
+	                    *htype = argv[i][0];
+	                    if(*htype != 'k' && *htype != 'h'){
+	                        fprintf(stderr, "Unkown heap option %c\n", *htype);
+	                        usage(argv);
+	                        exit(-1);
+	                    }
+	                    break;
+	                case 'k':
+	                    i++;
+	                    *hdim = atoi(argv[i]);
+	                    break;
+	                case 't':
+	                    *time_info = true;
+	                    break;
+	                default:
+	                    fprintf(stderr, "Unkown parameter %s \n", argv[i]);
+	                    usage(argv);
+	                    exit(-1);
+	            }
+	        }else{
+                fprintf(stderr, "Unkown parameter %s \n", argv[i]);
+                usage(argv);
+                exit(-1);
+	        }
+	    }
+    }
 }
 
 void usage(char **argv){
-	fprintf(stderr, "usage:\n%s <source node> <target node> [<heap dimension>] [<time information>]\n\t-source node: \t\tnatural numbers\n\t-target node: \t\tnatural numbers\n\t-heap dimension: \tnatural numbers\n\t-time information: \toption t\n", argv[0]);
+	fprintf(stderr, "usage:\n%s <source node> <target node> [-h <heap type>][-k <k-heap dimension>] [-t <print time information>]\n\t-source node: \t\tnatural numbers\n\t-target node: \t\tnatural numbers\n\t-heap type: \t\tk for k-heaps, h for hollow heaps (default h)\n\t-k-heap dimension: \tnatural numbers (default k=2)\n\t-time information: \ttoogle opton (default not toogled)\n", argv[0]);
 }
 
 
