@@ -207,7 +207,6 @@ void test_validate(unsigned int hd){
 			s = rand()%n;
 			t = (t+1)%n;
 		}
-		
 		unsigned int dst = dijkstra_hheap(g, s, t, hd);
 		
 		vector<unsigned int> dist(n);
@@ -215,10 +214,11 @@ void test_validate(unsigned int hd){
   		dijkstra_shortest_paths(g, s, weight_map(get(&EdgeData::weight,g)).distance_map(&dist[0]).predecessor_map(&pred[0]));
   		
   		int valid = 0;
-  		if(dst != dist[t])
+  		if(dst != dist[t] && dst != MAX_DIST){
   			valid = -1;
+  	    }
 
-		printf("%u,%u,%u,%i,%i\n", i, dst, dist[t], valid, hd);
+		printf("%u,%u,%u,%i,%i (%u -> %u)\n", i, dst, dist[t], valid, hd, s, t);
 	}
 
 	return;

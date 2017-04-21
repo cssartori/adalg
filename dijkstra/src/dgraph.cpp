@@ -142,29 +142,25 @@ unsigned int dijkstra_hheap(const Graph& g, unsigned int s, unsigned int t, unsi
 	while(!h.is_empty()){
 		unsigned int v = h.getmin(); h.deletemin();
 		visited[v] = true;	
-        printf("n = %u\n", v);
+
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
 			unsigned int u = target(*ie, g);
 			if(!visited[u]){
 				if(dist[u] == MAX_DIST){ //distance is "infinity"
 					dist[u] = dist[v] +  g[*ie].weight; //update u distance
-					printf("Inserting %u\n", u);
 					h.insert(u, dist[u]);
 				}else{
 					unsigned int ndu = min(dist[u], dist[v]+g[*ie].weight);
 					if(ndu < dist[u]){
-					    printf("Updating %u from %u to %u\n", u, dist[u], ndu);
 						h.decrease_key(u, ndu);
-						printf("d[u] = nu;\n");
 						dist[u] = ndu;
 					}
 				}
-				printf("\tDone\n");
 			}
 		}
 	}
-	printf("Finished\n");
+
 	return dist[t];
 }
 

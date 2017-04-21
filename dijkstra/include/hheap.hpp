@@ -59,18 +59,7 @@ public:
     };
     
     //returns the minimum element
-    unsigned int getmin(){  
-        if(this->h->item == nullptr){
-            printf("trying to get null item or node\n");
-            if(this->h->ns != nullptr){
-                printf("with ns = ");
-                if(this->h->ns->item != nullptr)
-                    printf("(%u,%u)\n", *this->h->ns->item->data, this->h->ns->key);
-                else
-                    printf("null\n");
-            }
-        }
-      
+    unsigned int getmin(){        
         return *this->h->item->data;
     };
     
@@ -101,29 +90,20 @@ public:
         Item *e = this->pos_h[data];
 
         if(e != nullptr){
-            printf("Current h is = ");
-            if(this->h->item != nullptr)
-            printf("(%u,%u)\n", *this->h->item->data, this->h->key);
-        else
-            printf("null\n");  
             Node *u = e->node;
             Node *v = make_heap(e->data, key);
             v->rank = std::max(0, u->rank-2);
             if(u->rank >= 2){
                 v->fc = u->fc->ns->ns;
                 u->fc->ns->ns = nullptr;
-            }
-            
+            }           
             //make u a hollow node
+            destroy(u->item);
             u->item = nullptr;
+            //update reference to node of element data
+            pos_h[data] = v->item;
+            
             this->h = meld(this->h, v);
-            
-                    printf("**After decrease_key h = ");
-        if(this->h->item != nullptr)
-            printf("(%u,%u)\n", *this->h->item->data, this->h->key);
-        else
-            printf("null\n");  
-            
             
             //a hollow node has been added to the heap
             this->nt += 1;
@@ -159,17 +139,6 @@ public:
         return this->ne;
     };
 
-    void print_roots(){
-        Node *ht = this->h;
-
-        do{
-            if((ht->item != nullptr))
-                printf("(%u,%u)\n", *(ht->item->data), ht->key);
-            else
-                printf("(null,%u)\n", ht->key);
-            ht = ht->ns;
-        }while(ht != this->h)  ;
-    };
 
 private:
     const double GOLDEN_RATIO = 1.6180;
@@ -207,7 +176,7 @@ private:
     unsigned int ne; //number of elements in the heap
     unsigned int nt; //number of total nodes in the heap
     std::map<unsigned int, Item*> pos_h;  
-
+    
     Node* make_heap(){
         return nullptr;
     };
@@ -261,6 +230,7 @@ private:
             return nullptr;
         
         //makes hr hollow node
+        destroy(hr->item, true);
         hr->item = nullptr;
         //removed a normal node
         this->ne -= 1;
@@ -270,7 +240,7 @@ private:
         Node *r = hr;
         //loop to recover the references to each root
         do{
-            Node *rn = r->ns;
+            Node *rn = r->ns;            
             link_heap(r, &R);
             r = rn;
         }while(r != hr);
@@ -297,21 +267,40 @@ private:
                 link_heap(r, R); //link each child to remove hollows
                 r = rn;
             }
-            delete hr;
             
+            destroy(hr);
+            hr = nullptr;
             //removed a hollow node
             this->nt -= 1;
         }else{
             unsigned int i = hr->rank;
             //go over each reference in R
             while((*R)[i] != nullptr){
-                hr = link(hr, (*R)[i]); //link the reference to the heap h
+                hr = link(hr, (*R)[i]); //link the reference to the node hr
                 (*R)[i] = nullptr;
                 i++;
             }
             (*R)[i] = hr;
-        }         
+        }
     };
+        
+    void destroy(Item *e, bool a = false){
+        if(e != nullptr){
+            if(a){
+                pos_h.erase(*e->data);
+                delete e->data;
+            }
+            
+            delete e;
+        }
+    }
+    
+    void destroy(Node *n, bool a = false){
+        if(n != nullptr){
+            destroy(n->item, a);
+            delete n;
+        }
+    }
 };
 
 #endif //__H_HEAP__
