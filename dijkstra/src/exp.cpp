@@ -4,7 +4,9 @@
 #include <vector>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include "../include/nheap.h"
+#include "../include/hheap.hpp"
 #include "../include/dgraph.h"
+
 
 static unsigned int NUM_EXP = 20;
 static const int DEFAULT_HDIM = 2; //binary k-heap (2-heap)
@@ -22,6 +24,48 @@ std::chrono::duration<long double> elapsed_seconds;
 
 void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int *hd);
 void usage(char **argv);
+
+void test_delete_hheap(){
+    vector<long double> eh(NUM_EXP+1, 0.0);
+    for(unsigned int i=1;i<=NUM_EXP;i++){
+        unsigned int N = pow(2,i); //insert 2^i random keys
+        unsigned int n = 0;    
+            
+        HHeap h(N);
+        
+        while(n < N){
+            h.insert(n, rand()%N);
+            n++;
+        }
+        
+        tstart = std::chrono::system_clock::now();
+        n = 0;
+        
+        h.n_links = 0;
+        h.deletemin();
+        eh[i] += N+1;
+        while(n < N-1){
+            eh[i] += ceil((log(h.getnt())/log(1.6180)));
+            //printf("ceil(log) = %lf\n", ceil((log(h.getnt())/log(1.6180))));
+            h.deletemin();
+            n++;
+        }
+        
+        tend = std::chrono::system_clock::now();
+		elapsed_seconds = tend-tstart;	           
+		
+		swaps[i] = h.n_links;
+		times[i] = elapsed_seconds.count();
+		
+    }    
+    
+    printf("%i,%i,%u,%Le,%Le,%Le\n", 0, 0, swaps[0], eh[0], times[0], (long double)0.0);
+	//printf("%i,%i,%u,%u,%Le,%Le\n", 1, hd, swaps[0], e[0], times[0], (long double)0.0);
+	for(unsigned int j=1;j<swaps.size();j++){
+	  printf("%i,%i,%u,%Le,%Le,%Le\n", j, 0, swaps[j], eh[j], times[j]-times[j-1], swaps[j]/eh[j]);
+	}	
+    
+}
 
 
 void test_delete(unsigned int hd){
@@ -197,9 +241,7 @@ void test_scale(char htype, unsigned int hd, bool is_scale){
 		
 }
 
-void test_validate(char htype, unsigned int hd){
-	srand(time(0));
-		
+void test_validate(char htype, unsigned int hd){	
 	unsigned int n,m;
 
 	Graph g = read_dimacs(std::cin, &n, &m);
@@ -253,8 +295,10 @@ int main(int argc, char **argv){
 		test_insert(hdim);
 	else if(op == 'u')
 		test_update(hdim);
-	else if(op == 'd')
+	else if(op == 'd' && htype == 'k')
 		test_delete(hdim);
+    else if(op == 'd' && htype == 'h')
+        test_delete_hheap();
 	else if(op == 's')
 		test_scale(htype, hdim, true);
 	else if(op == 'c')

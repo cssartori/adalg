@@ -1,5 +1,5 @@
-#ifndef __H_HEAP__
-#define __H_HEAP__
+#ifndef __HOLLOW_HEAP_H__
+#define __HOLLOW_HEAP_H__
 
 #include <map>
 #include <vector>
@@ -7,30 +7,26 @@
 
 class HHeap{
 public:
-    
-    HHeap(){
-        this->h = make_heap();
-        this->ne = 0;
-        this->nt = 0;
-    };
-    
+    unsigned int n_links = 0; //link counter
+        
     HHeap(unsigned int sz){
         this->h = make_heap();
         this->ne = 0;
         this->nt = 0;
+        this->n_links = 0;
         this->pos_h.reserve(sz);
     };
     
-    HHeap(unsigned int data, unsigned int key){
-        unsigned int *d = new unsigned int;
-        *d = data;
-        this->h = make_heap(d, key);
-        this->pos_h[data] = this->h->item;
-        
-        //A new node has been added to the heap
-        this->ne = 1;
-        this->nt = 1;
-    };
+//    HHeap(unsigned int data, unsigned int key){
+//        unsigned int *d = new unsigned int;
+//        *d = data;
+//        this->h = make_heap(d, key);
+//        this->pos_h[data] = this->h->item;
+//        
+//        //A new node has been added to the heap
+//        this->ne = 1;
+//        this->nt = 1;
+//    };
     
     //inserts a new node (data,key) in the heap
     void insert(unsigned int data, unsigned int key){
@@ -107,7 +103,7 @@ public:
 
 private:
     const double GOLDEN_RATIO = 1.6180;
-    class Node;
+    class Node; //pre declaration of class Node
 
     class Item{
     public:
@@ -140,8 +136,8 @@ private:
     Node *h;    //node with minimum key
     unsigned int ne; //number of elements in the heap
     unsigned int nt; //number of total nodes in the heap
-    //std::map<unsigned int, Item*> pos_h;  
-    std::vector<Item*> pos_h;
+    //std::map<unsigned int, Item*> pos_h;  //use map for generic cases - does not keep O(1) for decrease_key
+    std::vector<Item*> pos_h;   //vector for specific cases
     
     Node* make_heap(){
         return nullptr;
@@ -209,8 +205,8 @@ private:
             Node *rn = r->ns;            
             link_heap(r, &R);
             r = rn;
-        }while(r != hr);
-        
+        }while(r != hr && r != nullptr);
+
         //Rebuild heap from "scratch"              
         hr = nullptr; 
         for(unsigned i=0;i<M;i++){
@@ -225,6 +221,8 @@ private:
     
     //link heap removing hollow nodes
     void link_heap(Node *hr, std::vector<Node*> *R){
+        
+        this->n_links += 1; //executed one link_heap, that is, one "swap"
         if(hr->item == nullptr){
             //node hr is hollow
             Node *r = hr->fc;
@@ -270,4 +268,4 @@ private:
     }
 };
 
-#endif //__H_HEAP__
+#endif //__HOLLOW_HEAP_H__

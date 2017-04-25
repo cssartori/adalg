@@ -1,5 +1,5 @@
-#ifndef __NHEAP_H__
-#define __NHEAP_H__
+#ifndef __NARY_HEAP_H__
+#define __NARY_HEAP_H__
 
 /**
  * Implementation of a n-heap data structure, where n is the maximum number of 
@@ -11,7 +11,6 @@
  */
 
 #include <vector>
-#include <unordered_map>
 
 
 class NHeap{
@@ -52,4 +51,4 @@ public:
 
 };
 
-#endif //__NHEAP_H__
+#endif //__NARY_HEAP_H__

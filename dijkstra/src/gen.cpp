@@ -11,15 +11,16 @@ using namespace boost;
  
 const unsigned maxweight = 1000;
 
-void read_parameters(int argc, char **argv, unsigned int *n, double *p, bool *medges); 
+void read_parameters(int argc, char **argv, unsigned int *n, double *p, bool *medges, int *ledges); 
 void usage(char **argv); 
  
 int main(int argc, char *argv[]) { 	  
 	unsigned int n, m;
 	double p;
 	bool medges;
+	int ledges;
 	  
-	read_parameters(argc, argv, &n, &p, &medges);
+	read_parameters(argc, argv, &n, &p, &medges, &ledges);
 	 
 	Graph g;
 	for(unsigned i=0; i<n; i++)
@@ -29,13 +30,19 @@ int main(int argc, char *argv[]) {
 	srand(time(0));
 	if(medges){
 	    m = (unsigned int)(((n*log10(n))+n));
-	    p =  pow(n, 0.2)*log10(n)/n;	
+	    p =  pow(n, 0.1)*log10(n)/n;	
+	    
+	    if(ledges > 0){
+	        m = ledges;
+	    }
 	    
 	    //in case number of edges is bigger than the maximum
 	    if(m >= (n*(n-1))){
 		    p=1;
 		    m = n*(n-1);
 	    }
+	    
+	    
 	    fprintf(stderr, "p = %f | n = %u | nlogn = %f | m = %u\n", p, n, log(n), m);
 	    //edge created counter
 		unsigned int mc = 0;
@@ -44,6 +51,7 @@ int main(int argc, char *argv[]) {
 			for(unsigned int i=0; i<n; i++){
     		    for(unsigned int j=0; j<n; j++){
       			    if (i != j && drand48() < p && !edge_exist(g, i, j)){
+      			        //fprintf(stderr, "Adding edge %u\n", mc);
       			        mc++;
         			    Edge e = add_edge(i,j,g).first;
 					    g[e].weight = lrand48()%maxweight;
@@ -85,13 +93,15 @@ int main(int argc, char *argv[]) {
 
 
 
-void read_parameters(int argc, char **argv, unsigned int *n, double *p, bool *medges){
+void read_parameters(int argc, char **argv, unsigned int *n, double *p, bool *medges, int *ledges){
 	if(argc < 4){
 		usage(argv);
 		exit(-1);
 	}
 	
 	bool has_n = false;
+	*medges = false;
+	*ledges = -1;
 	int edge_p = 0; //only one of the edge parameters should be informed
 	
 	for(int i=1;i<argc;i++){
@@ -106,6 +116,12 @@ void read_parameters(int argc, char **argv, unsigned int *n, double *p, bool *me
 					edge_p++;
 					*medges = true;
 					break;
+			    case 'l':
+			        edge_p++;
+			        i++;
+			        *ledges = atoi(argv[i]);
+			        *medges = true;
+			        break;
 				case 'p':
 					i++;
 					*p = atof(argv[i]);
