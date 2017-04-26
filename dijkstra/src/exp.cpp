@@ -392,11 +392,8 @@ void test_scale(char htype, unsigned int hd, bool is_scale){
       		    d = dijkstra_nheap_test(g, s, t, &n_ins, &n_del, &n_upd, &time, &mu, hd);
       		    
 		}while(d == MAX_DIST && is_scale);	
-		
-		if(NUM_EXP != 1)
-			printf("%u,", i);
-				
-		printf("%u,%u,%u,%u,%u,%lu,%Le,%u,%i\n", n, m, n_ins, n_del, n_upd, mu, time, d, hd);
+					
+		printf("%i,%c,%i,%u,%u,%u,%u,%u,%lu,%Le,%u\n", i, htype, hd, n, m, n_ins, n_del, n_upd, mu, time, d);
 		if(d == MAX_DIST)
 			ninf++;
 	}

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-dirname="hs_n2"
+dirname="hs_n"
 mkdir $dirname
 
-for filename in ./inst2/*.gr
+for filename in ./inst/*.gr
 	do
 		outf=$(echo $filename| cut -d'/' -f 3)
 	   	outf=$(echo $outf| cut -d'.' -f  1)
