@@ -35,11 +35,11 @@ public:
 	unsigned int n_swaps;
 	
 	//Create a new n-heap to support up to m-int-elements with values [0...m-1]
-	NHeap(unsigned int n, unsigned int m);
+	NHeap(unsigned int m, unsigned int n=2);
 	//Insert a new item in the heap (key, e)
-	void insert(unsigned int key, unsigned int e);
+	void insert(unsigned int e, unsigned int key);
 	//Update the key of an item e
-	void update_key(unsigned int e, unsigned int nkey);
+	void decrease_key(unsigned int e, unsigned int nkey);
 	//Removes the top-most element, i.e., the minimum
 	void deletemin();
 	//true if heap is empty

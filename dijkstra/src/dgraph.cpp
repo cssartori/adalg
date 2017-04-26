@@ -45,12 +45,12 @@ Graph read_dimacs(std::istream& in, unsigned int* n, unsigned int* m) {
 
 // Computes the shortest path from node s to t in graph g using Dijkstra's algorithm and n-heaps
 unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsigned int nh){
-	NHeap h(nh, num_vertices(g));
+	NHeap h(num_vertices(g), nh);
 	vector<bool> visited(num_vertices(g), false); //no node has been visited yet
 	vector<unsigned int> dist(num_vertices(g), MAX_DIST);
 
 	dist[s] = 0;
-	h.insert(0, s);
+	h.insert(s, 0);
 	
 	while(!h.is_empty()){
 		unsigned int v = h.getmin(); h.deletemin();
@@ -62,11 +62,11 @@ unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsi
 			if(!visited[u]){
 				if(dist[u] == MAX_DIST){ //distance is "infinity"
 					dist[u] = dist[v] +  g[*ie].weight; //update u distance
-					h.insert(dist[u], u);
+					h.insert(u, dist[u]);
 				}else{
 					unsigned int ndu = min(dist[u], dist[v]+g[*ie].weight);
 					if(ndu < dist[u]){
-						h.update_key(u, ndu);
+						h.decrease_key(u, ndu);
 						dist[u] = ndu;
 					}
 				}
@@ -80,7 +80,7 @@ unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsi
 // Implementation of Dijkstra's algorithm with n-heaps for testing purposes (collects memory used, number of insertions, deletions, updates and execution time)
 unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t, unsigned int *n_ins, unsigned int *n_del, unsigned int *n_upd, long double *time, size_t *mem, unsigned int nh){
 
-	NHeap h(nh, num_vertices(g));
+	NHeap h(num_vertices(g), nh);
 	std::chrono::time_point<std::chrono::system_clock> tstart, tend;
     std::chrono::duration<long double> elapsed_seconds;
 	vector<bool> visited(num_vertices(g), false); //no node has been visited yet
@@ -90,7 +90,7 @@ unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t,
 	*n_upd = 0;
 
 	dist[s] = 0;
-	h.insert(0, s); 
+	h.insert(s, 0); 
 	*n_ins += 1;
 	
 	if(mem != NULL)
@@ -109,12 +109,12 @@ unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t,
 			if(!visited[u]){
 				if(dist[u] == MAX_DIST){ //distance is "infinity"
 					dist[u] = dist[v] +  g[*ie].weight; //update u distance
-					h.insert(dist[u], u);
+					h.insert(u, dist[u]);
 					*n_ins += 1;
 				}else{
 					unsigned int ndu = min(dist[u], dist[v]+g[*ie].weight);
 					if(ndu < dist[u]){
-						h.update_key(u, ndu);
+						h.decrease_key(u, ndu);
 						dist[u] = ndu;
 						*n_upd += 1;
 					}

@@ -5,7 +5,7 @@
 using namespace std;
 
 //Create a new n-heap to support up to m-int-elements with values [0...m-1]
-NHeap::NHeap(unsigned int n, unsigned int m){
+NHeap::NHeap(unsigned int m, unsigned int n){
 	this->heap.reserve(m);
 	this->data.reserve(m);
 	this->pos_heap.assign(m, 0);
@@ -14,7 +14,7 @@ NHeap::NHeap(unsigned int n, unsigned int m){
 }
 
 //Insert a new item in the heap (key, e)
-void NHeap::insert(unsigned int key, unsigned int e){
+void NHeap::insert(unsigned int e, unsigned int key){
 	heap.push_back(key);
 	data.push_back(e);
 	pos_heap[e] = heap.size()-1;
@@ -23,7 +23,7 @@ void NHeap::insert(unsigned int key, unsigned int e){
 }
 
 //Update the key of an item e
-void NHeap::update_key(unsigned int e, unsigned int nkey){
+void NHeap::decrease_key(unsigned int e, unsigned int nkey){
 	unsigned int i = pos_heap[e];
 	unsigned int okey = heap[i]; //old key
 	heap[i] = nkey;

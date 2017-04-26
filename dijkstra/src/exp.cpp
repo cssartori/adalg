@@ -25,57 +25,221 @@ std::chrono::duration<long double> elapsed_seconds;
 void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int *hd);
 void usage(char **argv);
 
-void test_delete_hheap(){
-    vector<long double> eh(NUM_EXP+1, 0.0);
+
+void test_delete(char htype, unsigned int hd){
+
     for(unsigned int i=1;i<=NUM_EXP;i++){
         unsigned int N = pow(2,i); //insert 2^i random keys
         unsigned int n = 0;    
+        
+        if(htype == 'k'){   
+            //n-ary heap test 
+            NHeap h(N, hd);
             
-        HHeap h(N);
-        
-        while(n < N){
-            h.insert(n, rand()%N);
-            n++;
-        }
-        
-        tstart = std::chrono::system_clock::now();
-        n = 0;
-        
-        h.n_links = 0;
-        h.deletemin();
-        eh[i] += N+1;
-        while(n < N-1){
-            eh[i] += ceil((log(h.getnt())/log(1.6180)));
-            //printf("ceil(log) = %lf\n", ceil((log(h.getnt())/log(1.6180))));
+            while(n < N){
+                h.insert(n, rand()%N);
+                n++;
+            }
+            
+            tstart = std::chrono::system_clock::now();
+            n = 0;
+            h.n_swaps = 0;
+            e[i] = (i)*(pow(hd, i));
             h.deletemin();
-            n++;
-        }
+            while(n < N-1){
+                h.deletemin();
+                n++;
+            }
+            
+            tend = std::chrono::system_clock::now();
+		    swaps[i] = h.n_swaps;
+		}else if(htype == 'h'){
+		    //hollow heap test
+		    HHeap h(N);
         
-        tend = std::chrono::system_clock::now();
-		elapsed_seconds = tend-tstart;	           
+            while(n < N){
+                h.insert(n, rand()%N);
+                n++;
+            }
+            
+            tstart = std::chrono::system_clock::now();
+            n = 0;
+            h.n_links = 0;
+            e[i] = ceil((log(h.getnt())/log(1.6180)))*N;
+            h.deletemin();
+            while(n < N-1){
+                h.deletemin();
+                n++;
+            }
+            tend = std::chrono::system_clock::now();          
+		    swaps[i] = h.n_links;
+		}
 		
-		swaps[i] = h.n_links;
-		times[i] = elapsed_seconds.count();
-		
+		elapsed_seconds = tend-tstart;
+		times[i] = elapsed_seconds.count();	
     }    
     
-    printf("%i,%i,%u,%Le,%Le,%Le\n", 0, 0, swaps[0], eh[0], times[0], (long double)0.0);
-	//printf("%i,%i,%u,%u,%Le,%Le\n", 1, hd, swaps[0], e[0], times[0], (long double)0.0);
+    printf("%i,%c,%i,%u,%u,%Le,%Le\n", 0, htype, hd, swaps[0], e[0], times[0], (long double)0.0);
 	for(unsigned int j=1;j<swaps.size();j++){
-	  printf("%i,%i,%u,%Le,%Le,%Le\n", j, 0, swaps[j], eh[j], times[j]-times[j-1], swaps[j]/eh[j]);
-	}	
-    
+	  printf("%i,%c,%i,%u,%u,%Le,%Le,%Le\n", j, htype, hd, swaps[j], e[j], times[j], (long double)swaps[j]/e[j], (long double)times[j]/e[j]);
+	}	  
 }
 
 
-void test_delete(unsigned int hd){
+void test_update(char htype, unsigned int hd){
+	
+	for(unsigned int i=1;i<=NUM_EXP;i++){
+		unsigned int n = pow(2,i)-1;
+		unsigned int k = pow(2,i)+1;
+		unsigned int el = 0;
+		
+		if(htype == 'k'){
+		    //n-ary heap test
+		    NHeap h(n*2+1, hd);
+				
+		    for(unsigned int x=0;x<n;x++){
+			    h.insert(el++, k);
+		    }
+		
+		    n = n+1;
+		    k = k+1;
+
+		    vector<unsigned int> els;
+		    for(unsigned int x=0;x<n;x++){
+			    h.insert(el, k);
+			    els.push_back(el);
+			    el++;
+		    }
+		
+		    //start updating
+		    h.n_swaps = 0;
+		    k = n;
+
+	       	tstart = std::chrono::system_clock::now();	
+		
+		    for(unsigned int x=0;x<n;x++){
+			    h.decrease_key(els[x], k--);	
+		    }
+
+	       	tend = std::chrono::system_clock::now();
+	       	swaps[i] = h.n_swaps;
+	       	e[i] = (i)*pow(hd, i);       	
+	    }else if(htype == 'h'){
+	        //hollow heap test
+	        HHeap h(n*2+1);
+				
+		    for(unsigned int x=0;x<n;x++){
+			    h.insert(el++, k);
+		    }
+		
+		    n = pow(2, i);
+		    k = k+1;
+
+		    vector<unsigned int> els;
+		    for(unsigned int x=0;x<n;x++){
+			    h.insert(el, k);
+			    els.push_back(el);
+			    el++;
+		    }
+		
+		    //start updating
+		    h.n_links = 0;
+		    k = n-1;
+
+	       	tstart = std::chrono::system_clock::now();	
+		
+		    for(unsigned int x=0;x<n;x++){
+			    h.decrease_key(els[x], k--);	
+		    }
+
+	       	tend = std::chrono::system_clock::now();
+	       	swaps[i] = h.n_links;
+	       	e[i] = 1;  
+	    }
+	    
+		elapsed_seconds = tend-tstart;					
+		times[i] = elapsed_seconds.count();
+	}
+
+	printf("%i,%c,%i,%u,%u,%Le,%Le\n", 0, htype, hd, swaps[0], e[0], times[0], (long double)0.0);	
+	for(unsigned int j=1;j<swaps.size();j++){
+		printf("%i,%c,%i,%u,%u,%Le,%Le\n", j, htype, hd, swaps[j], e[j], times[j], times[j]/e[j]);
+	}		
+}
+
+void test_insert(char htype, unsigned int hd){
+
+	unsigned int n = (pow(2,NUM_EXP)-1); //limit
+	unsigned int i=2;
+    
+    
+    if(htype == 'k'){
+	    NHeap h(n+1, hd);
+	    h.insert(n, n);
+	
+	    n--;
+	    unsigned int ninserts = 1;
+
+       	tstart = std::chrono::system_clock::now();
+       	unsigned int NI = pow(2,i)-1;
+       	
+	    for(;n > 0 && i < NUM_EXP+1;n--){
+		    h.insert(n, n);
+		    ninserts++;
+		    if(NI == ninserts){
+			    swaps[i] = h.n_swaps;
+		       	tend = std::chrono::system_clock::now();
+			    elapsed_seconds = tend-tstart;			
+			    times[i] = elapsed_seconds.count();
+			    e[i] = (i-1)*pow(hd,i-1);
+			    i++;
+			    NI = ((pow(hd,i)-1)/(hd-1));
+			    h.n_swaps = 0;
+		    }
+	    }
+	}else if(htype == 'h'){
+	    HHeap h(n+1);
+	    h.insert(n, n);
+	
+	    n--;
+	    unsigned int ninserts = 1;
+
+       	tstart = std::chrono::system_clock::now();
+       	unsigned int NI = pow(2,i)-1;
+       	
+	    for(;n > 0 && i < NUM_EXP+1;n--){
+		    h.insert(n, n);
+		    ninserts++;
+		    if(NI == ninserts){
+			    swaps[i] = h.n_links;
+		       	tend = std::chrono::system_clock::now();
+			    elapsed_seconds = tend-tstart;			
+			    times[i] = elapsed_seconds.count();
+			    e[i] = 1;
+			    i++;
+			    NI = pow(2,i)-1;
+			    h.n_links = 0;
+		    }
+	    }
+	}
+	
+	printf("%i,%c,%i,%u,%u,%Le,%Le\n", 0, htype, hd, swaps[0], e[0], times[0], (long double)0.0);
+	printf("%i,%c,%i,%u,%u,%Le,%Le\n", 1, htype, hd, swaps[1], e[1], times[1], (long double)0.0);	
+	for(unsigned int j=2;j<swaps.size();j++){
+		printf("%i,%c,%i,%u,%u,%Le,%Le\n", j, htype, hd, swaps[j], e[j], times[j]-times[j-1], (times[j]-times[j-1])/e[j]);
+	}	
+}
+
+
+
+void test_delete_old(unsigned int hd){
 
 	for(unsigned int i=1;i<=NUM_EXP;i++){
 		unsigned int N = ((pow(hd,i)-1)/(hd-1));
 		unsigned int n = 0;
 		unsigned int k=0;
 				
-		NHeap h(hd, N*hd+1);
+		NHeap h(N*hd+1, hd);
 				
 		while(n < N){
 			h.insert(k, n);
@@ -113,21 +277,21 @@ void test_delete(unsigned int hd){
 	printf("%i,%i,%u,%u,%Le,%Le\n", 0, hd, swaps[0], e[0], times[0], (long double)0.0);
 	printf("%i,%i,%u,%u,%Le,%Le\n", 1, hd, swaps[0], e[0], times[0], (long double)0.0);
 	for(unsigned int j=2;j<swaps.size();j++){
-	  printf("%i,%i,%u,%u,%Le,%Le\n", j, hd, swaps[j], e[j], times[j]-times[j-1], (times[j]-times[j-1])/e[j]);
+	  printf("%i,%i,%u,%u,%Le,%Le\n", j, hd, swaps[j], e[j], times[j], times[j]/e[j]);
 	}	
 }
 
-void test_update(unsigned int hd){
+void test_update_old(unsigned int hd){
 	
 	for(unsigned int i=1;i<=NUM_EXP;i++){
 		unsigned int n = ((pow(hd,i)-1)/(hd-1));
 		unsigned int k = ((pow(hd,i)-1)/(hd-1))*hd+1;
 		unsigned int el = 0;
 		
-		NHeap h(hd, n*hd+1);
+		NHeap h(n*hd+1, hd);
 				
 		for(unsigned int x=0;x<n;x++){
-			h.insert(k, el++);
+			h.insert(el++, k);
 		}
 		
 		n = pow(hd, i);
@@ -135,7 +299,7 @@ void test_update(unsigned int hd){
 
 		vector<unsigned int> els;
 		for(unsigned int x=0;x<n;x++){
-			h.insert(k, el);
+			h.insert(el, k);
 			els.push_back(el);
 			el++;
 		}
@@ -147,7 +311,7 @@ void test_update(unsigned int hd){
 	   	tstart = std::chrono::system_clock::now();	
 		
 		for(unsigned int x=0;x<n;x++){
-			h.update_key(els[x], k--);	
+			h.decrease_key(els[x], k--);	
 		}
 
 	   	tend = std::chrono::system_clock::now();
@@ -160,17 +324,17 @@ void test_update(unsigned int hd){
 
 	printf("%i,%i,%u,%u,%Le,%Le\n", 0, hd, swaps[0], e[0], times[0], (long double)0.0);	
 	for(unsigned int j=1;j<swaps.size();j++){
-		printf("%i,%i,%u,%u,%Le,%Le\n", j, hd, swaps[j], e[j], times[j]-times[j-1], (times[j]-times[j-1])/e[j]);
+		printf("%i,%i,%u,%u,%Le,%Le\n", j, hd, swaps[j], e[j], times[j], times[j]/e[j]);
 	}		
 }
 
 
-void test_insert(unsigned int hd){
+void test_insert_old(unsigned int hd){
 
 	unsigned int n = ((pow(hd,NUM_EXP)-1)/(hd-1)); //limit
 	unsigned int i=2;
 
-	NHeap h(hd, n+1);
+	NHeap h(n+1, hd);
 	h.insert(n, n);
 	
 	n--;
@@ -292,13 +456,11 @@ int main(int argc, char **argv){
 	e = vector<unsigned int>(NUM_EXP+1, 0);
 
 	if(op == 'i')
-		test_insert(hdim);
+		test_insert(htype, hdim);
 	else if(op == 'u')
-		test_update(hdim);
-	else if(op == 'd' && htype == 'k')
-		test_delete(hdim);
-    else if(op == 'd' && htype == 'h')
-        test_delete_hheap();
+		test_update(htype, hdim);
+	else if(op == 'd')
+		test_delete(htype, hdim);
 	else if(op == 's')
 		test_scale(htype, hdim, true);
 	else if(op == 'c')
@@ -339,6 +501,8 @@ void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int 
 	                    usage(argv);
 	                    exit(-1);
 	                }
+	                if(*htype == 'h')
+	                    *hdim = 0;
 			        break;
 				case 'k':
 					i++;
