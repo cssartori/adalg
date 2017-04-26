@@ -47,23 +47,50 @@ int main(int argc, char *argv[]) {
 	    //edge created counter
 		unsigned int mc = 0;
         
-		while(mc < m){
-			for(unsigned int i=0; i<n; i++){
-    		    for(unsigned int j=0; j<n; j++){
-      			    if (i != j && drand48() < p && !edge_exist(g, i, j)){
-      			        //fprintf(stderr, "Adding edge %u\n", mc);
-      			        mc++;
-        			    Edge e = add_edge(i,j,g).first;
-					    g[e].weight = lrand48()%maxweight;
-      			    }
-      			    if(mc >= m)
-      			        break;
-      		    }
-      		    if(mc >= m)
-      		        break;
-      		    fprintf(stderr, "\rmc = %u", mc);
+        unsigned int s = rand()%n;
+        vector<bool> visited(n, false);
+        while(mc < m && mc < n-1){
+            visited[s] = true;
+            unsigned int t = rand()%n;
+            if(!visited[t]){
+                Edge e = add_edge(s,t,g).first;
+    		    g[e].weight = lrand48()%maxweight+0.01*maxweight;
+    		    mc ++;
+    		    s = t;
+    		    fprintf(stderr, "\rmc = %u", mc);
 		        fflush(stderr);
-      	    }
+            }            
+        }
+        
+		while(mc < m){
+		    unsigned int s = rand()%n;
+		    unsigned int t = rand()%n;
+            
+            if(s != t && !edge_exist(g, s, t)){
+                Edge e = add_edge(s,t,g).first;
+    		    g[e].weight = lrand48()%maxweight+0.01*maxweight;
+    		    mc ++;
+    		    fprintf(stderr, "\rmc = %u", mc);
+		        fflush(stderr);
+            }
+		
+		
+//			for(unsigned int i=0; i<n; i++){
+//    		    for(unsigned int j=0; j<n; j++){
+//      			    if (i != j && drand48() < p && !edge_exist(g, i, j)){
+//      			        //fprintf(stderr, "Adding edge %u\n", mc);
+//      			        mc++;
+//        			    Edge e = add_edge(i,j,g).first;
+//					    g[e].weight = lrand48()%maxweight;
+//      			    }
+//      			    if(mc >= m)
+//      			        break;
+//      		    }
+//      		    if(mc >= m)
+//      		        break;
+//      		    fprintf(stderr, "\rmc = %u", mc);
+//		        fflush(stderr);
+//      	    }
 		}
 
 	}else{
