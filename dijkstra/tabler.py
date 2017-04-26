@@ -104,14 +104,14 @@ def __proc_file_scale__(filename, op):
                 nexp = 0
                 
                 for row in cdata:
-                    k = int(row[9])
-                    n = int(row[1])
-                    m = int(row[2])
-                    nins += int(row[3])
-                    ndel += int(row[4])
-                    nupd += int(row[5])
-                    mem  += int(row[6])
-                    time += float(row[7])
+                    k = int(row[2])
+                    n = int(row[3])
+                    m = int(row[4])
+                    nins += int(row[5])
+                    ndel += int(row[6])
+                    nupd += int(row[7])
+                    mem  += int(row[8])
+                    time += float(row[9])
                     nexp += 1
                     
                     if int(row[4]) > n:
