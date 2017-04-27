@@ -29,26 +29,33 @@ void usage(char **argv);
 void test_delete(char htype, unsigned int hd){
 
     for(unsigned int i=1;i<=NUM_EXP;i++){
-        unsigned int N = pow(2,i); //insert 2^i random keys
+        unsigned int N = pow(2,i)-1; //insert 2^i random keys
         unsigned int n = 0;    
         
         if(htype == 'k'){   
             //n-ary heap test 
             NHeap h(N, hd);
-            
+            unsigned int k = 2*N;
             while(n < N){
-                h.insert(n, rand()%N);
+                h.insert(n, k--);
                 n++;
             }
             
             tstart = std::chrono::system_clock::now();
             n = 0;
+            int p = 1;
             h.n_swaps = 0;
-            e[i] = (i)*(pow(hd, i));
+            //e[i] = (i-1)*((pow(hd, i))-1);
+            e[i] = (i)*((pow(hd, i)));
             h.deletemin();
-            while(n < N-1){
+            while(!h.is_empty()){
                 h.deletemin();
                 n++;
+//                if(n == pow(2, i-p)){
+//                    p++;
+//                    n = 0;
+//                    e[i] += (i-p)*(pow(2, i-p));
+//                }
             }
             
             tend = std::chrono::system_clock::now();
@@ -56,9 +63,9 @@ void test_delete(char htype, unsigned int hd){
 		}else if(htype == 'h'){
 		    //hollow heap test
 		    HHeap h(N);
-        
+        unsigned int k = 2*N;
             while(n < N){
-                h.insert(n, rand()%N);
+                h.insert(n, k--);
                 n++;
             }
             
@@ -367,7 +374,7 @@ void test_insert_old(unsigned int hd){
 
 
 void test_scale(char htype, unsigned int hd, bool is_scale){
-	
+  is_scale = false;
 	unsigned int n,m;
 
 	Graph g = read_dimacs(std::cin, &n, &m);
