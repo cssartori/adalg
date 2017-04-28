@@ -186,7 +186,7 @@ def __proc_dir_table_scale__(dirname, outfname, rfext):
     
       
     # Generate table file       
-	lr = sorted(lr, key = lambda x: (x[1], x[0])) #sort by number of vertices and k
+	lr = sorted(lr, key = lambda x: (x[2], x[0])) #sort by number of vertices and k
     avg = dict({})
     for l in lr:
         avg[l[0]] = 0.0

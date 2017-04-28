@@ -9,7 +9,7 @@
 using namespace std;
 using namespace boost;
  
-const unsigned maxweight = 1000;
+const unsigned maxweight = 10000;
 
 void read_parameters(int argc, char **argv, unsigned int *n, double *p, bool *medges, int *ledges); 
 void usage(char **argv); 
@@ -68,7 +68,9 @@ int main(int argc, char *argv[]) {
             
             if(s != t && !edge_exist(g, s, t)){
                 Edge e = add_edge(s,t,g).first;
-    		    g[e].weight = lrand48()%maxweight+0.01*maxweight;
+    		    g[e].weight = lrand48()%maxweight;//+0.01*maxweight;
+//    		    Edge el = add_edge(t,s,g).first;
+//    		    g[el].weight = lrand48()%maxweight;//+0.01*maxweight;
     		    mc ++;
     		    fprintf(stderr, "\rmc = %u", mc);
 		        fflush(stderr);
