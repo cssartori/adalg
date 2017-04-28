@@ -1,11 +1,11 @@
 #!/bin/bash
 
-dirname="hs_n"
+dirname="inst/hs_k"
 mkdir $dirname
 
-for filename in ./inst/*.gr
+for filename in ./inst/k/*.gr
 	do
-		outf=$(echo $filename| cut -d'/' -f 3)
+		outf=$(echo $filename| cut -d'/' -f 4)
 	   	outf=$(echo $outf| cut -d'.' -f  1)
 	   	outf=$dirname"/"$outf".dat"  
 		./exp -t s -h k -n 50 < $filename > $outf		
