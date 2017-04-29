@@ -175,14 +175,12 @@ unsigned int dijkstra_hheap_test(const Graph& g, unsigned int s, unsigned int t,
 	*n_ins = 0;
 	*n_del = 0;
 	*n_upd = 0;
+    *mem = 0;
 
 	dist[s] = 0;
 	h.insert(s, 0); 
 	*n_ins += 1;
 	
-	//TODO: check amount of memory used by Hollow Heaps
-	if(mem != NULL)
-		*mem = memory_used(); //all memory is allocated up to this point	
 	
 	tstart = std::chrono::system_clock::now();
 		
@@ -190,7 +188,10 @@ unsigned int dijkstra_hheap_test(const Graph& g, unsigned int s, unsigned int t,
 		unsigned int v = h.getmin(); h.deletemin();
 		*n_del += 1;
 		visited[v] = true;
-		
+	    
+	    if(mem != NULL)
+    		*mem = std::max(*mem, memory_used()); //all memory is allocated up to this point    
+	    	
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
 			unsigned int u = target(*ie, g);

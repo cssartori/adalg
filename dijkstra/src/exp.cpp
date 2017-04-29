@@ -13,6 +13,7 @@ static unsigned int NUM_EXP = 20;
 static const int DEFAULT_HDIM = 2; //binary k-heap (2-heap)
 static const char DEFAULT_HTYPE = 'h'; //hollow heaps
 
+static unsigned int seed; //random seed
 
 using namespace std;
 
@@ -404,7 +405,7 @@ void test_scale(char htype, unsigned int hd, bool is_scale){
       		    
 		}while(d == MAX_DIST && is_scale);	
 					
-		printf("%i,%c,%i,%u,%u,%u,%u,%u,%lu,%Le,%u\n", i, htype, hd, n, m, n_ins, n_del, n_upd, mu, time, d);
+		printf("%i,%c,%i,%u,%u,%u,%u,%u,%lu,%Le,%u,%u\n", i, htype, hd, n, m, n_ins, n_del, n_upd, mu, time, d,seed);
 		if(d == MAX_DIST)
 			ninf++;
 	}
@@ -443,7 +444,7 @@ void test_validate(char htype, unsigned int hd){
   			valid = -1;
   	    }
 
-		printf("%u,%u,%u,%i,%i (%u -> %u)\n", i, dst, dist[t], valid, hd, s, t);
+		printf("%u,%c,%u,%u,%u,%i,%i,%i,%u\n", i, htype, hd, dst, dist[t], valid, s, t, seed);
 	}
 
 	return;
@@ -451,7 +452,8 @@ void test_validate(char htype, unsigned int hd){
 
 
 int main(int argc, char **argv){
-	srand(time(0));
+    seed = time(0);
+	srand(seed);
 	
 	unsigned int hdim;
 	char op;

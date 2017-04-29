@@ -1,15 +1,24 @@
 #!/bin/bash
 
-dirname="inst/hs_k"
-mkdir $dirname
+mkdir "scale"
 
-for filename in ./inst/k/*.gr
+drh="scale/hollow"
+drk="scale/kheap"
+
+mkdir $drh
+mkdir $drk
+
+for filename in ../../instances/*.gr
 	do
-		outf=$(echo $filename| cut -d'/' -f 4)
-	   	outf=$(echo $outf| cut -d'.' -f  1)
-	   	outf=$dirname"/"$outf".dat"  
-		./exp -t s -h k -n 50 < $filename > $outf		
+		o=$(echo $filename| cut -d'/' -f 4)
+        echo "Running instance "$o
+	   	o=$(echo $outf| cut -d'.' -f  2)
+	   	ork=$drk"/"$o"-K.dat"
+        orh=$drh"/"$o"-H.dat"
+		./exp -t s -h k -n 50 < $filename > $ork		
+		echo "Finished k-heap. Results in "$ork
+    	./exp -t s -h h -n 50 < $filename > $orh
+    	echo "Finished hollow. Results in "$orh
 	   	echo "Done with "$filename
-		echo "Results in file "$outf
 done
 
