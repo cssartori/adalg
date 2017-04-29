@@ -25,7 +25,7 @@
 /// The amount of memory currently being used by this process, in bytes.
 /// By default, returns the full virtual arena, but if resident=true,
 /// it will report just the resident set in RAM (if supported on that OS).
-size_t memory_used (bool resident=false)
+static size_t memory_used (bool resident=false)
 {
 #if defined(__linux__)
     // Ugh, getrusage doesn't work well on Linux.  Try grabbing info
