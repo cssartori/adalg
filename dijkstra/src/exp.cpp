@@ -88,7 +88,7 @@ void test_delete(char htype, unsigned int hd){
 		times[i] = elapsed_seconds.count();	
     }    
     
-    printf("%i,%c,%i,%lu,%u,%u,%Le,%Le\n", 0, htype, hd, mem[0], swaps[0], e[0], times[0], (long double)0.0);
+    printf("%i,%c,%i,%lu,%u,%u,%Le,%Le,%Le\n", 0, htype, hd, mem[0], swaps[0], e[0], times[0], (long double)0.0, (long double)0.0);
 	for(unsigned int j=1;j<swaps.size();j++){
 	  printf("%i,%c,%i,%lu,%u,%u,%Le,%Le,%Le\n", j, htype, hd, mem[j], swaps[j], e[j], times[j], (long double)swaps[j]/e[j], (long double)times[j]/e[j]);
 	}	  
@@ -171,9 +171,9 @@ void test_update(char htype, unsigned int hd){
 		times[i] = elapsed_seconds.count();
 	}
 
-	printf("%i,%c,%i,%lu,%u,%u,%Le,%Le\n", 0, htype, hd, mem[0], swaps[0], e[0], times[0], (long double)0.0);	
+	printf("%i,%c,%i,%lu,%u,%u,%Le,%Le,%Le\n", 0, htype, hd, mem[0], swaps[0], e[0], times[0], (long double)0.0, (long double)0.0);	
 	for(unsigned int j=1;j<swaps.size();j++){
-		printf("%i,%c,%i,%lu,%u,%u,%Le,%Le\n", j, htype, hd, mem[j], swaps[j], e[j], times[j], times[j]/e[j]);
+		printf("%i,%c,%i,%lu,%u,%u,%Le,%Le,%Le\n", j, htype, hd, mem[j], swaps[j], e[j], times[j], (long double)swaps[j]/e[j], times[j]/e[j]);
 	}		
 }
 
@@ -202,12 +202,13 @@ void test_insert(char htype, unsigned int hd){
 			    elapsed_seconds = tend-tstart;			
 			    times[i] = elapsed_seconds.count();
 			    e[i] = (i-1)*pow(hd,i-1);
+			    mem[i] = memory_used();
 			    i++;
 			    NI = ((pow(2,i)-1));
 			    h.n_swaps = 0;
 		    }
 	    }
-        mem[i] = memory_used();
+
 	}else if(htype == 'h'){
 	    HHeap h(n+1);
 	    h.insert(n, n);
@@ -227,18 +228,19 @@ void test_insert(char htype, unsigned int hd){
 			    elapsed_seconds = tend-tstart;			
 			    times[i] = elapsed_seconds.count();
 			    e[i] = 1;
+			    mem[i] = memory_used();
 			    i++;
 			    NI = pow(2,i)-1;
 			    h.n_links = 0;
 		    }
 	    }
-        mem[i] = memory_used();
+
 	}
 	
-	printf("%i,%c,%i,%lu,%u,%u,%Le,%Le\n", 0, htype, hd, mem[0], swaps[0], e[0], times[0], (long double)0.0);
-	printf("%i,%c,%i,%lu,%u,%u,%Le,%Le\n", 1, htype, hd, mem[1], swaps[1], e[1], times[1], (long double)0.0);	
+	printf("%i,%c,%i,%lu,%u,%u,%Le,%Le,%Le\n", 0, htype, hd, mem[0], swaps[0], e[0], times[0], (long double)0.0, (long double)0.0);
+	printf("%i,%c,%i,%lu,%u,%u,%Le,%Le,%Le\n", 1, htype, hd, mem[1], swaps[1], e[1], times[1], (long double)0.0, (long double)0.0);	
 	for(unsigned int j=2;j<swaps.size();j++){
-		printf("%i,%c,%i,%lu,%u,%u,%Le,%Le\n", j, htype, hd, mem[j], swaps[j], e[j], times[j]-times[j-1], (times[j]-times[j-1])/e[j]);
+		printf("%i,%c,%i,%lu,%u,%u,%Le,%Le,%Le\n", j, htype, hd, mem[j], swaps[j], e[j], times[j]-times[j-1],(long double)swaps[j]/e[j], (times[j]-times[j-1])/e[j]);
 	}	
 }
 
