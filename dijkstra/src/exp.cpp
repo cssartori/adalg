@@ -203,7 +203,7 @@ void test_insert(char htype, unsigned int hd){
 			    times[i] = elapsed_seconds.count();
 			    e[i] = (i-1)*pow(hd,i-1);
 			    i++;
-			    NI = ((pow(hd,i)-1)/(hd-1));
+			    NI = ((pow(2,i)-1));
 			    h.n_swaps = 0;
 		    }
 	    }
