@@ -79,6 +79,7 @@ unset output
 
 unset logscale y
 unset logscale x
+set key top right
 plot "../res/comp/RM/Grmk.dat" u 5:14 w lp lw 3 title "2-heap"
 replot "../res/comp/RM/Grmh.dat" u 5:14 w lp lw 3 title "hollow heap"
 set output "../res/comp/gcm.eps"
@@ -98,6 +99,7 @@ unset output
 
 unset logscale y
 unset logscale x
+set key top right
 set xlabel "Numero de vertices n"
 set ylabel "(tempo / (n+m)log n)"
 plot "../res/comp/RN/Grnk.dat" u 4:14 w lp lw 3 title "2-heap"

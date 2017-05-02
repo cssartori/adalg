@@ -133,21 +133,29 @@ def __proc_file_scale__(filename, op):
                 l = [t, k, n, m, nins_avg, ndel_avg, nupd_avg, mem_avg, time_avg]
             else:
                 cdata = csv.reader(cfile, delimiter=" ")
-
+                
+                t = ' '
                 k = 0
                 n = 0
                 m = 0
+                ins = 0
+                ups = 0
+                des = 0
                 mem = 0
                 time = 0.0              
                     
                 for row in cdata:
-                    k = int(row[0])
-                    n = int(row[2])
-                    m = int(row[3])
-                    mem  = float(row[10])
-                    time = float(row[11])
+                    t = row[0]
+                    k = int(row[1])
+                    n = int(row[3])
+                    m = int(row[4])
+                    ins = int(row[5])
+                    des = int(row[6])
+                    ups = int(row[7])
+                    mem  = float(row[11])
+                    time = float(row[12])
                         
-                    lt = [k, n, m, mem, time]
+                    lt = [t, k, n, m, ins, des, ups, mem, time]
                     l.append(lt)
 
     return l
@@ -165,7 +173,7 @@ def __proc_dir_graph_scale__(dirname, outfname, rfext):
         lr.append(lf)
   
     # Generate graph file       
-	lr = sorted(lr, key = lambda x: (x[3])) #sort by number of vertices
+	lr = sorted(lr, key = lambda x: (x[2])) #sort by number of vertices
 
     for l in lr:
         # type k log2(n) n m I D U pI pD pU mem t t/O
@@ -174,7 +182,7 @@ def __proc_dir_graph_scale__(dirname, outfname, rfext):
     outf.close()
 
 
-def __proc_dir_table_scale__(dirname, outfname, rfext):
+def __proc_dir_table_scale__(dirname, outfname, rfext, x=3):
     outf = open(outfname, "w")
     
     print("reading files")
@@ -187,241 +195,59 @@ def __proc_dir_table_scale__(dirname, outfname, rfext):
         for l in lf:        
             lr.append(l)
     
-      
+    
+	
+	vr = 2
+    if x == 4:
+        vr = 3    
+    
+    #print ("vr = " % (vr))
     # Generate table file       
-	lr = sorted(lr, key = lambda x: (x[2], x[0])) #sort by number of vertices and k
+    lr = sorted(lr, key = lambda x: (x[vr], x[1])) #sort by number of vertices and k
+	
     avg = dict({})
     for l in lr:
-        avg[l[0]] = 0.0
+        # ins des ups mem time
+        avg[l[1]] = [0.0,0.0,0.0,0.0,0.0]
     
     nn = -1
     c=0
     mavg = 0
     navg = 0
-    memavg = 0
-    
+   
     for l in lr:
-        if nn != l[1]:
+        if nn != l[vr]:
             if nn != -1:
                 outf.write("\\\\")
             c += 1
-            navg += l[1]
-            mavg += l[2]
-            memavg += l[3]
-            outf.write("\n%u & %u & %u & %.2f " % (c, l[1], l[2], l[3]))
-            #outf.write("\n%u & %u & %u " % (c, l[1], l[2]))
-            nn = l[1]
+            navg += l[2]
+            mavg += l[3]
+                      
+            outf.write("\n%u & %u & %u " % (c, l[2], l[3]))            
+            nn = l[vr]
         
-        outf.write("& %.2Le " % (l[4]))
-        avg[l[0]] += l[4]
+        if x == 3 or x == 4: # print operations, but not memory (complexity)
+            outf.write(" & %i & %i & %i & %.2Le " % (l[4], l[5], l[6], l[8]))            
+        elif x == 5: # print memory, but not operations (scale)
+            outf.write(" & %.2Le & %.2Le " % (l[7], l[8]))
+            
+        avg[l[1]][0] += l[4]
+        avg[l[1]][1] += l[5]
+        avg[l[1]][2] += l[6]
+        avg[l[1]][3] += l[7]
+        avg[l[1]][4] += l[8]
         
-    outf.write("\\\\\n\\textbf{Average} & %.2f & %.2f & %.2f " % (navg/c, mavg/c, memavg/c))
-    #outf.write("\\\\\n\\textbf{Average} & %.2f & %.2f " % (navg/c, mavg/c))
+    outf.write("\\\\\n\\textbf{Media} & %.2f & %.2f " % (navg/c, mavg/c))
+    
     for a in avg:
-        outf.write(" & %.2Le" % (avg[a]/c))
+        if x == 3 or x == 4:
+            outf.write(" & %.2Le & %.2Le & %.2Le & %.2Le" % (avg[a][0]/c, avg[a][1]/c, avg[a][2]/c, avg[a][4]/c))
+        elif x == 5:
+            outf.write(" & %.2Le & %.2Le" % (avg[a][3]/c, avg[a][4]/c))
     
     outf.write("\\\\")
     outf.close()
     
-
-
-
-
-
-
-
-def __proc_exp1__(dirname, outfname, rfext):
-    
-    outf = open(outfname, "w")
-    print("reading files") 
-    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
-        lr = []
-        print("Reading file "+file)
-        with open(dirname+file, 'rb') as csvfile:
-            csvdata = csv.reader(csvfile, delimiter=' ')
-
-            for row in csvdata:
-                i = int(row[0])
-                nswaps = int(row[1])
-                time = float(row[3])
-                tpe = float(row[4])  
-                
-                l = [i, nswaps, time, tpe]           
-                lr.append(l)
-
-	
-	    lr = sorted(lr, key=itemgetter(0))
-	    outf.write("----"+dirname+file+"----\n")    
-        for l in lr:
-            #outf.write("%i %Le\n" % (l[0], l[3]))
-            outf.write("%i & %i & %.2Le\n" % (l[0], l[1], l[2]))
-        outf.write("------------------------\n")
-
-
-
-def __proc_exp23__(dirname, outfname, rfext):
-    lr = []
-    outf = open(outfname, "w")
-    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
-        with open(dirname+file, 'rb') as csvfile:
-            csvdata = csv.reader(csvfile, delimiter=',')
-            fl = csvdata.next()
-            n = int(fl[1])
-            m = int(fl[2])
-            nins = int(fl[3])
-            ndel = int(fl[4])
-            nupd = int(fl[5])
-            mem  = int(fl[6])
-            time = float(fl[7])
-            
-            nexp = 1
-            for row in csvdata:
-                nins += int(row[3])
-                ndel += int(row[4])
-                nupd += int(row[5])
-                mem  += int(row[6])
-                time += float(row[7])
-                nexp += 1
-           
-            nins_avg = float(nins/nexp)
-            ndel_avg = float(ndel/nexp)
-            nupd_avg = float(nupd/nexp)
-            mem_avg  = float(mem/nexp)
-            time_avg = float(time/nexp)
-           
-            l = [n, m, nins_avg, ndel_avg, nupd_avg, mem_avg, time_avg]
-            lr.append(l)     
-
-
-    lr = sorted(lr, key=itemgetter(0))    
-    outf = open(outfname, "w")
-    
-    for l in lr:
-        outf.write("%i\t%i\t%f\t%f\t%f\t%f\t%Le\n" % (l[0], l[1], l[2], l[3], l[4], (l[5]/(1024*1024)), l[6]))
-
-   
-def __proc_exp11__(dirname, outfname, rfext):
-    lr = []
-    outf = open(outfname, "w")
-    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
-        print "reading "+file
-        with open(dirname+file, 'rb') as csvfile:
-            csvdata = csv.reader(csvfile, delimiter=' ')
-            fl = csvdata.next()
-            k = int(fl[0])
-            ns = 0
-            e = 0
-            t  = 0
-            idt = 0
-            
-            nexp = 1
-            for row in csvdata:
-                idt = int(row[0])
-                ns = int(row[1])
-                e = int(row[2])
-                t  = float(row[3])
-                l = [k, idt, ns, e, t]                
-                lr.append(l) 
-           
-            #print ("appending %i %i %i\n" % (k, n, m))
-                
-
-    
-    lr = sorted(lr, key = lambda x: (x[1], x[0]))    
-    outf = open(outfname, "w")
-    nn = -1
-    for l in lr:
-        if(l[1] != nn):
-            nn = l[1]
-            outf.write("\n%i & " % (l[1]))
-            
-        outf.write(" %i & %i & %.2Le &" % (l[3], l[2], l[4]))
-
-
-def __proc_exp44__(dirname, outfname, rfext):
-    lr = []
-    outf = open(outfname, "w")
-    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
-        with open(dirname+file, 'rb') as csvfile:
-            csvdata = csv.reader(csvfile, delimiter='\t')
-            fl = csvdata.next()
-            k = int(fl[0])
-            n = 0
-            m = 0
-            mem  = 0
-            time = 0
-            
-            nexp = 1
-            for row in csvdata:
-                n = int(row[0])
-                m = int(row[1])
-                mem  = float(row[5])
-                time = float(row[6])
-                l = [k, n, m, mem, time]                
-                lr.append(l) 
-           
-            #print ("appending %i %i %i\n" % (k, n, m))
-                
-
-    
-    lr = sorted(lr, key = lambda x: (x[1], x[0]))    
-    outf = open(outfname, "w")
-    nn = 0
-    for l in lr:
-        if(l[1] != nn):
-            nn = l[1]
-            outf.write("\n%i & %i &" % (l[1], l[2]))
-        outf.write(" %.2Le &" % (l[4]))
-   
-
-def __proc_exp55__(dirname, outfname, rfext):
-
-    outf = open(outfname, "w")
-    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
-        lr = []
-        with open(dirname+file, 'rb') as csvfile:
-            csvdata = csv.reader(csvfile, delimiter='\t')
-            print "reading "+file+"\n"
-            for row in csvdata:
-                n = int(row[0])
-                m = int(row[1])
-                I  = float(row[2])
-                D = float(row[3])
-                U = float(row[4])
-                t = float(row[6])
-                
-                if I > n:
-                    print "Error on I for "+file
-                if D > n:
-                    print "Error on D for "+file
-                if U > m:
-                    print "Error on U for "+file
-                
-                tp = (t/((m*math.log(n))+(n*math.log(n))))
-                pI = I/n
-                pD = D/n
-                pU = U/m
-                #print file+"\n"
-                #print ("t = %.2Le | tp = %.2Le | (m+n)log(n) = %.2Le | log(%d) = %.2Le\n" % (t, tp, (m*math.log(n))+(n*math.log(n)), n, math.log(n)))
-                
-                l = [n, m, tp, t, pI, pD, pU]                
-                lr.append(l) 
-                   
-            lr = sorted(lr, key = lambda x: (x[0]))    
-            
-            outf.write(file+"\n")    
-            for l in lr:
-                outf.write("%i %i %.2Le %.2Le %.2Le %.2Le %.2Le\n" % (l[0], l[1], l[2], l[3], l[4], l[5], l[6]))
-
-            outf.write("--------------------------------\n")
-            
-            for l in lr:
-                outf.write("%i & %i & %.2Le\n" % (l[0], l[1], l[3]))
-                
-            outf.write("================================\n")
-            
-
-
 
 
 #The main module, in case this program was called as the main program
@@ -440,8 +266,8 @@ if __name__ == '__main__':
         __proc_dir_heap__(dirname, outfname, rfext)    
     elif exp == 2:
         __proc_dir_graph_scale__(dirname, outfname, rfext)
-    elif exp == 3:
-        __proc_dir_table_scale__(dirname, outfname, rfext)
+    elif exp == 3 or exp == 4 or exp == 5:
+        __proc_dir_table_scale__(dirname, outfname, rfext, exp)
 #    elif exp == 5:
 #        __proc_exp55__(dirname, outfname, rfext)
 #    elif exp == 11:
