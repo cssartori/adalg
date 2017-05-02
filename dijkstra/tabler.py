@@ -28,11 +28,12 @@ def __proc_file_heap__(filename):
      
         for row in cdata:
             i = int(row[0])
-            k = int(row[1])
-            nswaps = int(row[2])
-            time = float(row[4])
-            tpe = float(row[5])             
-            l = [i, k, nswaps, time, tpe]           
+            t = row[1]
+            k = int(row[2])
+            nswaps = int(row[4])
+            time = float(row[6])
+            tpe = float(row[8])             
+            l = [i, t, k, nswaps, time, tpe]           
             lr.append(l)
 
     return lr
@@ -53,20 +54,20 @@ def __proc_dir_heap__(dirname, outfname, rfext):
             lr.append(l)
         
         # Generate graph file
-        lf = sorted(lf, key = lambda x: (x[0])) #sort by experiment
-        gfname = "G"+file.split(".")[0]+".dat"
-        outg = open(dirname+gfname, "w")
-        for l in lf:
-            outg.write("%i %i %i %Le %Le\n" % (l[0], l[1], l[2], l[3], l[4]))
-        
-        outg.close()
+#        lf = sorted(lf, key = lambda x: (x[0])) #sort by experiment
+#        gfname = "G"+file.split(".")[0]+".dat"
+#        outg = open(dirname+gfname, "w")
+#        for l in lf:
+#            outg.write("%i %i %i %Le %Le\n" % (l[0], l[1], l[2], l[3], l[4]))
+#        
+#        outg.close()
         
         
     # Generate table file       
-	lr = sorted(lr, key = lambda x: (x[0], x[1])) #sort by experiment and k
+	lr = sorted(lr, key = lambda x: (x[0], x[2])) #sort by experiment and k
 	avg = dict({})
 	for l in lr:
-	    avg[l[1]] = [0,0.0,0]
+	    avg[l[2]] = [0,0.0,0]
 	    
 	ne = -1
     for l in lr:
@@ -76,10 +77,10 @@ def __proc_dir_heap__(dirname, outfname, rfext):
             outf.write("\n%i " % (l[0]))
             ne = l[0]
                         
-        outf.write(" & %i & %.2Le " % (l[2], l[3]))
-        avg[l[1]] = [avg[l[1]][0]+l[2], avg[l[1]][1]+l[3], avg[l[1]][2]+1]
+        outf.write(" & %i & %.2Le " % (l[3], l[4]))
+        avg[l[2]] = [avg[l[2]][0]+l[3], avg[l[2]][1]+l[4], avg[l[2]][2]+1]
 
-    outf.write("\\\\\n\\textbf{Average} ")
+    outf.write("\\\\\n\\textbf{Media} ")
     for a in avg:
         outf.write(" & %.2f & %.2Le " % (float(avg[a][0]/avg[a][2]), avg[a][1]/avg[a][2]))
     
@@ -93,6 +94,7 @@ def __proc_file_scale__(filename, op):
     with open(filename, 'rb') as cfile:
             if op == "gr":
                 cdata = csv.reader(cfile, delimiter=",")
+                t = ' '
                 k = 0
                 n = 0
                 m = 0
@@ -104,6 +106,7 @@ def __proc_file_scale__(filename, op):
                 nexp = 0
                 
                 for row in cdata:
+                    t = row[1]
                     k = int(row[2])
                     n = int(row[3])
                     m = int(row[4])
@@ -114,11 +117,11 @@ def __proc_file_scale__(filename, op):
                     time += float(row[9])
                     nexp += 1
                     
-                    if int(row[4]) > n:
-                        print "Error on I row "+str(row[0])
                     if int(row[5]) > n:
+                        print "Error on I row "+str(row[0])
+                    if int(row[6]) > n:
                         print "Error on D row "+str(row[0])
-                    if int(row[6]) > m:
+                    if int(row[7]) > m:
                         print "Error on U row "+str(row[0])
                                
                 nins_avg = float(nins/nexp)
@@ -127,7 +130,7 @@ def __proc_file_scale__(filename, op):
                 mem_avg  = float(mem/nexp)
                 time_avg = float(time/nexp)
                        
-                l = [k, n, m, nins_avg, ndel_avg, nupd_avg, mem_avg, time_avg]
+                l = [t, k, n, m, nins_avg, ndel_avg, nupd_avg, mem_avg, time_avg]
             else:
                 cdata = csv.reader(cfile, delimiter=" ")
 
@@ -162,11 +165,11 @@ def __proc_dir_graph_scale__(dirname, outfname, rfext):
         lr.append(lf)
   
     # Generate graph file       
-	lr = sorted(lr, key = lambda x: (x[1])) #sort by number of vertices
+	lr = sorted(lr, key = lambda x: (x[3])) #sort by number of vertices
 
     for l in lr:
-        # k log2(n) n m I D U pI pD pU mem t t/O
-        outf.write("%i %u %u %u %u %u %u %f %f %f %f %Le %Le\n" % (l[0], math.log(l[1], 2), l[1], l[2], l[3], l[4], l[5], float(l[3]/l[1]), float(l[4]/l[1]), float(l[5]/l[2]), float(l[6]/(1024*1024)), l[7], l[7]/((l[2]+l[1])*math.log(l[1]))))
+        # type k log2(n) n m I D U pI pD pU mem t t/O
+        outf.write("%c %i %u %u %u %u %u %u %f %f %f %f %Le %Le\n" % (l[0], l[1], math.log(l[2], 2), l[2], l[3], l[4], l[5], l[6], float(l[4]/l[2]), float(l[5]/l[3]), float(l[6]/l[3]), float(l[7]/(1024*1024)), l[8], l[8]/((l[2]+l[3])*math.log(l[2]))))
         
     outf.close()
 

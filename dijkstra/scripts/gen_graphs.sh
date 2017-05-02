@@ -16,42 +16,42 @@ set xlabel "n=2^x elementos"
 set ylabel "tempo (s)"
 
 # Inserts
-plot "../res/heap/tinsk2.dat" u 1:7 w lp lw 3 title "2-heap"
-replot "../res/heap/tinsh.dat" u 1:7 w lp lw 3 title "hollow heap"
+plot "../res/heap/insert/tinsk2.dat" u 1:7 w lp lw 3 title "2-heap"
+replot "../res/heap/insert/tinsh.dat" u 1:7 w lp lw 3 title "hollow heap"
 set output "../res/heap/gins_2.eps"
 replot
 unset output
 
 # Updates
-plot "../res/heap/tupdk2.dat" u 1:7 w lp lw 3 title "2-heap"
-replot "../res/heap/tupdh.dat" u 1:7 w lp lw 3 title "hollow heap"
+plot "../res/heap/update/tupdk2.dat" u 1:7 w lp lw 3 title "2-heap"
+replot "../res/heap/update/tupdh.dat" u 1:7 w lp lw 3 title "hollow heap"
 set output "../res/heap/gupd_2.eps"
 replot
 unset output
 
 # Deletes
-plot "../res/heap/tdelDk2.dat" u 1:7 w lp lw 3 title "2-heap"
-replot "../res/heap/tdelDh.dat" u 1:7 w lp lw 3 title "hollow heap"
+plot "../res/heap/delete/deterministic/tdelDk2.dat" u 1:7 w lp lw 3 title "2-heap"
+replot "../res/heap/delete/deterministic/tdelDh.dat" u 1:7 w lp lw 3 title "hollow heap"
 set output "../res/heap/gdelD_2.eps"
 replot
 unset output
 
-plot "../res/heap/tdelRk2.dat" u 1:7 w lp lw 3 title "2-heap"
-replot "../res/heap/tdelRh.dat" u 1:7 w lp lw 3 title "hollow heap"
+plot "../res/heap/delete/random/tdelRk2.dat" u 1:7 w lp lw 3 title "2-heap"
+replot "../res/heap/delete/random/tdelRh.dat" u 1:7 w lp lw 3 title "hollow heap"
 set output "../res/heap/gdelR_2.eps"
 replot
 unset output
 
 set ylabel "(tempo / E) (s)"
 
-plot "../res/heap/tdelDk2.dat" u 1:9 w lp lw 3 title "2-heap"
-replot "../res/heap/tdelDh.dat" u 1:9 w lp lw 3 title "hollow heap"
+plot "../res/heap/delete/deterministic/tdelDk2.dat" u 1:9 w lp lw 3 title "2-heap"
+replot "../res/heap/delete/deterministic/tdelDh.dat" u 1:9 w lp lw 3 title "hollow heap"
 set output "../res/heap/gcdelD_2.eps"
 replot
 unset output
 
-plot "../res/heap/tdelRk2.dat" u 1:9 w lp lw 3 title "2-heap"
-replot "../res/heap/tdelRh.dat" u 1:9 w lp lw 3 title "hollow heap"
+plot "../res/heap/delete/random/tdelRk2.dat" u 1:9 w lp lw 3 title "2-heap"
+replot "../res/heap/delete/random/tdelRh.dat" u 1:9 w lp lw 3 title "hollow heap"
 set output "../res/heap/gcdelR_2.eps"
 replot
 unset output
