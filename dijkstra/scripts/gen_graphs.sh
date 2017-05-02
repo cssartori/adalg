@@ -136,4 +136,32 @@ set output "../res/scale/gBIGm.eps"
 replot
 unset output
 
+#===============================================================================
+#===============================================================================
+#===============================================================================
+#===============================================================================
+
+# Linear Regression graphics
+
+unset logscale y
+unset logscale x
+set key top right
+
+set xlabel "Numero de vertices n"
+set ylabel "Numero de arestas m"
+set zlabel "Tempo (s)"
+
+f(x,y) = 10**(-12.159)*x**(0.845)*y**(1.057)
+splot f(x,y) lw 3 title "T(n,m)"
+replot "../res/comp/linreg/lrh.dat" u 4:5:13 w lp lw 3 title "hollow heap"
+set output "../res/comp/linreg/gLRh.eps"
+replot
+unset output
+
+f(x,y) = 10**(-12.912)*x**(0.824)*y**(1.127)
+splot f(x,y) lw 3 title "T(n,m)"
+replot "../res/comp/linreg/lrk.dat" u 4:5:13 w lp lw 3 title "2-heap"
+set output "../res/comp/linreg/gLRk.eps"
+replot
+unset output
 
