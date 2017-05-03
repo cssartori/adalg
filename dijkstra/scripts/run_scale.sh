@@ -1,18 +1,34 @@
 #!/bin/bash
 
-for hd in {1..16}
-do
-	dirname="hd_"$hd
-	mkdir $dirname
+# Define a timestamp function                                                                                                                                           
+timestamp() {
+  date +"%Y-%m-%d :: %H:%M:%S"
+}
 
-	for filename in ../../instances/dijkstra/*.gr
+
+mkdir "scale"
+
+drh="scale/hollow"
+drk="scale/kheap"
+
+mkdir $drh
+mkdir $drk
+
+for filename in ../../instances/*.gr
 	do
-		outf=$(echo $filename| cut -d'/' -f 5)
-	   	outf=$(echo $outf| cut -d'.' -f  2)
-	   	outf=$dirname"/"$outf".dat"  
-		./exp -t s -n 50 -h $hd < $filename > $outf		
+		o=$(echo $filename| cut -d'/' -f 4)
+		echo "==============================================="
+        echo "Running instance "$o
+	timestamp
+	   	o=$(echo $o| cut -d'.' -f  2)
+	   	ork=$drk"/"$o"-K.dat"
+        orh=$drh"/"$o"-H.dat"
+		./exp -t s -h k -n 50 < $filename > $ork		
+		echo "Finished k-heap. Results in "$ork
+		timestamp
+    	./exp -t s -h h -n 50 < $filename > $orh
+    	echo "Finished hollow. Results in "$orh
+	timestamp
 	   	echo "Done with "$filename
-		echo "Results in file "$outf
-		
-	done
 done
+
