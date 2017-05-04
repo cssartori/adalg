@@ -5,7 +5,8 @@
 using namespace std;
 
 //Create a new n-heap to support up to m-int-elements with values [0...m-1]
-NHeap::NHeap(unsigned int m, unsigned int n){
+NHeap::NHeap(unsigned int m, unsigned int n):
+        Heap(){
 	this->heap.reserve(m);
 	this->data.reserve(m);
 	this->pos_heap.assign(m, 0);
@@ -28,9 +29,9 @@ void NHeap::decrease_key(unsigned int e, unsigned int nkey){
 	unsigned int okey = heap[i]; //old key
 	heap[i] = nkey;
 	
-	if(nkey > okey){ //new key is smaller than previous
+	if(nkey < okey){ //new key is smaller than previous
 		heapify_up(i);
-	}else if (nkey < okey){ //new key is bigger than previous: check if respects propoperties w.r.t. children
+	}else if (nkey > okey){ //new key is bigger than previous: check if respects propoperties w.r.t. children
 		heapify_down(i);
 	}
 }
@@ -44,7 +45,7 @@ void NHeap::heapify_up(unsigned int i){
 	unsigned int hpi = heap[pi];
 	unsigned int hi = heap[i];
 
-	if(hi > hpi){ //key is greater than parent's
+	if(hi < hpi){ //key is smaller than parent's
 		n_swaps++;
 		
 		//swap key
@@ -72,10 +73,10 @@ void NHeap::heapify_down(unsigned int i){
 	unsigned first_child = n*i+1;	//first child of i
 	//get smallest child
 	for(unsigned int j=first_child; j < heap.size() && j-first_child < n;j++){
-		if(heap[j] > heap[min])
+		if(heap[j] < heap[min])
 			min = j;
 	}
-	if(min == i) //e is not greater than any of its children
+	if(min == i) //e is not smaller than any of its children
 		return;	
 
 	n_swaps++;

@@ -4,30 +4,21 @@
 #include <map>
 #include <vector>
 #include <math.h>
+#include "heap.h"
 
-class HHeap{
+class HHeap: public Heap{
 public:
     unsigned int n_links = 0; //link counter
         
-    HHeap(unsigned int sz){
+    HHeap(unsigned int sz):
+        Heap(){
         this->h = make_heap();
         this->ne = 0;
         this->nt = 0;
         this->n_links = 0;
         this->pos_h.reserve(sz);
     };
-    
-//    HHeap(unsigned int data, unsigned int key){
-//        unsigned int *d = new unsigned int;
-//        *d = data;
-//        this->h = make_heap(d, key);
-//        this->pos_h[data] = this->h->item;
-//        
-//        //A new node has been added to the heap
-//        this->ne = 1;
-//        this->nt = 1;
-//    };
-    
+        
     //inserts a new node (data,key) in the heap
     void insert(unsigned int data, unsigned int key){
         unsigned int *d = new unsigned int;
@@ -86,6 +77,10 @@ public:
         unsigned int M = ceil(log(this->nt)/log(GOLDEN_RATIO));
         this->h = remove_min(this->h, M);
     };  
+    
+    unsigned int getminKey(){
+        return this->h->key;  
+    };
     
     //Returns true if heap is empty 
     bool is_empty(){
