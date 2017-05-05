@@ -9,16 +9,16 @@
 class HHeap: public Heap{
 public:
     unsigned int n_links = 0; //link counter
-        
-    HHeap(unsigned int sz):
-        Heap(){
+    
+            
+    HHeap(unsigned int sz, bool is_min=true) : Heap(is_min){
         this->h = make_heap();
         this->ne = 0;
         this->nt = 0;
         this->n_links = 0;
         this->pos_h.reserve(sz);
     };
-        
+    
     //inserts a new node (data,key) in the heap
     void insert(unsigned int data, unsigned int key){
         unsigned int *d = new unsigned int;
@@ -38,7 +38,7 @@ public:
     };
     
     //decreases the key of a given element of the heap, based on its data
-    void decrease_key(unsigned int data, unsigned int key){
+    void update_key(unsigned int data, unsigned int key){
         Item *e = this->pos_h[data];
 
         if(e != nullptr){
@@ -158,7 +158,7 @@ private:
         h2->ns = temp;
         
         //return the one with smallest key
-        if(h1->key <= h2->key)
+        if(compare(h1->key, h2->key))
             return h1;
         else
             return h2;
@@ -167,7 +167,7 @@ private:
     //link two nodes (trees) into a single one   
     Node* link(Node *t1, Node *t2){
         //comparison produces a winner and a loser
-        if(t1->key <= t2->key)
+        if(compare(t1->key, t2->key))
             return make_child(t1, t2);
         else
             return make_child(t2, t1);
