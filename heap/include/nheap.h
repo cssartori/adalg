@@ -50,7 +50,7 @@ public:
 	};
 	
 	//Removes the top-most element, i.e., the minimum
-	void deletemin(){
+	void deletetop(){
 		if(heap.size() >= 1){
 		    heap[0] = heap.back();
 		    data[0] = data.back();
@@ -70,12 +70,12 @@ public:
 	};
 	
 	//Return the minimum element
-	unsigned int getmin(){
+	unsigned int gettop(){
     	return data[0];
 	};
 	
 	//Return the key of the minimum element
-	unsigned int getminKey(){
+	unsigned int gettopKey(){
 	    return heap[0];
 	};
 	

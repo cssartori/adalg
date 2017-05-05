@@ -12,11 +12,12 @@
 using namespace std;
  
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/read_dimacs.hpp>
+//#include <boost/graph/read_dimacs.hpp>
 #include <boost/graph/push_relabel_max_flow.hpp>
 using namespace boost;
  
 #include "include/dgraph.h" 
+ 
  
 // graph element descriptors
 typedef adjacency_list_traits<vecS,vecS,directedS>::vertex_descriptor DiNode;
@@ -53,17 +54,25 @@ int main(int argc, char *argv[]) {
                                 
   Graph gr;
   Node sr,tr;
-     
-  read_dimacs_max_flow(gr,
-                       get(&EdgeData::capacity,gr),
-                       get(&EdgeData::reverse_edge,gr),
-                       sr, tr);
+  unsigned n;
+  unsigned m;
+  unsigned s;
+  unsigned t;
+    printf("Reading instance file...\n");
+    gr = read_dimacs_max_flow(std::cin, &n,&m,&s,&t);
+    printf("Running dijkstra %u -> %u...\n", s, t);
+    unsigned int fat = dijkstra_nheap(gr, s, t);
+     cout << "fat = " << fat << endl;
+//  read_dimacs_max_flow(gr,
+//                       get(&EdgeData::capacity,gr),
+//                       get(&EdgeData::reverse_edge,gr),
+//                       sr, tr);
  
   // (1) determine maximum flow
-  cout << push_relabel_max_flow(gr, sr, tr,
-                                get(&EdgeData::capacity,gr),
-                                get(&EdgeData::residual_capacity,gr),
-                                get(&EdgeData::reverse_edge,gr),
-                                get(boost::vertex_index, gr)) << endl;    
+//  cout << push_relabel_max_flow(gr, sr, tr,
+//                                get(&EdgeData::capacity,gr),
+//                                get(&EdgeData::residual_capacity,gr),
+//                                get(&EdgeData::reverse_edge,gr),
+//                                get(boost::vertex_index, gr)) << endl;    
     
 }

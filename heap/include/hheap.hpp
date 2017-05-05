@@ -33,7 +33,7 @@ public:
     };
     
     //returns the minimum element
-    unsigned int getmin(){        
+    unsigned int gettop(){        
         return *this->h->item->data;
     };
     
@@ -68,17 +68,17 @@ public:
         Item *e = this->pos_h[*data];
         e->node->item = nullptr;
         if(e->node == this->h)
-            deletemin();
+            deletetop();
     };
     
     //removes the element with minimum key
-    void deletemin(){
+    void deletetop(){
         // M is the log_phi(N), where phi is the golden ratio (~1.6180) and N the total number of elements in the heap
         unsigned int M = ceil(log(this->nt)/log(GOLDEN_RATIO));
-        this->h = remove_min(this->h, M);
+        this->h = remove_top(this->h, M);
     };  
     
-    unsigned int getminKey(){
+    unsigned int gettopKey(){
         return this->h->key;  
     };
     
@@ -182,7 +182,7 @@ private:
     };
     
     //removes the element with minimum key
-    Node* remove_min(Node *hr, unsigned int M){
+    Node* remove_top(Node *hr, unsigned int M){
         if(hr == nullptr || hr->item == nullptr)
             return nullptr;
         
