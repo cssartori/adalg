@@ -43,11 +43,12 @@ int main(int argc, char *argv[]) {
                        s, t);
  
   // (1) determine maximum flow
-  cout << push_relabel_max_flow(g, s, t,
+  unsigned int fat = push_relabel_max_flow(g, s, t,
                                 get(&EdgeInformation::edge_capacity,g),
                                 get(&EdgeInformation::edge_residual_capacity,g),
                                 get(&EdgeInformation::reverse_edge,g),
-                                get(boost::vertex_index, g)) << endl;
+                                get(boost::vertex_index, g));
+  cout << fat << endl;
                                 
 //  Graph gr;
 //  Node sr,tr;
@@ -72,4 +73,5 @@ int main(int argc, char *argv[]) {
 //                                get(&EdgeData::reverse_edge,gr),
 //                                get(boost::vertex_index, gr)) << endl;    
     
+    return fat;
 }

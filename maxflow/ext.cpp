@@ -73,6 +73,8 @@ int main(int argc, char *argv[]) {
 //                                get(&EdgeData::capacity,gr),
 //                                get(&EdgeData::residual_capacity,gr),
 //                                get(&EdgeData::reverse_edge,gr),
-//                                get(boost::vertex_index, gr)) << endl;    
+//                                get(boost::vertex_index, gr)) << endl; 
+
+    return fat;
     
 }
