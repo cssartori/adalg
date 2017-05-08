@@ -7,7 +7,6 @@
 using namespace std;
 using namespace boost;
 
-
 // Read a graph in DIMACS format from an input stream and return a Graph
 Graph read_dimacs_max_flow(std::istream& in, unsigned int* n, unsigned int* m, unsigned int* s, unsigned int* t) {
 	Graph g;
@@ -60,15 +59,16 @@ Graph read_dimacs_max_flow(std::istream& in, unsigned int* n, unsigned int* m, u
       		Edge e = add_edge(u-1,v-1,g).first;
 			g[e].capacity = c;
 			g[e].residual_capacity = c;
-			
+			g[e].is_reverse = false;
 			
 			//reverse edge
-			EdgeData *er = new EdgeData;
-			er->capacity = c;
-			er->residual_capacity = c;
-			er->reverse_edge = &g[e];
-      		
-      		g[e].reverse_edge = er;
+			Edge er = add_edge(v-1,u-1,g).first;
+			g[er].capacity = c;
+			g[er].residual_capacity = c;
+			g[er].is_reverse = true;
+			
+			g[e].reverse_edge = er;
+			g[er].reverse_edge = e;
       		i++;
     	}
   	}
@@ -77,47 +77,68 @@ Graph read_dimacs_max_flow(std::istream& in, unsigned int* n, unsigned int* m, u
 }
 
 // Computes the shortest path from node s to t in graph g using Dijkstra's algorithm and n-heaps
-unsigned int dijkstra_nheap(const Graph& g, unsigned int s, unsigned int t, unsigned int nh){
-    printf("Creating heap...\n");
-	NHeap h(num_vertices(g), nh, Heap::MAXHEAP);
+FlowPath dijkstra_flow(const Graph& g, unsigned int s, unsigned int t, unsigned int k){
+	NHeap h(num_vertices(g), k, Heap::MAXHEAP);
 	//vector<bool> visited(num_vertices(g), false); //no node has been visited yet
-	printf("Allocating fat vector with %u...\n", num_vertices(g));
 	vector<unsigned int> fat(num_vertices(g), 0);
-	printf("fat = { ");
-	for(int i =0;i<num_vertices(g);i++)
-	    printf("%u, ", fat[i]);
-	
-	printf("}\n");
-    printf("Setting fat[s] = inf\n");
+
 	fat[s] = MAX_DIST;
-    
-    printf("Inserting all vertices in heap...\n");
+
     for(unsigned int i=0;i<num_vertices(g);i++)
         h.insert(i, fat[i]);
-	
-	printf("Main loop:\n");
+    
+    FlowPath fp; 
+    fp.path = std::vector<unsigned int>(num_vertices(g), t);
+    fp.empty = false;
+    
 	while(!h.is_empty()){
 		unsigned int v = h.gettop(); h.deletetop();
-        printf("\tremoved vertex %u\n", v);
+
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
 			unsigned int u = target(*ie, g);
 			Edge e = edge(v,u,g).first;
-//			printf("%i = e.b\n", e.second);
-//			//Edge e;
-//		    printf("\t\tneighbor %u\n", u);
-//			printf("%u < min(", fat[u]);
-//			printf("%u,", fat[v]);
-//			printf("%u)\n", g[e.first].capacity);
-			if(fat[u] < min(fat[v], g[e].capacity)){
-			    
-			    fat[u] = min(fat[v], g[e].capacity);
-			    h.update_key(u, fat[u]);	
+			if(g[e].is_reverse) continue;
+            printf("%u -> %u [%u]\n", v, u, g[e].residual_capacity);
+			if(fat[u] < min(fat[v], g[e].residual_capacity) && g[e].residual_capacity > 0){			    
+			    fat[u] = min(fat[v], g[e].residual_capacity);
+			    h.update_key(u, fat[u]);
+			    fp.path[u] = v;
+			    printf("n: %u -> %u [%u]\n", v, u, fat[u]);	
 			}
 		}
 	}
 	
-	return fat[t];
+	if(fp.path[t] == t)
+	    fp.empty = true;
+	
+    fp.flow = fat[t];	
+
+	return fp;
+}
+
+unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int k){
+    unsigned int flow = 0;
+    
+    FlowPath fp = dijkstra_flow(g, s, t, k);
+    
+    while(!fp.empty){
+        printf("Path with flow = %u\n", fp.flow);
+        flow += fp.flow;
+        unsigned int v = t;
+        while(v != s){
+            printf("%u -> %u\n", v, fp.path[v]);
+            Edge e = edge(v,fp.path[v],g).first;
+            g[e].residual_capacity -= fp.flow;
+            g[g[e].reverse_edge].residual_capacity -= fp.flow;
+            v = fp.path[v];
+        }
+        printf("Getting other path...\n");
+        
+        fp = dijkstra_flow(g, s, t, k);   
+    }
+    
+    return flow;
 }
 
 //// Implementation of Dijkstra's algorithm with n-heaps for testing purposes (collects memory used, number of insertions, deletions, updates and execution time)

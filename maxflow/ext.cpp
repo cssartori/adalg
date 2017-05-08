@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
     printf("Reading instance file...\n");
     gr = read_dimacs_max_flow(std::cin, &n,&m,&s,&t);
     printf("Running dijkstra %u -> %u...\n", s, t);
-    unsigned int fat = dijkstra_nheap(gr, s, t);
+    unsigned int fat = fattest_path(gr, s, t);
      cout << "fat = " << fat << endl;
 //  read_dimacs_max_flow(gr,
 //                       get(&EdgeData::capacity,gr),
