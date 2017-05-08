@@ -69,6 +69,13 @@ Graph read_dimacs_max_flow(std::istream& in, unsigned int* n, unsigned int* m, u
 			
 			g[e].reverse_edge = er;
 			g[er].reverse_edge = e;
+			
+			printf("g[exp] = %u | g[er] = %u\n", g[g[e].reverse_edge].residual_capacity, g[er].residual_capacity);
+			printf("g[expr] = %u | g[e] = %u\n", g[g[er].reverse_edge].residual_capacity, g[e].residual_capacity);
+			
+			Edge et = edge(u-1, v-1, g).first;
+			
+			printf("%u -> %u [%u]\n", u-1, v-1, g[et].residual_capacity);
       		i++;
     	}
   	}
@@ -120,21 +127,39 @@ FlowPath dijkstra_flow(const Graph& g, unsigned int s, unsigned int t, unsigned 
 unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int k){
     unsigned int flow = 0;
     
+    Edge e53 = edge(5,3,g).first;
+    printf("5 -> 3 [%u]\n", g[g[e53].reverse_edge].residual_capacity);
+    
     FlowPath fp = dijkstra_flow(g, s, t, k);
     
+    
+    int c = 0;
     while(!fp.empty){
         printf("Path with flow = %u\n", fp.flow);
         flow += fp.flow;
         unsigned int v = t;
         while(v != s){
-            printf("%u -> %u\n", v, fp.path[v]);
             Edge e = edge(v,fp.path[v],g).first;
+            Edge er = edge(fp.path[v],v,g).first;
+            printf("%u -> %u [%u]\n", fp.path[v], v, g[er].residual_capacity);
             g[e].residual_capacity -= fp.flow;
-            g[g[e].reverse_edge].residual_capacity -= fp.flow;
+            g[er].residual_capacity -= fp.flow;
             v = fp.path[v];
         }
-        printf("Getting other path...\n");
+        v = t;
+        while(v != s){
+
+            Edge er = edge(fp.path[v],v,g).first;
+            printf("%u -> %u [%u]\n", fp.path[v], v, g[er].residual_capacity);
+//            g[e].residual_capacity -= fp.flow;
+//            g[g[e].reverse_edge].residual_capacity -= fp.flow;
+            v = fp.path[v];
+        }
         
+        printf("Getting other path...\n");
+        c++;
+//        if(c == 2)
+//            break;
         fp = dijkstra_flow(g, s, t, k);   
     }
     
