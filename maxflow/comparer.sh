@@ -12,7 +12,7 @@ for filename in ./instances/*.gr
 	do
 		o=$(echo $filename| cut -d'/' -f 3)
         echo "Running instance "$o
-    	echo -n "Start:   " 
+    	echo -n -e "Started:\t" 
     	timestamp
 		rext=$(./ext < $filename)
 		rtester=$(./tester < $filename)
@@ -24,7 +24,7 @@ for filename in ./instances/*.gr
 		    echo -n "Incorrect"
 		fi
 		echo "  ( "$rext" = "$rtester" )"
-		echo -n "Finished:   " 
+		echo -n -e "Finished:\t" 
 		timestamp
 		echo "----------"
 		i=$((i + 1))

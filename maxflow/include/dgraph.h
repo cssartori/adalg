@@ -27,7 +27,6 @@ struct VertexData{
 struct EdgeData{
   unsigned int capacity;            //capacity is only positive
   unsigned int residual_capacity; 
-  bool is_reverse;
   Edge reverse_edge;                //backward edge for FF algorithm (O(1) access)
 };
  

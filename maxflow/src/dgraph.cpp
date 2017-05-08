@@ -53,21 +53,29 @@ Graph read_dimacs_max_flow(std::istream& in, unsigned int* n, unsigned int* m, u
       		unsigned int u,v,c;
       		char ac;
       		arc >> ac >> u >> v >> c;
-        		
+        	
         	//forward edge	
-      		Edge e = add_edge(u-1,v-1,g).first;
-			g[e].capacity = c;
-			g[e].residual_capacity = c;
-			g[e].is_reverse = false;
+        	pair<Edge, bool> fep = edge(u-1,v-1,g);
+        	if(fep.second){ //edge already exists as reverse edge
+        	    g[fep.first].capacity = c;
+        	    g[fep.first].residual_capacity += c;
+        	}else{ //create new edge    	
+          		Edge e = add_edge(u-1,v-1,g).first;
+	    		g[e].capacity = c;
+	    		g[e].residual_capacity = c;
+	    		fep.first = e;
+			}
 			
 			//reverse edge
-			Edge er = add_edge(v-1,u-1,g).first;
-			g[er].capacity = c;
-			g[er].residual_capacity = c;
-			g[er].is_reverse = true;
+           	pair<Edge, bool> rep = edge(v-1,u-1,g);
+           	if(!rep.second){ //create new edge
+    			Edge er = add_edge(v-1,u-1,g).first;
+	    		g[er].residual_capacity = 0;
+	    		rep.first = er;
+	        }
 			
-			g[e].reverse_edge = er;
-			g[er].reverse_edge = e;
+			g[fep.first].reverse_edge = rep.first;
+			g[rep.first].reverse_edge = fep.first;
 			
 //			printf("g[exp] = %u | g[er] = %u\n", g[g[e].reverse_edge].residual_capacity, g[er].residual_capacity);
 //			printf("g[expr] = %u | g[e] = %u\n", g[g[er].reverse_edge].residual_capacity, g[e].residual_capacity);
@@ -125,23 +133,21 @@ FlowPath dijkstra_flow(const Graph& g, unsigned int s, unsigned int t, unsigned 
 
 unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int k){
     unsigned int flow = 0;
-    
-//    Edge e53 = edge(5,3,g).first;
-//    printf("5 -> 3 [%u]\n", g[g[e53].reverse_edge].residual_capacity);
-    
+       
     FlowPath fp = dijkstra_flow(g, s, t, k);
-    
+  //  vector< vector<unsigned int> > flows(num_vertices(g), vector<unsigned int>(num_vertices(g), 0));
     
     int c = 0;
     while(!fp.empty){
-       // printf("Path with flow = %u\n", fp.flow);
+        printf("Path with flow = %u [flow = %u]\n", fp.flow, flow);
         flow += fp.flow;
         unsigned int v = t;
         while(v != s){
             Edge e = edge(v,fp.path[v],g).first;
             Edge er = edge(fp.path[v],v,g).first;
+          //  flows[fp.path[v]][v] += fp.flow;
            // printf("%u -> %u [%u]\n", fp.path[v], v, g[er].residual_capacity);
-            g[e].residual_capacity -= fp.flow;
+            g[e].residual_capacity += fp.flow;
             g[er].residual_capacity -= fp.flow;
             v = fp.path[v];
         }
@@ -161,6 +167,13 @@ unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int
 //            break;
         fp = dijkstra_flow(g, s, t, k);   
     }
+    
+//    for(int i=0;i<num_vertices(g);i++){
+//        for(int j=0;j<num_vertices(g);j++){
+//            if(flows[i][j] != 0)
+//                printf("%u -> %u [%u]\n", i, j, flows[i][j]);
+//        }
+//    }
     
     return flow;
 }
