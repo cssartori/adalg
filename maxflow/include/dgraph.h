@@ -13,7 +13,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 
-const unsigned int MAX_DIST = 1e8; 
+const unsigned int MAX_FAT = 1e8; 
 
 typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::directedS>::vertex_descriptor Node;
 typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::directedS>::edge_descriptor Edge;
@@ -30,30 +30,16 @@ struct EdgeData{
   Edge reverse_edge;                //backward edge for FF algorithm (O(1) access)
 };
  
-struct FlowPath {
-    std::vector<unsigned int> path;
-    unsigned int flow;
-    bool empty;
-}; 
- 
 //A graph is an adjacency list represented by vectors (vecS)
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, VertexData, EdgeData> Graph;
 
+
 // Read a graph in DIMACS format from an input stream and return a Graph
 Graph read_dimacs_max_flow(std::istream& in, unsigned int* n, unsigned int* m, unsigned int* s, unsigned int* t);
-
-////Returns true if edge between node u and v exists
-//bool edge_exist(const Graph& g, unsigned int u, unsigned int v);
-
-// Computes the shortest path from node s to t in graph g using Dijkstra's algorithm and n-heaps
-FlowPath dijkstra_flow(const Graph& g, unsigned int s, unsigned int t, unsigned int k=2);
 
 unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int k=2);
 
 //// Implementation of Dijkstra's algorithm with n-heaps for testing purposes (collects memory used, number of insertions, deletions, updates and execution time)
 //unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t, unsigned int *n_ins, unsigned int *n_del, unsigned int *n_upd, long double *time, size_t *mem=NULL, unsigned int nh=2);
 
-//unsigned int dijkstra_hheap(const Graph& g, unsigned int s, unsigned int t);
-
-//unsigned int dijkstra_hheap_test(const Graph& g, unsigned int s, unsigned int t, unsigned int *n_ins, unsigned int *n_del, unsigned int *n_upd, long double *time, size_t *mem=NULL);
 #endif //__DGRAPH_H__

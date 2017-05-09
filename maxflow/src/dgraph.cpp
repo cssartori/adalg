@@ -7,6 +7,12 @@
 using namespace std;
 using namespace boost;
 
+struct FlowPath {
+    vector<Edge*> path;
+    unsigned int flow;
+    bool empty;
+}; 
+
 // Read a graph in DIMACS format from an input stream and return a Graph
 Graph read_dimacs_max_flow(std::istream& in, unsigned int* n, unsigned int* m, unsigned int* s, unsigned int* t) {
 	Graph g;
@@ -77,32 +83,27 @@ Graph read_dimacs_max_flow(std::istream& in, unsigned int* n, unsigned int* m, u
 			g[fep.first].reverse_edge = rep.first;
 			g[rep.first].reverse_edge = fep.first;
 			
-//			printf("g[exp] = %u | g[er] = %u\n", g[g[e].reverse_edge].residual_capacity, g[er].residual_capacity);
-//			printf("g[expr] = %u | g[e] = %u\n", g[g[er].reverse_edge].residual_capacity, g[e].residual_capacity);
-//			
-//			Edge et = edge(u-1, v-1, g).first;
-//			
-//			printf("%u -> %u [%u]\n", u-1, v-1, g[et].residual_capacity);
+			//printf("r: %u -> %u | %u -> %u\n", u-1, v-1, source(fep.first, g), target(fep.first, g));
       		i++;
     	}
   	}
-  	
+  	//exit(-1);
   	return g;
 }
 
-// Computes the shortest path from node s to t in graph g using Dijkstra's algorithm and n-heaps
-FlowPath dijkstra_flow(const Graph& g, unsigned int s, unsigned int t, unsigned int k){
-	NHeap h(num_vertices(g), k, Heap::MAXHEAP);
-	//vector<bool> visited(num_vertices(g), false); //no node has been visited yet
-	vector<unsigned int> fat(num_vertices(g), 0);
 
-	fat[s] = MAX_DIST;
+// Computes the maximum bottleneck flow from s to t in graph g using dijkstra algorithm with max-k-heap 
+FlowPath dijkstra_flow(Graph& g, unsigned int s, unsigned int t, unsigned int k=2){
+	NHeap h(num_vertices(g), k, Heap::MAXHEAP);     //max-k-heap declaration
+	vector<unsigned int> fat(num_vertices(g), 0);   //vector with fattest path values
+
+	fat[s] = MAX_FAT;
 
     for(unsigned int i=0;i<num_vertices(g);i++)
         h.insert(i, fat[i]);
     
     FlowPath fp; 
-    fp.path = std::vector<unsigned int>(num_vertices(g), t);
+    fp.path = std::vector<Edge*>(num_vertices(g), nullptr);
     fp.empty = false;
     
 	while(!h.is_empty()){
@@ -111,19 +112,19 @@ FlowPath dijkstra_flow(const Graph& g, unsigned int s, unsigned int t, unsigned 
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
 			unsigned int u = target(*ie, g);
-			Edge e = edge(v,u,g).first;
-			//if(g[e].is_reverse) continue;
-           // printf("%u -> %u [%u]\n", v, u, g[e].residual_capacity);
-			if(fat[u] < min(fat[v], g[e].residual_capacity) && g[e].residual_capacity > 0){			    
-			    fat[u] = min(fat[v], g[e].residual_capacity);
+            printf("**%lu -> %u\n", source(*ie, g), u);
+			if(fat[u] < min(fat[v], g[*ie].residual_capacity)/* && g[e].residual_capacity > 0*/){			    
+			    fat[u] = min(fat[v], g[*ie].residual_capacity);
 			    h.update_key(u, fat[u]);
-			    fp.path[u] = v;
-			   // printf("n: %u -> %u [%u]\n", v, u, fat[u]);	
+			    fp.path[u] = &(g[g[*ie].reverse_edge].reverse_edge);	
+			    printf("*%lu -> %lu | %lu -> %lu\n", source(*(fp.path[u]), g), target(*fp.path[u], g), source(g[g[*ie].reverse_edge].reverse_edge, g), target(g[g[*ie].reverse_edge].reverse_edge, g));
 			}
 		}
+		if(v == t) //already reached t
+		    break;
 	}
 	
-	if(fp.path[t] == t) //no positive flow in the graph to reach t
+	if(fp.path[t] == nullptr) //no positive flow in the graph to reach t
 	    fp.empty = true;
 	
     fp.flow = fat[t];	
@@ -131,50 +132,29 @@ FlowPath dijkstra_flow(const Graph& g, unsigned int s, unsigned int t, unsigned 
 	return fp;
 }
 
+
 unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int k){
     unsigned int flow = 0;
        
     FlowPath fp = dijkstra_flow(g, s, t, k);
-  //  vector< vector<unsigned int> > flows(num_vertices(g), vector<unsigned int>(num_vertices(g), 0));
     
     int c = 0;
-    while(!fp.empty){
-        printf("Path with flow = %u [flow = %u]\n", fp.flow, flow);
+    while(!fp.empty){ //while there is a path between s and t with positive flow
         flow += fp.flow;
         unsigned int v = t;
-        while(v != s){
-            Edge e = edge(v,fp.path[v],g).first;
-            Edge er = edge(fp.path[v],v,g).first;
-          //  flows[fp.path[v]][v] += fp.flow;
-           // printf("%u -> %u [%u]\n", fp.path[v], v, g[er].residual_capacity);
-            g[e].residual_capacity += fp.flow;
-            g[er].residual_capacity -= fp.flow;
-            v = fp.path[v];
-        }
-//        v = t;
-//        while(v != s){
+        while(v != s){ //update the edge's in path with new flow
+            Edge *e = fp.path[v]; 
+                        v = source(*e,g);
+            printf("%u -> %u\n", v, target(*e,g));
+            g[*e].residual_capacity += fp.flow;
+            g[g[*e].reverse_edge].residual_capacity -= fp.flow;
 
-//            Edge er = edge(fp.path[v],v,g).first;
-//            printf("%u -> %u [%u]\n", fp.path[v], v, g[er].residual_capacity);
-////            g[e].residual_capacity -= fp.flow;
-////            g[g[e].reverse_edge].residual_capacity -= fp.flow;
-//            v = fp.path[v];
-//        }
+        }
         
-        //printf("Getting other path...\n");
-        //c++;
-//        if(c == 2)
-//            break;
+        //get next path
         fp = dijkstra_flow(g, s, t, k);   
     }
-    
-//    for(int i=0;i<num_vertices(g);i++){
-//        for(int j=0;j<num_vertices(g);j++){
-//            if(flows[i][j] != 0)
-//                printf("%u -> %u [%u]\n", i, j, flows[i][j]);
-//        }
-//    }
-    
+        
     return flow;
 }
 
@@ -230,18 +210,4 @@ unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int
 //	
 //	return dist[t];
 //}
-
-
-//Returns true if edge between node u and v exists
-bool edge_exist(const Graph& g, unsigned int u, unsigned int v){
-	
-	graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
-	for(tie(ie, fe) = out_edges(u, g); ie != fe; ie++){
-		unsigned int t = target(*ie, g);
-		if(v == t)
-			return true;
-	}
-			
-	return false;
-}
 
