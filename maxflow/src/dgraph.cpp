@@ -8,7 +8,7 @@ using namespace std;
 using namespace boost;
 
 struct FlowPath {
-    vector<Edge*> path;
+    vector<Edge> path;
     unsigned int flow;
     bool empty;
 }; 
@@ -83,10 +83,17 @@ Graph read_dimacs_max_flow(std::istream& in, unsigned int* n, unsigned int* m, u
 			g[fep.first].reverse_edge = rep.first;
 			g[rep.first].reverse_edge = fep.first;
 			
-			//printf("r: %u -> %u | %u -> %u\n", u-1, v-1, source(fep.first, g), target(fep.first, g));
+			//printf("r: %u -> %u | %u -> %u [%u, %u]\n", u-1, v-1, &(g[fep.first].reverse_edge), &(g[rep.first].reverse_edge), g[fep.first].residual_capacity, g[rep.first].residual_capacity/*source(fep.first, g), target(fep.first, g)*/);
       		i++;
     	}
   	}
+  	
+//  	graph_traits<Graph>::edge_iterator ie, fe;
+//  	for(tie(ie, fe) = edges(g); ie != fe; ie++){
+//  	    printf("%u -> %u [%u,%u]\n", source(*ie, g), target(*ie, g), g[*ie].residual_capacity, g[g[*ie].reverse_edge].residual_capacity);
+//  	}
+  	
+  	
   	//exit(-1);
   	return g;
 }
@@ -102,31 +109,38 @@ FlowPath dijkstra_flow(Graph& g, unsigned int s, unsigned int t, unsigned int k=
     for(unsigned int i=0;i<num_vertices(g);i++)
         h.insert(i, fat[i]);
     
-    FlowPath fp; 
-    fp.path = std::vector<Edge*>(num_vertices(g), nullptr);
-    fp.empty = false;
+    //printf("DF :: &(2->3) = %u\n", &(g[edge(3,2,g).first].reverse_edge));
     
+    FlowPath fp;//=new FlowPath; 
+    fp.path = std::vector<Edge>(num_vertices(g));
+    
+    fp.empty = false;
+    unsigned int pt = t;
 	while(!h.is_empty()){
 		unsigned int v = h.gettop(); h.deletetop();
 
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
 			unsigned int u = target(*ie, g);
-            printf("**%lu -> %u\n", source(*ie, g), u);
+          //  printf("**%lu -> %u\n", source(*ie, g), u);
 			if(fat[u] < min(fat[v], g[*ie].residual_capacity)/* && g[e].residual_capacity > 0*/){			    
 			    fat[u] = min(fat[v], g[*ie].residual_capacity);
 			    h.update_key(u, fat[u]);
-			    fp.path[u] = &(g[g[*ie].reverse_edge].reverse_edge);	
-			    printf("*%lu -> %lu | %lu -> %lu\n", source(*(fp.path[u]), g), target(*fp.path[u], g), source(g[g[*ie].reverse_edge].reverse_edge, g), target(g[g[*ie].reverse_edge].reverse_edge, g));
+			    fp.path[u] = *ie;
+			    //Edge k = fp.path[u];
+			   // printf("%u -> %u : %u (%u) | %u -> %u\n", v, u, fp.path[u],(k), source(k,g), target(k,g));
+			  //  cout << "EDGE = " << k << " | FP = " << fp.path[u] << " | " << source(k,g) << " -> " << target(k, g) << " | " << g[k].reverse_edge <<  endl;	
+			  //  printf("+%u -> %u\n", source(g[*ie].reverse_edge, g), target(g[*ie].reverse_edge, g));
+			  //  printf("*%lu -> %lu | %lu -> %lu\n", source(*(fp.path[u]), g), target(*fp.path[u], g), source(g[g[*ie].reverse_edge].reverse_edge, g), target(g[g[*ie].reverse_edge].reverse_edge, g));		  
 			}
 		}
 		if(v == t) //already reached t
 		    break;
 	}
-	
-	if(fp.path[t] == nullptr) //no positive flow in the graph to reach t
-	    fp.empty = true;
-	
+	cout << "fp.empty = " << (fat[t] == 0) << endl;
+	if(fat[t] == 0) //no positive flow in the graph to reach t
+	   fp.empty = true;
+	//exit(-1);
     fp.flow = fat[t];	
 
 	return fp;
@@ -137,20 +151,39 @@ unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int
     unsigned int flow = 0;
        
     FlowPath fp = dijkstra_flow(g, s, t, k);
-    
+        //printf("FT :: &(2->3) = %u\n", &(g[edge(3,2,g).first].reverse_edge));
     int c = 0;
     while(!fp.empty){ //while there is a path between s and t with positive flow
         flow += fp.flow;
         unsigned int v = t;
+        cout << "Path..." << c+1 << endl;
         while(v != s){ //update the edge's in path with new flow
-            Edge *e = fp.path[v]; 
-                        v = source(*e,g);
-            printf("%u -> %u\n", v, target(*e,g));
-            g[*e].residual_capacity += fp.flow;
-            g[g[*e].reverse_edge].residual_capacity -= fp.flow;
+            //cout << "path...\n";
+            
+            Edge e = fp.path[v];
+            Edge er = g[e].reverse_edge;
 
+           // printf("eer :  %u -> %u [%u] | %u -> %u\n", source(e, g), target(e, g), g[g[e].reverse_edge].residual_capacity, source(er, g), target(er, g));
+            //cout << "E = " << e << " | ER = " << er << " | " << source(e,g) << " -> " << target(e,g) << endl;
+            
+            
+//            printf("e = %u\n", *e);
+//            printf("%u : %u\n", v, fp.path[v]); 
+//            printf("%u -> %u [%u]\n", source(g[*e].reverse_edge,g), target(g[*e].reverse_edge,g), g[g[*e].reverse_edge].residual_capacity);
+//            v = source(*e,g);
+//            printf("Edge exist: %u\n", edge(v,target(g[*e].reverse_edge,g),g).second);
+//            
+            g[e].residual_capacity -= fp.flow;
+            g[er].residual_capacity += fp.flow;
+//            printf("%u -> %u [%u]\n",v, target(*e,g), g[*e].residual_capacity);
+
+
+//           if(c == 2)
+//            exit(-1);
+           v = source(e, g);
         }
-        
+                    
+           c++;
         //get next path
         fp = dijkstra_flow(g, s, t, k);   
     }
