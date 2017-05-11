@@ -16,11 +16,9 @@
 
 class NHeap: public Heap{
 public:
-    //variable to hold the number of swaps executed by the heap
-	unsigned int n_swaps;
 	
 	//Create a new n-heap to support up to m-int-elements with values [0...m-1]
-	NHeap(unsigned int m, unsigned int n=2, bool is_min=true) : Heap(is_min){
+	NHeap(unsigned int m, unsigned int n=2, bool is_min_t=true) : Heap(is_min_t){
 	    this->heap.reserve(m);
 	    this->data.reserve(m);
 	    this->pos_heap.assign(m, 0);
@@ -79,6 +77,9 @@ public:
 	    return heap[0];
 	};
 	
+	unsigned int getsize(){
+	    return this->heap.size();
+	};
 	
 private:
     //heap itself, ordering the keys

@@ -1,5 +1,5 @@
 #include "../../heap/include/nheap.h"
-#include "../include/dgraph.h"
+#include "../include/ffgraph.h"
 #include "../include/mem_used.hpp"
 #include <vector>
 #include <chrono>
@@ -7,6 +7,7 @@
 using namespace std;
 using namespace boost;
 
+//A single flow's path information
 struct FlowPath {
     vector<Edge> path;
     unsigned int flow;
@@ -93,15 +94,14 @@ FlowPath dijkstra_flow(const Graph& g, unsigned int s, unsigned int t, unsigned 
 	NHeap h(num_vertices(g), k, Heap::MAXHEAP);     //max-k-heap declaration
 	vector<unsigned int> fat(num_vertices(g), 0);   //vector with fattest path values
 
-	fat[s] = MAX_FAT;
+	fat[s] = MAX_FLOW;
     for(unsigned int i=0;i<num_vertices(g);i++)
         h.insert(i, fat[i]);
     
     FlowPath fp;
     fp.path = std::vector<Edge>(num_vertices(g));
     fp.empty = false;
-    
-    unsigned int pt = t;
+
 	while(!h.is_empty()){
 		unsigned int v = h.gettop(); h.deletetop();
 
@@ -127,7 +127,7 @@ FlowPath dijkstra_flow(const Graph& g, unsigned int s, unsigned int t, unsigned 
 	return fp;
 }
 
-
+//Computes the max-flow between nodes s-t in graph g
 unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int k){
     unsigned int flow = 0;
  

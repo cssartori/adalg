@@ -9,9 +9,9 @@ SRCDIR = src/
 LIBS = -lm
 
 # define the C++ source files
-SMAIN = $(SRCDIR)main.cpp $(SRCDIR)nheap.cpp $(SRCDIR)dgraph.cpp
-SEXP = $(SRCDIR)exp.cpp  $(SRCDIR)nheap.cpp $(SRCDIR)dgraph.cpp
-SGEN = $(SRCDIR)gen.cpp $(SRCDIR)nheap.cpp $(SRCDIR)dgraph.cpp
+SMAIN = $(SRCDIR)main.cpp $(SRCDIR)dgraph.cpp
+SEXP = $(SRCDIR)exp.cpp $(SRCDIR)dgraph.cpp
+SGEN = $(SRCDIR)gen.cpp $(SRCDIR)dgraph.cpp
 
 OMAIN = $(SMAIN:.cpp=.o)
 OEXP = $(SEXP:.cpp=.o)

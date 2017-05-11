@@ -14,16 +14,16 @@ for filename in ./instances/*.gr
         echo "Running instance "$o
     	echo -n -e "Started:\t" 
     	timestamp
-		rext=$(./ext < $filename)
+		rfat=$(./fat < $filename)
 		rtester=$(./tester < $filename)
 
-		if ((rext==rtester)) ; then
+		if ((rfat==rtester)) ; then
 		    echo -n "Correct"   
 		    c=$((c + 1))
 		else
 		    echo -n "Incorrect"
 		fi
-		echo "  ( "$rext" = "$rtester" )"
+		echo "  ( "$rfat" = "$rtester" )"
 		echo -n -e "Finished:\t" 
 		timestamp
 		echo "----------"

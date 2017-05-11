@@ -1,21 +1,19 @@
 #ifndef __HOLLOW_HEAP_H__
 #define __HOLLOW_HEAP_H__
 
-#include <map>
 #include <vector>
 #include <math.h>
+#include <cstdlib>
 #include "heap.h"
 
 class HHeap: public Heap{
-public:
-    unsigned int n_links = 0; //link counter
-    
+public:  
             
-    HHeap(unsigned int sz, bool is_min=true) : Heap(is_min){
+    HHeap(unsigned int sz, bool is_min_t=true) : Heap(is_min_t){
         this->h = make_heap();
         this->ne = 0;
         this->nt = 0;
-        this->n_links = 0;
+        this->n_swaps = 0;
         this->pos_h.reserve(sz);
     };
     
@@ -95,6 +93,9 @@ public:
         return this->ne;
     };
 
+    unsigned int getsize(){
+        return this->getnt();  
+    };
 
 private:
     const double GOLDEN_RATIO = 1.6180;
@@ -217,7 +218,7 @@ private:
     //link heap removing hollow nodes
     void link_heap(Node *hr, std::vector<Node*> *R){
         
-        this->n_links += 1; //executed one link_heap, that is, one "swap"
+        this->n_swaps += 1; //executed one link_heap, that is, one "swap"
         if(hr->item == nullptr){
             //node hr is hollow
             Node *r = hr->fc;

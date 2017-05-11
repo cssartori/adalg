@@ -1,53 +1,51 @@
+/**
+ * Implementation of Ford Fulkerson's algorithm as Fattest Path augmenting path.
+ * Main function to solve the max-flow problem in stdin and return the value 
+ * in stdout.
+ * Carlo S. Sartori - 2017/1
+ * CMP588 - Advanced Algorithms, UFRGS, Prof. Marcus Ritt
+ */
+
 #include <cstdio>
 #include <chrono>
-#include "../include/dgraph.h"
-#include "../include/nheap.h"
+#include "../include/ffgraph.h"
 
 using namespace boost;
 using namespace std;
 
-static const char DEFAULT_HTYPE = 'h'; //hollow heaps
 static const int DEFAULT_HDIM = 2; //binary k-heap (2-heap)
 
+//Read command line parameters
+void read_parameters(int argc, char **argv, int *hdim, bool *time_info);
 void usage(char **argv);
-void read_parameters(int argc, char **argv, int *s, int *t, char *htype, int *hdim, bool *time_info);
-
 
 int main(int argc, char **argv){
-	//source and target nodes
-	int s;
-	int t;
-	//heap type (k-heap or hollow heap)
-	char htype;
 	//heap dimension
-	int hd;	
+	int hdim;	
 	//time information
 	bool time_info;
 
-	read_parameters(argc, argv, &s, &t, &htype, &hd, &time_info);
+	read_parameters(argc, argv, &hdim, &time_info);
 	
-	//graph dimensions
-	unsigned int n, m;
+	//graph dimensions, source and sink
+	unsigned int n, m, s, t;
 			
 	std::chrono::time_point<std::chrono::system_clock> start, end;
 	std::chrono::duration<double> elapsed_seconds;	
 
 	//read graph from stdin	
-	Graph g = read_dimacs(std::cin, &n, &m);
+	Graph g;
+	g = read_dimacs_max_flow(g, std::cin, &n, &m, &s, &t);
 	
 	if(time_info)		
    		start = std::chrono::system_clock::now();
    		
-	//compute shortest path
-	unsigned int dst;
-	if(htype == 'h')
-	    dst = dijkstra_hheap(g, s, t);		
-	else
-	    dst = dijkstra_nheap(g, s, t, hd);
+	//compute max-flow
+    unsigned int mflow = fattest_path(g, s, t, hdim);
 	    
 	//print result
-	if(dst != MAX_DIST)
-		printf("%u\n", dst);
+	if(mflow != MAX_FLOW)
+		printf("%u\n", mflow);
 	else
 		printf("inf\n");
 	
@@ -61,31 +59,17 @@ int main(int argc, char **argv){
 }
 
 
-void read_parameters(int argc, char **argv, int *s, int *t, char *htype, int *hdim, bool *time_info){
-	if(argc < 3){
-		usage(argv);
-		exit(-1);
-	}
-	
-	*s = atoi(argv[1]);
-	*t = atoi(argv[2]);
+//Read command line parameters
+void read_parameters(int argc, char **argv, int *hdim, bool *time_info){
+
+    //default values
 	*hdim = DEFAULT_HDIM;
-	*htype = DEFAULT_HTYPE;
 	*time_info = false;
 	
-	if(argc > 3){
-	    for(int i=3;i<argc;i++){
+	if(argc > 1){
+	    for(int i=1;i<argc;i++){
 	        if(argv[i][0]=='-'){
 	            switch(argv[i][1]){
-	                case 'h':
-	                    i++;
-	                    *htype = argv[i][0];
-	                    if(*htype != 'k' && *htype != 'h'){
-	                        fprintf(stderr, "Unkown heap option %c\n", *htype);
-	                        usage(argv);
-	                        exit(-1);
-	                    }
-	                    break;
 	                case 'k':
 	                    i++;
 	                    *hdim = atoi(argv[i]);
@@ -108,7 +92,7 @@ void read_parameters(int argc, char **argv, int *s, int *t, char *htype, int *hd
 }
 
 void usage(char **argv){
-	fprintf(stderr, "usage:\n%s <source node> <target node> [-h <heap type>][-k <k-heap dimension>] [-t <print time information>]\n\t-source node: \t\tnatural numbers\n\t-target node: \t\tnatural numbers\n\t-heap type: \t\tk for k-heaps, h for hollow heaps (default h)\n\t-k-heap dimension: \tnatural numbers (default k=2)\n\t-time information: \ttoogle opton (default not toogled)\n", argv[0]);
+	fprintf(stderr, "usage:\n%s [-k <k-heap dimension>] [-t <print time information>]\n\t-k-heap dimension: \tnatural numbers (default k=2)\n\t-time information: \ttoogle opton (default not toogled)\n", argv[0]);
 }
 
 

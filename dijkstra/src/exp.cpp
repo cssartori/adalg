@@ -3,15 +3,16 @@
 #include <math.h>
 #include <vector>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
-#include "../include/nheap.h"
-#include "../include/hheap.hpp"
+#include "../../heap/include/nheap.h"
+#include "../../heap/include/hheap.h"
+#include "../../heap/include/heap.h"
 #include "../include/dgraph.h"
 #include "../include/mem_used.hpp"
 
 
 static unsigned int NUM_EXP = 20;
 static const int DEFAULT_HDIM = 2; //binary k-heap (2-heap)
-static const char DEFAULT_HTYPE = 'h'; //hollow heaps
+static const char DEFAULT_HTYPE = 'k'; //hollow heaps
 
 static unsigned int seed; //random seed
 
@@ -25,9 +26,9 @@ vector<size_t> mem;
 std::chrono::time_point<std::chrono::system_clock> tstart, tend;
 std::chrono::duration<long double> elapsed_seconds;
 
+//Read command line parameters
 void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int *hd);
 void usage(char **argv);
-
 
 void test_delete(char htype, unsigned int hd){
 
@@ -35,55 +36,39 @@ void test_delete(char htype, unsigned int hd){
         unsigned int N = pow(2,i)-1; //insert 2^i random keys
         unsigned int n = 0;    
         
-        if(htype == 'k'){   
-            //n-ary heap test 
-            NHeap h(N, hd);
-            unsigned int k = 2*N; //for deterministic key insertion
-            while(n < N){
-                h.insert(n, rand()%N);
-                //h.insert(n, k--);
-                n++;
-            }
+        Heap *h;
+        if(htype == 'k') //k-heap declaration
+            h = new NHeap(N, hd);
+        else
+            h = new HHeap(N);
+
+        unsigned int k = 2*N; //for deterministic key insertion
+        while(n < N){
+            h->insert(n, rand()%N);
+            //h.insert(n, k--);
+            n++;
+        }
             
-            mem[i] = memory_used();
-            tstart = std::chrono::system_clock::now();
-            n = 0;
-            int p = 1;
-            h.n_swaps = 0;
- 
+        mem[i] = memory_used();
+        tstart = std::chrono::system_clock::now();
+        n = 0;
+        h->n_swaps = 0;
+        
+        if(htype == 'k')
             e[i] = (i-1)*((pow(hd, i))-1);
-            h.deletemin();
-            while(!h.is_empty()){
-                h.deletemin();
-                n++;
-            }
+        else
+            e[i] = (ceil((log(h->getsize())/log(1.6180)))*N)+1;
+        
+        //remove all elements    
+        h->deletetop();
+        while(!h->is_empty()){
+            h->deletetop();
+            n++;
+        }
+        
+        swaps[i] = h->n_swaps;
             
-            tend = std::chrono::system_clock::now();
-		    swaps[i] = h.n_swaps;
-		}else if(htype == 'h'){
-		    //hollow heap test
-		    HHeap h(N);
-            unsigned int k = 2*N; //for deterministic key insertion
-            while(n < N){
-                h.insert(n, rand()%N);
-                //h.insert(n, k--);
-                n++;
-            }
-            
-            mem[i] = memory_used();
-            tstart = std::chrono::system_clock::now();
-            n = 0;
-            h.n_links = 0;
-            e[i] = ceil((log(h.getnt())/log(1.6180)))*N+1;
-            h.deletemin();
-            while(n < N-1){
-                h.deletemin();
-                n++;
-            }
-            tend = std::chrono::system_clock::now();          
-		    swaps[i] = h.n_links;
-		}
-		
+        tend = std::chrono::system_clock::now();
 		elapsed_seconds = tend-tstart;
 		times[i] = elapsed_seconds.count();	
     }    
@@ -98,75 +83,47 @@ void test_delete(char htype, unsigned int hd){
 void test_update(char htype, unsigned int hd){
 	
 	for(unsigned int i=1;i<=NUM_EXP;i++){
-		unsigned int n = pow(2,i)-1;
+		unsigned int N = pow(2,i)-1;
 		unsigned int k = pow(2,i)+1;
 		unsigned int el = 0;
 		
-		if(htype == 'k'){
-		    //n-ary heap test
-		    NHeap h(n*2+1, hd);
+		Heap *h;
+        if(htype == 'k'){ //k-heap declaration
+            h = new NHeap(N*2+1, hd);
+           	e[i] = (i)*pow(hd, i);
+        }else{
+            h = new HHeap(N*2+1);
+            e[i] = 1; //constant time
+        }
 				
-		    for(unsigned int x=0;x<n;x++){
-			    h.insert(el++, k);
-		    }
+	    for(unsigned int x=0;x<N;x++){
+            h->insert(el++, k);
+        }
 		
-		    n = n+1;
-		    k = k+1;
+        N = N+1;
+        N = N+1;
 
-		    vector<unsigned int> els;
-		    for(unsigned int x=0;x<n;x++){
-			    h.insert(el, k);
-			    els.push_back(el);
-			    el++;
-		    }
-		
-		    //start updating
-		    h.n_swaps = 0;
-		    k = n;
-
-	       	tstart = std::chrono::system_clock::now();	
-		
-		    for(unsigned int x=0;x<n;x++){
-			    h.decrease_key(els[x], k--);	
-		    }
-	       	tend = std::chrono::system_clock::now();
-            mem[i] = memory_used();
-	       	swaps[i] = h.n_swaps;
-	       	e[i] = (i)*pow(hd, i);       	
-	    }else if(htype == 'h'){
-	        //hollow heap test
-	        HHeap h(n*2+1);
-				
-		    for(unsigned int x=0;x<n;x++){
-			    h.insert(el++, k);
-		    }
-		
-		    n = pow(2, i);
-		    k = k+1;
-
-		    vector<unsigned int> els;
-		    for(unsigned int x=0;x<n;x++){
-			    h.insert(el, k);
-			    els.push_back(el);
-			    el++;
-		    }
-		
-		    //start updating
-		    h.n_links = 0;
-		    k = n-1;
-
-	       	tstart = std::chrono::system_clock::now();	
-		
-		    for(unsigned int x=0;x<n;x++){
-			    h.decrease_key(els[x], k--);	
-		    }
-
-	       	tend = std::chrono::system_clock::now();
-            mem[i] = memory_used();
-	       	swaps[i] = h.n_links;
-	       	e[i] = 1;  
+		vector<unsigned int> els;
+		for(unsigned int x=0;x<N;x++){
+		    h->insert(el, k);
+	        els.push_back(el);
+		    el++;
 	    }
-	    
+		
+	    //start updating
+		h->n_swaps = 0;
+		k = N;
+       	tstart = std::chrono::system_clock::now();	
+		
+		for(unsigned int x=0;x<N;x++){
+		    //decrease keys only, because heap is min-heap
+    	    h->update_key(els[x], k--);	
+        }
+
+        mem[i] = memory_used();
+       	swaps[i] = h->n_swaps;
+       	
+       	tend = std::chrono::system_clock::now();
 		elapsed_seconds = tend-tstart;					
 		times[i] = elapsed_seconds.count();
 	}
@@ -179,64 +136,44 @@ void test_update(char htype, unsigned int hd){
 
 void test_insert(char htype, unsigned int hd){
 
-	unsigned int n = (pow(2,NUM_EXP)-1); //limit
+	unsigned int N = (pow(2,NUM_EXP)-1); //limit
 	unsigned int i=2;
     
+    Heap *h;
+    if(htype == 'k') //k-heap declaration
+        h = new NHeap(N+1, hd);
+    else
+        h = new HHeap(N+1);
     
-    if(htype == 'k'){
-	    NHeap h(n+1, hd);
-	    h.insert(n, n);
-	
-	    n--;
-	    unsigned int ninserts = 1;
+    
+    h->insert(N, N);
+    N--;
+    unsigned int ninserts = 1;
+    tstart = std::chrono::system_clock::now();
+    unsigned int NI = pow(2,i)-1;    	
+    for( ;N > 0 && i < NUM_EXP+1;N--){
+        h->insert(N, N);
+	    ninserts++;
+        if(NI == ninserts){
+            swaps[i] = h->n_swaps;
 
-       	tstart = std::chrono::system_clock::now();
-       	unsigned int NI = pow(2,i)-1;
-       	
-	    for(;n > 0 && i < NUM_EXP+1;n--){
-		    h.insert(n, n);
-		    ninserts++;
-		    if(NI == ninserts){
-			    swaps[i] = h.n_swaps;
-		       	tend = std::chrono::system_clock::now();
-			    elapsed_seconds = tend-tstart;			
-			    times[i] = elapsed_seconds.count();
-			    e[i] = (i-1)*pow(hd,i-1);
-			    mem[i] = memory_used();
-			    i++;
-			    NI = ((pow(2,i)-1));
-			    h.n_swaps = 0;
-		    }
-	    }
+            tend = std::chrono::system_clock::now();
+			elapsed_seconds = tend-tstart;			
+			times[i] = elapsed_seconds.count();
 
-	}else if(htype == 'h'){
-	    HHeap h(n+1);
-	    h.insert(n, n);
-	
-	    n--;
-	    unsigned int ninserts = 1;
-
-       	tstart = std::chrono::system_clock::now();
-       	unsigned int NI = pow(2,i)-1;
-       	
-	    for(;n > 0 && i < NUM_EXP+1;n--){
-		    h.insert(n, n);
-		    ninserts++;
-		    if(NI == ninserts){
-			    swaps[i] = h.n_links;
-		       	tend = std::chrono::system_clock::now();
-			    elapsed_seconds = tend-tstart;			
-			    times[i] = elapsed_seconds.count();
-			    e[i] = 1;
-			    mem[i] = memory_used();
-			    i++;
-			    NI = pow(2,i)-1;
-			    h.n_links = 0;
-		    }
-	    }
-
-	}
-	
+			if(htype == 'k')
+    			e[i] = (i-1)*pow(hd,i-1);
+    	    else
+                e[i] = 1; //constant time
+                
+			mem[i] = memory_used();
+			
+			i++;
+			NI = ((pow(2,i)-1));
+			h->n_swaps = 0;
+		}
+    }
+    
 	printf("%i,%c,%i,%lu,%u,%u,%Le,%Le,%Le\n", 0, htype, hd, mem[0], swaps[0], e[0], times[0], (long double)0.0, (long double)0.0);
 	printf("%i,%c,%i,%lu,%u,%u,%Le,%Le,%Le\n", 1, htype, hd, mem[1], swaps[1], e[1], times[1], (long double)0.0, (long double)0.0);	
 	for(unsigned int j=2;j<swaps.size();j++){
@@ -256,7 +193,7 @@ void test_delete_old(unsigned int hd){
 		NHeap h(N*hd+1, hd);
 				
 		while(n < N){
-			h.insert(k, n);
+			h.insert(n, k);
             k++;
 			n++;
 		}
@@ -266,7 +203,7 @@ void test_delete_old(unsigned int hd){
         k = k + N + 1;
         
         while(n < M){
-           	h.insert(k, n+N);
+           	h.insert(n+N, k);
             k--;
 			n++; 
         }
@@ -277,7 +214,7 @@ void test_delete_old(unsigned int hd){
 		h.n_swaps = 0;
 		while(n < M){
 			n++;	
-			h.deletemin();
+			h.deletetop();
 		}
 		
 		tend = std::chrono::system_clock::now();
@@ -325,7 +262,8 @@ void test_update_old(unsigned int hd){
 	   	tstart = std::chrono::system_clock::now();	
 		
 		for(unsigned int x=0;x<n;x++){
-			h.decrease_key(els[x], k--);	
+		    //decrease keys only, because heap is min-heap
+			h.update_key(els[x], k--);	
 		}
 
 	   	tend = std::chrono::system_clock::now();
@@ -381,12 +319,18 @@ void test_insert_old(unsigned int hd){
 
 
 void test_scale(char htype, unsigned int hd, bool is_scale){
-  is_scale = false;
 	unsigned int n,m;
-
-	Graph g = read_dimacs(std::cin, &n, &m);
+    Graph g;
+	g = read_dimacs_graph(g, std::cin, &n, &m);
 	if(n <= 1)
 		return;	
+	
+	Heap *h;
+	if(htype == 'k')
+	    h = new NHeap(num_vertices(g), hd);
+	else
+	    h = new HHeap(num_vertices(g));
+		
 	int ninf = 0;
 	for(unsigned int i=0;i<NUM_EXP;i++){
 		size_t mu = 0;
@@ -399,12 +343,8 @@ void test_scale(char htype, unsigned int hd, bool is_scale){
     		int t = rand()%n;
     		while(s == t)
     			t = rand()%n;
-
-            if(htype == 'h')
-    		    d = dijkstra_hheap_test(g, s, t, &n_ins, &n_del, &n_upd, &time, &mu);
-    		else
-      		    d = dijkstra_nheap_test(g, s, t, &n_ins, &n_del, &n_upd, &time, &mu, hd);
-      		    
+            
+            d = dijkstra_heap_test(g, s, t, *h, &n_ins, &n_del, &n_upd, &time, &mu);
 		}while(d == MAX_DIST && is_scale);	
 					
 		printf("%i,%c,%i,%u,%u,%u,%u,%u,%lu,%Le,%u,%u\n", i, htype, hd, n, m, n_ins, n_del, n_upd, mu, time, d,seed);
@@ -418,10 +358,17 @@ void test_scale(char htype, unsigned int hd, bool is_scale){
 
 void test_validate(char htype, unsigned int hd){	
 	unsigned int n,m;
-
-	Graph g = read_dimacs(std::cin, &n, &m);
+    Graph g;
+	g = read_dimacs_graph(g, std::cin, &n, &m);
 	if(n <= 1)
 		return;	
+	
+	Heap *h;
+	if(htype == 'k')
+	    h = new NHeap(num_vertices(g), hd);
+	else
+        h = new HHeap(num_vertices(g));
+	
 	
 	for(unsigned int i=0;i<NUM_EXP;i++){
 		int s = rand()%n;
@@ -431,12 +378,10 @@ void test_validate(char htype, unsigned int hd){
 			s = rand()%n;
 			t = (t+1)%n;
 		}
-		unsigned int dst;
-		if(htype == 'h')
-		    dst = dijkstra_hheap(g, s, t);
-		else
-		    dst = dijkstra_nheap(g, s, t, hd);
 		
+		unsigned int dst = dijkstra_heap(g, s, t, *h);
+		
+		//call boost implementation of dijkstra
 		vector<unsigned int> dist(n);
   		vector<unsigned int> pred(n);
   		dijkstra_shortest_paths(g, s, weight_map(get(&EdgeData::weight,g)).distance_map(&dist[0]).predecessor_map(&pred[0]));
