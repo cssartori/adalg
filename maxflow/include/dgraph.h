@@ -15,6 +15,7 @@
 
 const unsigned int MAX_FAT = 1e8; 
 
+
 typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::directedS>::vertex_descriptor Node;
 typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::directedS>::edge_descriptor Edge;
 

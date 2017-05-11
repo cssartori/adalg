@@ -30,4 +30,4 @@ for filename in ./instances/*.gr
 		i=$((i + 1))
 done		
 
-echo $c" correct from "$i
+echo $c" out of "$i" correct."
