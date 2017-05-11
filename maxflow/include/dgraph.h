@@ -35,8 +35,8 @@ struct EdgeData{
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, VertexData, EdgeData> Graph;
 
 
-// Read a graph in DIMACS format from an input stream and return a Graph
-Graph read_dimacs_max_flow(std::istream& in, unsigned int* n, unsigned int* m, unsigned int* s, unsigned int* t);
+// Read a graph in DIMACS format from an input stream. Note that Graph is not guaranteed to be assignable, thus the use of references.
+Graph& read_dimacs_max_flow(Graph &g, std::istream& in, unsigned int* n, unsigned int* m, unsigned int* s, unsigned int* t);
 
 unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int k=2);
 
