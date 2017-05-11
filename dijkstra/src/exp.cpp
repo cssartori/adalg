@@ -27,10 +27,10 @@ std::chrono::time_point<std::chrono::system_clock> tstart, tend;
 std::chrono::duration<long double> elapsed_seconds;
 
 //Read command line parameters
-void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int *hd);
+void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int *hd, bool *old_test);
 void usage(char **argv);
 
-void test_delete(char htype, unsigned int hd){
+void test_delete(char htype, unsigned int hd, bool is_rand){
 
     for(unsigned int i=1;i<=NUM_EXP;i++){
         unsigned int N = pow(2,i)-1; //insert 2^i random keys
@@ -44,8 +44,10 @@ void test_delete(char htype, unsigned int hd){
 
         unsigned int k = 2*N; //for deterministic key insertion
         while(n < N){
-            h->insert(n, rand()%N);
-            //h.insert(n, k--);
+            if(is_rand)
+                h->insert(n, rand()%N);
+            else
+                h->insert(n, k--);
             n++;
         }
             
@@ -405,20 +407,29 @@ int main(int argc, char **argv){
 	unsigned int hdim;
 	char op;
 	char htype;
+	bool old_test;
 	
-	read_parameters(argc, argv, &op, &htype, &hdim);
+	read_parameters(argc, argv, &op, &htype, &hdim, &old_test);
 
 	swaps = vector<unsigned int>(NUM_EXP+1, 0);
 	times = vector<long double>(NUM_EXP+1, 0.0);
 	e = vector<unsigned int>(NUM_EXP+1, 0);
 	mem = vector<size_t>(NUM_EXP+1, 0);
 
-	if(op == 'i')
+	if(op == 'i' && !old_test)
 		test_insert(htype, hdim);
-	else if(op == 'u')
+	else if(op == 'u' && !old_test)
 		test_update(htype, hdim);
-	else if(op == 'd')
-		test_delete(htype, hdim);
+	else if(op == 'd' && !old_test)
+		test_delete(htype, hdim, false);
+	else if(op == 'r' && !old_test)
+		test_delete(htype, hdim, true);	
+	else if(op == 'i' && old_test)
+		test_insert_old(hdim);
+	else if(op == 'u' && old_test)
+		test_update_old(hdim);
+	else if(op == 'd' && old_test)
+		test_delete_old(hdim);
 	else if(op == 's')
 		test_scale(htype, hdim, true);
 	else if(op == 'c')
@@ -428,13 +439,14 @@ int main(int argc, char **argv){
 	
 }
 
-void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int *hdim){
+void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int *hdim, bool *old_test){
 	if(argc < 3){
 		usage(argv);
 		exit(-1);
 	}
 	
 	bool has_type = false;
+	*old_test = true;
 	*hdim = DEFAULT_HDIM;
     *htype = DEFAULT_HTYPE;  
 	
@@ -444,7 +456,7 @@ void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int 
 				case 't':
 					i++;
 					*op = argv[i][0];
-					if(*op != 'i' && *op != 'u' && *op != 'd' && *op != 's' && *op != 'c' && *op != 'v'){
+					if(*op != 'i' && *op != 'u' && *op != 'd' && *op != 'r' && *op != 's' && *op != 'c' && *op != 'v'){
     					fprintf(stderr, "Unkown test option %c \n", *op);
                 		usage(argv);
                 		exit(-1);
@@ -470,6 +482,9 @@ void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int 
 					i++;
 					NUM_EXP = atoi(argv[i]);
 					break;
+			    case 'O':
+			        *old_test = true;
+			        break;
 				default:
 					fprintf(stderr, "Unkown parameter %s \n", argv[i]);
 					usage(argv);
@@ -489,6 +504,6 @@ void read_parameters(int argc, char **argv, char *op, char *htype, unsigned int 
 }
 
 void usage(char **argv){
-	fprintf(stderr, "usage:\n%s -t <test type> [-h <heap type>] [-k <k-heap dimension>] [-n <number of tests>]\n\t-t test type: \t\ti, u, d, s, c, v\n\t-heap type: \t\t k for k-heap, h for hollow (default h)\n\t-k heap dimension: \tnatural numbers (default k=2)\n\t-n number of tests: \tnatural numbers (default n=20)\n", argv[0]);
+	fprintf(stderr, "usage:\n%s -t <test type> [-h <heap type>] [-k <k-heap dimension>] [-n <number of tests>] [-O <toogle old tests>]\n\t-t test type: \t\ti, u, d, r, s, c, v\n\t-heap type: \t\t k for k-heap, h for hollow (default %c)\n\t-k heap dimension: \tnatural numbers (default k=%u)\n\t-n number of tests: \tnatural numbers (default n=20)\n\t-O tootle old tests: \ttoogle (default not toogled)\n", argv[0], DEFAULT_HTYPE, DEFAULT_HDIM);
 }
 

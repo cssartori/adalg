@@ -1,7 +1,7 @@
 
 CC = g++
 
-CFLAGS = -Wall -O3 -std=c++11 -g
+CFLAGS = -Wall -O3 -std=c++11
 
 INCLUDES = -I include/
 SRCDIR = src/

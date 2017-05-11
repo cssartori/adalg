@@ -120,7 +120,7 @@ void read_parameters(int argc, char **argv, unsigned int *s, unsigned int *t, ch
 }
 
 void usage(char **argv){
-	fprintf(stderr, "usage:\n%s <source node> <target node> [-h <heap type>][-k <k-heap dimension>] [-t <print time information>]\n\t-source node: \t\tnatural numbers\n\t-target node: \t\tnatural numbers\n\t-heap type: \t\tk for k-heaps, h for hollow heaps (default h)\n\t-k-heap dimension: \tnatural numbers (default k=2)\n\t-time information: \ttoogle opton (default not toogled)\n", argv[0]);
+	fprintf(stderr, "usage:\n%s <source node> <target node> [-h <heap type>][-k <k-heap dimension>] [-t <print time information>]\n\t-source node: \t\tnatural numbers\n\t-target node: \t\tnatural numbers\n\t-heap type: \t\tk for k-heaps, h for hollow heaps (default %c)\n\t-k-heap dimension: \tnatural numbers (default k=%u)\n\t-time information: \ttoogle opton (default not toogled)\n", argv[0], DEFAULT_HTYPE, DEFAULT_HDIM);
 }
 
 
