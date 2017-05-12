@@ -11,26 +11,23 @@ using namespace boost;
 
 // Read a graph in DIMACS format from an input stream and return a Graph
 Graph& read_dimacs_graph(Graph& g, std::istream& in, unsigned int* n, unsigned int* m) {
+    std::ios::sync_with_stdio(false);
 	std::string line="", dummy;
-	while (line.substr(0,4) != "p sp")
-    getline(in,line);
+	while (line[0] != 'p' || line[1] != ' ' || line[2] != 's' || line[3] != 'p'){
+        getline(in,line);
+    }
  
   	//get nodes and edges
-  	std::stringstream linestr;
-  	linestr.str(line);
-  	linestr >> dummy >> dummy >> *n >> *m;
-
+    sscanf(line.c_str(), "p sp %u %u\n", n, m);
 	for(unsigned int x=0;x<*n;x++)
 		add_vertex(g);
   	  	
   	unsigned i=0;
   	while (i<*m) {
     	getline(in,line);
-    	if (line.substr(0,2) == "a ") {
-      		std::stringstream arc(line);
+    	if (line[0] == 'a' && line[1] == ' ') {
       		unsigned int u,v,w;
-      		char ac;
-      		arc >> ac >> u >> v >> w;
+      		sscanf(line.c_str(), "a %u %u %u\n", &u, &v, &w);
         		
       		Edge e = add_edge(u-1,v-1,g).first;
 			g[e].weight = w;

@@ -17,27 +17,23 @@ struct FlowPath {
 // Read a graph in DIMACS format from an input stream. Note that Graph is not guaranteed to be assignable, thus the use of references.
 Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigned int* m, unsigned int* s, unsigned int* t) {
 	std::string line="", dummy;
-	while (line.substr(0,5) != "p max")
+	while (line[0] != 'p' || line[1] != ' ' || line[2] != 'm' || line[3] != 'a' || line[4] != 'x')
         getline(in,line);
  
   	//get nodes and edges
-  	std::stringstream linestr;
-  	linestr.str(line);
-  	linestr >> dummy >> dummy >> *n >> *m;
+  	sscanf(line.c_str(), "p max %u %u\n", n, m);
     
     //get source and target
     int taken = 0;
     while(taken != 2){
-        line="";
+        getline(in,line);
         while (line[0] != 'n')
             getline(in,line);
         
         char which;
         unsigned int k;
         char dm;
-        std::stringstream lstr;
-        lstr.str(line);
-  	    lstr >> dm >> k >> which;
+        sscanf(line.c_str(), "n %u %c\n", &k, &which);
   	    
   	    if(which == 's')
   	        *s = k-1;
@@ -54,11 +50,10 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
   	unsigned i=0;
   	while (i<*m) {
     	getline(in,line);
-    	if (line.substr(0,2) == "a ") {
-      		std::stringstream arc(line);
+    	if (line[0] == 'a' && line[1] == ' ') {
       		unsigned int u,v,c;
       		char ac;
-      		arc >> ac >> u >> v >> c;
+      		sscanf(line.c_str(), "a %u %u %u\n", &u, &v, &c);
         	
         	//forward edge	
         	pair<Edge, bool> fep = edge(u-1,v-1,g);
