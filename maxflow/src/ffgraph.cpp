@@ -9,7 +9,7 @@ using namespace boost;
 
 //A single flow's path information
 struct FlowPath {
-    vector<Edge> path;
+    vector<Edge*> path;
     unsigned int flow;
     bool empty;
 }; 
@@ -32,7 +32,6 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
         
         char which;
         unsigned int k;
-        char dm;
         sscanf(line.c_str(), "n %u %c\n", &k, &which);
   	    
   	    if(which == 's')
@@ -52,7 +51,6 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
     	getline(in,line);
     	if (line[0] == 'a' && line[1] == ' ') {
       		unsigned int u,v,c;
-      		char ac;
       		sscanf(line.c_str(), "a %u %u %u\n", &u, &v, &c);
         	
         	//forward edge	
@@ -85,16 +83,16 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
 
 
 // Computes the maximum bottleneck flow from s to t in graph g using dijkstra algorithm with max-k-heap 
-FlowPath dijkstra_flow(const Graph& g, unsigned int s, unsigned int t, unsigned int k=2){
-	NHeap h(num_vertices(g), k, Heap::MAXHEAP);     //max-k-heap declaration
+FlowPath& dijkstra_flow(Graph& g, unsigned int s, unsigned int t, Heap& h, FlowPath& fp){
+	//NHeap h(num_vertices(g), k, Heap::MAXHEAP);     //max-k-heap declaration
 	vector<unsigned int> fat(num_vertices(g), 0);   //vector with fattest path values
 
 	fat[s] = MAX_FLOW;
     for(unsigned int i=0;i<num_vertices(g);i++)
         h.insert(i, fat[i]);
     
-    FlowPath fp;
-    fp.path = std::vector<Edge>(num_vertices(g));
+    //FlowPath fp;
+    //fp.path = std::vector<Edge>(num_vertices(g));
     fp.empty = false;
 
 	while(!h.is_empty()){
@@ -107,11 +105,9 @@ FlowPath dijkstra_flow(const Graph& g, unsigned int s, unsigned int t, unsigned 
 			if(fat[u] < min(fat[v], g[*ie].residual_capacity)){			    
 			    fat[u] = min(fat[v], g[*ie].residual_capacity);
 			    h.update_key(u, fat[u]);
-			    fp.path[u] = *ie;	  
+			    fp.path[u] = &g[g[*ie].reverse_edge].reverse_edge;	  
 			}
 		}
-		if(v == t) //already reached t
-		    break;
 	}
 
 	if(fat[t] == 0) //no positive flow in the graph to reach t
@@ -125,15 +121,21 @@ FlowPath dijkstra_flow(const Graph& g, unsigned int s, unsigned int t, unsigned 
 //Computes the max-flow between nodes s-t in graph g
 unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int k){
     unsigned int flow = 0;
- 
-    FlowPath fp = dijkstra_flow(g, s, t, k);
+    
+    NHeap h(num_vertices(g)+1, k, Heap::MAXHEAP);
+    
+    FlowPath fp;
+    fp.path = std::vector<Edge*>(num_vertices(g));
+    
+    fp = dijkstra_flow(g, s, t, h, fp);
 
     while(!fp.empty){ //while there is a path between s and t with positive flow
+       // printf("Flow of %u : %u\n", fp.flow, flow);
         flow += fp.flow;
         unsigned int v = t;
 
         while(v != s){ //update the edge's in path with new flow            
-            Edge e = fp.path[v];
+            Edge e = *fp.path[v];
             Edge er = g[e].reverse_edge;
                       
             g[e].residual_capacity -= fp.flow;
@@ -143,7 +145,7 @@ unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int
         }
                     
         //get next path
-        fp = dijkstra_flow(g, s, t, k);   
+        fp = dijkstra_flow(g, s, t, h, fp);   
     }
         
     return flow;
