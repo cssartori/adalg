@@ -40,7 +40,8 @@ Graph& read_dimacs_max_flow(Graph &g, std::istream& in, unsigned int* n, unsigne
 //Computes the max-flow between nodes s-t in graph g
 unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int k=2);
 
-//// Implementation of Dijkstra's algorithm with n-heaps for testing purposes (collects memory used, number of insertions, deletions, updates and execution time)
-//unsigned int dijkstra_nheap_test(const Graph& g, unsigned int s, unsigned int t, unsigned int *n_ins, unsigned int *n_del, unsigned int *n_upd, long double *time, size_t *mem=NULL, unsigned int nh=2);
+//Computes the max-flow between nodes s-t in graph g. Used for testing purposes. 
+//(stores the number of calls to dijkstra algorithm, number of heap inserts, deletes and updates, as well as memmory consumption).
+unsigned int fattest_path_test(Graph& g, unsigned int s, unsigned int t, unsigned int *ndij, unsigned int *nins, unsigned int *ndel, unsigned int *nupd, long double *time, size_t *mem=NULL, unsigned int k=2);
 
 #endif //__FFGRAPH_H__
