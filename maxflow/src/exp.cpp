@@ -3,17 +3,54 @@
 #include <math.h>
 #include <vector>
 #include "../include/ffgraph.h"
-
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/connected_components.hpp>
+//#include "boost/graph/copy.hpp"
 
 static unsigned int NUM_EXP = 20;
 static const int DEFAULT_HDIM = 2; //binary k-heap (2-heap)
 static unsigned int seed; //random seed
 
 using namespace std;
+using namespace boost;
+
 
 void read_parameters(int argc, char **argv, unsigned int *k);
 void usage(char **argv);
 
+//method to copy a graph since boost does not copy the edge references for FF algorithm
+Graph& copy_graph(Graph& src, Graph& dest){
+    //add vertices to graph g
+	for(unsigned int x=0;x<num_vertices(src);x++)
+		add_vertex(dest);
+  	
+  	
+  	graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
+	for(tie(ie, fe) = edges(src); ie != fe; ie++){
+	    //forward edge	
+        pair<Edge, bool> fep = edge(source(*ie,src),target(*ie,src),dest);
+        if(fep.second){ //edge already exists as reverse edge
+            dest[fep.first].capacity = src[*ie].capacity;
+            dest[fep.first].residual_capacity += src[*ie].capacity;
+        }else{ //create new edge    	
+            fep.first = add_edge(source(*ie,src),target(*ie,src),dest).first;
+	    	dest[fep.first].capacity = src[*ie].capacity;
+	    	dest[fep.first].residual_capacity = src[*ie].capacity;
+		}
+			
+		//reverse edge
+        pair<Edge, bool> rep = edge(target(*ie,src),source(*ie,src),dest);
+        if(!rep.second){ //create new edge
+    	    rep.first = add_edge(target(*ie,src),source(*ie,src),dest).first;
+	    	dest[rep.first].residual_capacity = 0;
+	    }
+
+		dest[fep.first].reverse_edge = rep.first;		
+		dest[rep.first].reverse_edge = fep.first;
+	}
+  	
+  	return dest;
+}
 
 void test_scale(unsigned int k=2){
 	unsigned int n,m; //number of vertices and edges in graph g
@@ -31,13 +68,16 @@ void test_scale(unsigned int k=2){
 		unsigned int ndij, nins, ndel, nupd;
 		long double time;
 		unsigned int d;
-
+	//	      printf("copying graph...\n");
+        Graph gl;
+        copy_graph(g, gl);
+    //    printf("copied graph... %u %u\n", num_vertices(gl), num_edges(gl));
 		do{           
-            d = fattest_path_test(g, s, t, &ndij, &nins, &ndel, &nupd, &time, &mu, k);    
+            d = fattest_path_test(gl, s, t, &ndij, &nins, &ndel, &nupd, &time, &mu, k);   
 		}while(d == MAX_FLOW);					
 		
 		printf("%i,%i,%u,%u,%u,%u,%u,%u,%lu,%Le,%u,%u\n", i, k, n, m, ndij, nins, ndel, nupd, mu, time, d, seed);
-		
+		g = Graph(gl);
 		if(d == MAX_FLOW)
 			ninf++;
 	}
