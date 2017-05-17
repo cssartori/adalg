@@ -1,3 +1,5 @@
+gcc -O3 new_washington.c -o new_washington 2> /dev/null
+
 mkdir "exp"
 
 for s in {50,100,150,200,250,300,350,400,450,500}

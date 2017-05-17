@@ -8,14 +8,14 @@ timestamp() {
 c=0
 i=0
 
-for filename in ./instances/*.gr
+for filename in ../instances/exp/*.gr
 	do
-		o=$(echo $filename| cut -d'/' -f 3)
+		o=$(echo $filename| cut -d'/' -f 4)
         echo "Running instance "$o
     	echo -n -e "Started:\t" 
     	timestamp
-		rfat=$(./fat < $filename)
-		rtester=$(./tester < $filename)
+		rfat=$(../fat < $filename)
+		rtester=$(../tester < $filename)
 
 		if ((rfat==rtester)) ; then
 		    echo -n "Correct"   

@@ -15,7 +15,7 @@ for filename in ../instances/exp/*.gr
 		echo "==============================================="
         echo "Running instance "$i": "$f
 	    timestamp
-	   	f=$(echo $f| cut -d'.' -f  2)
+	   	f=$(echo $f| cut -d'.' -f 1)
         of=$drn"/R"$f".dat"
 		./exp -n 50 < $filename > $of		
 		echo "Finished "$i". Results in "$of

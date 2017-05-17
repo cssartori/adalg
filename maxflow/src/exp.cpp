@@ -64,21 +64,15 @@ void test_scale(unsigned int k=2){
 		
 	int ninf = 0;   
 	for(unsigned int i=0;i<NUM_EXP;i++){
-		size_t mu = 0;
-		unsigned int ndij, nins, ndel, nupd;
-		long double time;
-		unsigned int d;
-	//	      printf("copying graph...\n");
         Graph gl;
         copy_graph(g, gl);
-    //    printf("copied graph... %u %u\n", num_vertices(gl), num_edges(gl));
+        TestData td;
 		do{           
-            d = fattest_path_test(gl, s, t, &ndij, &nins, &ndel, &nupd, &time, &mu, k);   
-		}while(d == MAX_FLOW);					
+            td = fattest_path_test(gl, s, t, k);   
+		}while(td.flow == MAX_FLOW);					
 		
-		printf("%i,%i,%u,%u,%u,%u,%u,%u,%lu,%Le,%u,%u\n", i, k, n, m, ndij, nins, ndel, nupd, mu, time, d, seed);
-		g = Graph(gl);
-		if(d == MAX_FLOW)
+		printf("%i,%i,%u,%u,%u,%u,%u,%u,%u,%lu,%Le,%u,%u\n", i, k, n, m, td.ndij, td.nins, td.ndel, td.nupd, td.nswp, td.mem, td.time, td.flow, seed);
+		if(td.flow == MAX_FLOW)
 			ninf++;
 	}
 	

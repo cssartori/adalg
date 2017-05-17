@@ -14,15 +14,7 @@ struct FlowPath {
     bool empty;
 }; 
 
-//Data to be collected when testing
-struct TestData {
-    unsigned int *ndij; //number of calls to dijkstra
-    unsigned int *nins; //number of inserts in heap
-    unsigned int *ndel; //number of deletes in heap
-    unsigned int *nupd; //number of updates in heap
-    long double *time; //time to execute the algorithm
-    size_t *mem; //amount of memory used
-};
+
 
 // Read a graph in DIMACS format from an input stream. Note that Graph is not guaranteed to be assignable, thus the use of references.
 Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigned int* m, unsigned int* s, unsigned int* t) {
@@ -160,23 +152,23 @@ unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int
 }
 
 // Computes the maximum bottleneck flow from s to t in graph g using dijkstra algorithm with max-k-heap 
-FlowPath& dijkstra_flow_test(Graph& g, unsigned int s, unsigned int t, Heap& h, FlowPath& fp, TestData& td){    
+FlowPath& dijkstra_flow_test(Graph& g, unsigned int s, unsigned int t, Heap& h, FlowPath& fp, TestData& td, bool get_mem=false){    
 	vector<unsigned int> fat(num_vertices(g), 0);   //vector with fattest path values
 
 	fat[s] = MAX_FLOW;
     for(unsigned int i=0;i<num_vertices(g);i++){
         h.insert(i, fat[i]);
-        *td.nins += 1;
+        td.nins += 1;
     }
     
-    if(td.mem != NULL)
-        *td.mem = max(*td.mem, memory_used());
+    if(get_mem)
+        td.mem = max(td.mem, memory_used());
     
     fp.empty = false;
 
 	while(!h.is_empty()){
 		unsigned int v = h.gettop(); h.deletetop();
-        *td.ndel += 1;
+        td.ndel += 1;
         
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
@@ -186,7 +178,7 @@ FlowPath& dijkstra_flow_test(Graph& g, unsigned int s, unsigned int t, Heap& h, 
 			    fat[u] = min(fat[v], g[*ie].residual_capacity);
 			    h.update_key(u, fat[u]);
 			    fp.path[u] = &g[g[*ie].reverse_edge].reverse_edge;	  
-			    *td.nupd += 1;
+			    td.nupd += 1;
 			}
 		}
 	}
@@ -201,35 +193,29 @@ FlowPath& dijkstra_flow_test(Graph& g, unsigned int s, unsigned int t, Heap& h, 
 
 //Computes the max-flow between nodes s-t in graph g. Used for testing purposes. 
 //(stores the number of calls to dijkstra algorithm, number of heap inserts, deletes and updates, as well as memmory consumption).
-unsigned int fattest_path_test(Graph& g, unsigned int s, unsigned int t, unsigned int *ndij, unsigned int *nins, unsigned int *ndel, unsigned int *nupd, long double *time, size_t *mem, unsigned int k){
+TestData fattest_path_test(Graph& g, unsigned int s, unsigned int t, unsigned int k){
     std::chrono::time_point<std::chrono::system_clock> tstart, tend;
     std::chrono::duration<long double> elapsed_seconds;
     tstart = std::chrono::system_clock::now();    
     
-    unsigned int flow = 0;
-    *ndij = 0;
-    *nins = 0;
-    *ndel = 0;
-    *nupd = 0;
-    *time = 0;
-    *mem = 0;
-    
+    unsigned int flow = 0;    
     TestData td;
-    td.ndij = ndij;
-    td.nins = nins;
-    td.ndel = ndel;
-    td.nupd = nupd;
-    td.time = time;
-    td.mem = mem;
+    td.ndij = 0;
+    td.nins = 0;
+    td.ndel = 0;
+    td.nupd = 0;
+    td.nswp = 0;
+    td.time = 0;
+    td.mem = 0;
+    td.flow = 0;
     
     NHeap h(num_vertices(g)+1, k, Heap::MAXHEAP);
     
     FlowPath fp;
     fp.path = std::vector<Edge*>(num_vertices(g));
     
-    fp = dijkstra_flow_test(g, s, t, h, fp, td);
-    *td.ndij += 1;
-    td.mem = NULL; //avoid delaying the testing. One measure is enough for most cases.
+    fp = dijkstra_flow_test(g, s, t, h, fp, td, true);
+    td.ndij += 1;
 
     while(!fp.empty){ //while there is a path between s and t with positive flow
         flow += fp.flow;
@@ -247,18 +233,15 @@ unsigned int fattest_path_test(Graph& g, unsigned int s, unsigned int t, unsigne
                     
         //get next path
         fp = dijkstra_flow_test(g, s, t, h, fp, td);   
-        *td.ndij += 1;
+        td.ndij += 1;
     }
     
     tend = std::chrono::system_clock::now();
 	elapsed_seconds = tend-tstart;	
-    *td.time = elapsed_seconds.count();
-//	*ndij = *td.ndij;
-//	*nins = *td.nins;
-//	*ndel = *td.ndel;
-//	*nupd = *td.nupd;
-//	*time = elapsed_seconds.count();
+    td.time = elapsed_seconds.count();
+    td.flow = flow;
+    td.nswp = h.n_swaps;
         
-    return flow;
+    return td;
 }
 
