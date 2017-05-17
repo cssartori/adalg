@@ -40,6 +40,7 @@ struct TestData {
     unsigned int ndel; //number of deletes in heap
     unsigned int nupd; //number of updates in heap
     unsigned int nswp; //number of swaps in the heap
+    unsigned int nitr; //number of iterations of fattest path
     long double time; //time to execute the algorithm
     size_t mem; //amount of memory used
     unsigned int flow; //max flow returned by the algorithm

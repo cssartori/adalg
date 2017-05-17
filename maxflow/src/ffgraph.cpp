@@ -215,6 +215,7 @@ TestData fattest_path_test(Graph& g, unsigned int s, unsigned int t, unsigned in
     td.ndel = 0;
     td.nupd = 0;
     td.nswp = 0;
+    td.nitr = 0;
     td.time = 0;
     td.mem = 0;
     td.flow = 0;
@@ -228,6 +229,7 @@ TestData fattest_path_test(Graph& g, unsigned int s, unsigned int t, unsigned in
     td.ndij += 1;
 
     while(!fp.empty){ //while there is a path between s and t with positive flow
+        td.nitr += 1;
         flow += fp.flow;
         unsigned int v = t;
 

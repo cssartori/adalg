@@ -71,7 +71,7 @@ void test_scale(unsigned int k=2){
             td = fattest_path_test(gl, s, t, k);   
 		}while(td.flow == MAX_FLOW);					
 		
-		printf("%i,%i,%u,%u,%u,%u,%u,%u,%u,%lu,%Le,%u,%u\n", i, k, n, m, td.ndij, td.nins, td.ndel, td.nupd, td.nswp, td.mem, td.time, td.flow, seed);
+		printf("%i,%i,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%Le,%u,%u\n", i, k, n, m, td.ndij, td.nins, td.ndel, td.nupd, td.nswp, td.nitr, td.mem, td.time, td.flow, seed);
 		if(td.flow == MAX_FLOW)
 			ninf++;
 	}
