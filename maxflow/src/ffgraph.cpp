@@ -107,6 +107,11 @@ FlowPath& dijkstra_flow(Graph& g, unsigned int s, unsigned int t, Heap& h, FlowP
 			    fp.path[u] = &g[g[*ie].reverse_edge].reverse_edge;	  
 			}
 		}
+		if(v == t){
+		    while(!h.is_empty())
+		        h.deletetop();		        
+		    break;
+		}
 	}
 
 	if(fat[t] == 0) //no positive flow in the graph to reach t
@@ -180,6 +185,11 @@ FlowPath& dijkstra_flow_test(Graph& g, unsigned int s, unsigned int t, Heap& h, 
 			    fp.path[u] = &g[g[*ie].reverse_edge].reverse_edge;	  
 			    td.nupd += 1;
 			}
+		}
+		if(v == t){
+		    while(!h.is_empty())
+		        h.deletetop();  
+		    break;
 		}
 	}
 
