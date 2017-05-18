@@ -16,11 +16,26 @@ for filename in ../instances/exp/*.gr
         echo "Running instance "$i": "$f
 	    timestamp
 	   	f=$(echo $f| cut -d'.' -f 1)
-        of=$drn"/R"$f".dat"
-		./exp -n 50 < $filename > $of		
+        of=$drn"/R_t_"$f".dat"
+		./exp -k 4 -n 1 < $filename > $of		
 		echo "Finished "$i". Results in "$of
 		timestamp
 	   	echo "Done with "$filename
 	   	i=$((i + 1))
 done
 
+
+for filename in ../instances/exp/*.gr
+	do
+		f=$(echo $filename| cut -d'/' -f 4)
+		echo "==============================================="
+        echo "Running instance "$i": "$f
+	    timestamp
+	   	f=$(echo $f| cut -d'.' -f 1)
+        of=$drn"/R"$f".dat"
+		./exp -k 4 -n 10 < $filename > $of		
+		echo "Finished "$i". Results in "$of
+		timestamp
+	   	echo "Done with "$filename
+	   	i=$((i + 1))
+done
