@@ -69,7 +69,7 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
     		g[fep.first].residual_capacity = c;
     		
     		//code comment to be used only when backwards edges are allowed in the input data
-//        	pair<Edge, bool> fep; = edge(u-1,v-1,g);
+//        	pair<Edge, bool> fep = edge(u-1,v-1,g);
 //        	if(fep.second){ //edge already exists as reverse edge
 //        	    g[fep.first].capacity = c;
 //        	    g[fep.first].residual_capacity += c;
@@ -77,7 +77,7 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
 //          	fep.first = add_edge(u-1,v-1,g).first;
 //	    		g[fep.first].capacity = c;
 //	    		g[fep.first].residual_capacity = c;
-			//}
+//			}
 			
 			//reverse edge
 			pair<Edge, bool> rep;
@@ -98,32 +98,38 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
   	}
  	
  	//gv_close();
- 	printf("Finshed reading...\n");
+ 	//printf("Finshed reading...\n");
   	return g;
 }
 
 
 // Computes the maximum bottleneck flow from s to t in graph g using dijkstra algorithm with max-k-heap 
 FlowPath& dijkstra_flow(Graph& g, unsigned int s, unsigned int t, Heap& h, FlowPath& fp){
+	
 	vector<unsigned int> fat(num_vertices(g), 0);   //vector with fattest path values
-
+    vector<unsigned int> visited(num_vertices(g), false); //vector of visited nodes
+    
 	fat[s] = MAX_FLOW;
-    for(unsigned int i=0;i<num_vertices(g);i++)
-        h.insert(i, fat[i]);
+    h.insert(s, fat[s]);
     
     fp.empty = false;
 
 	while(!h.is_empty()){
 		unsigned int v = h.gettop(); h.deletetop();
-
+       	visited[v] = true;
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
 			unsigned int u = target(*ie, g);
-
-			if(fat[u] < min(fat[v], g[*ie].residual_capacity)){			    
-			    fat[u] = min(fat[v], g[*ie].residual_capacity);
-			    h.update_key(u, fat[u]);
-			    fp.path[u] = &g[g[*ie].reverse_edge].reverse_edge;	  
+            if(!visited[u]){
+                if(fat[u] == 0){
+                    fat[u] = min(fat[v], g[*ie].residual_capacity);
+                    h.insert(u,fat[u]);
+                    fp.path[u] = &g[g[*ie].reverse_edge].reverse_edge;
+                }else if(fat[u] < min(fat[v], g[*ie].residual_capacity)){			    
+			        fat[u] = min(fat[v], g[*ie].residual_capacity);
+			        h.update_key(u, fat[u]);
+			        fp.path[u] = &g[g[*ie].reverse_edge].reverse_edge;	  
+			    }
 			}
 		}
 		if(v == t){
@@ -177,40 +183,47 @@ unsigned int fattest_path(Graph& g, unsigned int s, unsigned int t, unsigned int
 
 // Computes the maximum bottleneck flow from s to t in graph g using dijkstra algorithm with max-k-heap 
 FlowPath& dijkstra_flow_test(Graph& g, unsigned int s, unsigned int t, Heap& h, FlowPath& fp, TestData& td, bool get_mem=false){    
-	vector<unsigned int> fat(num_vertices(g), 0);   //vector with fattest path values
 
+	vector<unsigned int> fat(num_vertices(g), 0);   //vector with fattest path values
+    vector<unsigned int> visited(num_vertices(g), false); //vector of visited nodes
+    
 	fat[s] = MAX_FLOW;
-    for(unsigned int i=0;i<num_vertices(g);i++){
-        h.insert(i, fat[i]);
-        td.nins += 1;
-    }
+    h.insert(s, fat[s]);
+    td.nins += 1;
+    
+    fp.empty = false;
     
     if(get_mem)
         td.mem = max(td.mem, memory_used());
     
-    fp.empty = false;
-
 	while(!h.is_empty()){
 		unsigned int v = h.gettop(); h.deletetop();
-        td.ndel += 1;
-        
+       	visited[v] = true;
+       	td.ndel += 1;
 		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		for(tie(ie, fe) = out_edges(v, g); ie != fe; ie++){
 			unsigned int u = target(*ie, g);
-
-			if(fat[u] < min(fat[v], g[*ie].residual_capacity)){			    
-			    fat[u] = min(fat[v], g[*ie].residual_capacity);
-			    h.update_key(u, fat[u]);
-			    fp.path[u] = &g[g[*ie].reverse_edge].reverse_edge;	  
-			    td.nupd += 1;
+            if(!visited[u]){
+                if(fat[u] == 0){
+                    fat[u] = min(fat[v], g[*ie].residual_capacity);
+                    h.insert(u,fat[u]);
+                    td.nins += 1;
+                    fp.path[u] = &g[g[*ie].reverse_edge].reverse_edge;
+                }else if(fat[u] < min(fat[v], g[*ie].residual_capacity)){			    
+			        fat[u] = min(fat[v], g[*ie].residual_capacity);
+			        h.update_key(u, fat[u]);
+			        td.nupd += 1;
+			        fp.path[u] = &g[g[*ie].reverse_edge].reverse_edge;	  
+			    }
 			}
 		}
 		if(v == t){
 		    while(!h.is_empty())
-		        h.deletetop();  
+		        h.deletetop();		        
 		    break;
 		}
 	}
+
 
 	if(fat[t] == 0) //no positive flow in the graph to reach t
 	   fp.empty = true;
