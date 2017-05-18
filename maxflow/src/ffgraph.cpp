@@ -1,6 +1,7 @@
 #include "../../heap/include/nheap.h"
 #include "../include/ffgraph.h"
 #include "../include/mem_used.hpp"
+#include "../../common/cc_gv.h"
 #include <vector>
 #include <chrono>
 
@@ -21,7 +22,9 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
 	std::string line="", dummy;
 	while (line[0] != 'p' || line[1] != ' ' || line[2] != 'm' || line[3] != 'a' || line[4] != 'x')
         getline(in,line);
- 
+    
+    //gv_init("graph.gr");
+    
   	//get nodes and edges
   	sscanf(line.c_str(), "p max %u %u\n", n, m);
     
@@ -44,8 +47,10 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
     }
     
     //add vertices to graph g
-	for(unsigned int x=0;x<*n;x++)
+	for(unsigned int x=0;x<*n;x++){
 		add_vertex(g);
+		//gv_declare(x);
+    }
   	
   	//read arcs  	
   	unsigned i=0;
@@ -55,23 +60,35 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
       		unsigned int u,v,c;
       		sscanf(line.c_str(), "a %u %u %u\n", &u, &v, &c);
         	
+        	//gv_connect(u-1,v-1,c);
+        	
         	//forward edge	
-        	pair<Edge, bool> fep = edge(u-1,v-1,g);
-        	if(fep.second){ //edge already exists as reverse edge
-        	    g[fep.first].capacity = c;
-        	    g[fep.first].residual_capacity += c;
-        	}else{ //create new edge    	
-          		fep.first = add_edge(u-1,v-1,g).first;
-	    		g[fep.first].capacity = c;
-	    		g[fep.first].residual_capacity = c;
-			}
+        	pair<Edge, bool> fep;
+        	fep.first = add_edge(u-1,v-1,g).first;
+    		g[fep.first].capacity = c;
+    		g[fep.first].residual_capacity = c;
+    		
+    		//code comment to be used only when backwards edges are allowed in the input data
+//        	pair<Edge, bool> fep; = edge(u-1,v-1,g);
+//        	if(fep.second){ //edge already exists as reverse edge
+//        	    g[fep.first].capacity = c;
+//        	    g[fep.first].residual_capacity += c;
+//        	}else{ //create new edge    	
+//          	fep.first = add_edge(u-1,v-1,g).first;
+//	    		g[fep.first].capacity = c;
+//	    		g[fep.first].residual_capacity = c;
+			//}
 			
 			//reverse edge
-           	pair<Edge, bool> rep = edge(v-1,u-1,g);
-           	if(!rep.second){ //create new edge
-    			rep.first = add_edge(v-1,u-1,g).first;
-	    		g[rep.first].residual_capacity = 0;
-	        }
+			pair<Edge, bool> rep;
+			rep.first = add_edge(v-1,u-1,g).first;
+	    	g[rep.first].residual_capacity = 0;
+	    	
+//         	pair<Edge, bool> rep = edge(v-1,u-1,g);
+//         	if(!rep.second){ //create new edge
+//   			rep.first = add_edge(v-1,u-1,g).first;
+//	    		g[rep.first].residual_capacity = 0;
+//	        }
 
 			g[fep.first].reverse_edge = rep.first;		
 			g[rep.first].reverse_edge = fep.first;
@@ -80,6 +97,8 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
     	}
   	}
  	
+ 	//gv_close();
+ 	printf("Finshed reading...\n");
   	return g;
 }
 

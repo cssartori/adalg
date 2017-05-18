@@ -11,7 +11,7 @@ using namespace boost;
 
 // Read a graph in DIMACS format from an input stream and return a Graph
 Graph& read_dimacs_graph(Graph& g, std::istream& in, unsigned int* n, unsigned int* m) {
-    std::ios::sync_with_stdio(false);
+    //std::ios::sync_with_stdio(false);
 	std::string line="", dummy;
 	while (line[0] != 'p' || line[1] != ' ' || line[2] != 's' || line[3] != 'p'){
         getline(in,line);
