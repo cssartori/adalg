@@ -56,9 +56,9 @@ def __proc_data_file__(filename, op):
                     flow = int(row[12])
                     seed = int(row[13])
                     nexp += 1
-                    log = 2*m*Math.log(flow)+1
+                    log = 2*m*math.log(flow)+1
                     nlog += log
-                    if int(row[9]) > Math.log:
+                    if int(row[9]) > math.log:
                         print "Error at %i (%s): number of iterations bigger than maximum allowed" % (int(row[0], filename))  
                 
                                
@@ -72,7 +72,7 @@ def __proc_data_file__(filename, op):
                 mem_avg  = float(mem/nexp)
                 time_avg = float(time/nexp)
                 
-                comp = (n*Math.log10(n)+m)*m*Math.log10(flow)
+                comp = (n*math.log10(n)+m)*m*math.log10(flow)
                        
                 l = [k, n, m, ndij_avg, nins_avg, ndel_avg, nupd_avg, nswp_avg, nitr_avg, nlog_avg, nitr_avg/nlog_avg, mem_avg, time_avg, time_avg/comp]
             else: #generate tables
