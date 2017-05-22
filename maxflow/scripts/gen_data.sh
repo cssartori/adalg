@@ -2,7 +2,7 @@
 
 basedir="../res/"
 datadir="../data/"
-
+graphdir=$datadir"graphs/"
 mkdir $datadir
 
 # Type 1 instances
@@ -50,3 +50,5 @@ python tabler.py -d $basedir"t9/" -o $datadir"dt9.dat" -x 1
 
 # Type 10 instances
 python tabler.py -d $basedir"t10/" -o $datadir"dt10.dat" -x 1
+
+mkdir $graphdir
