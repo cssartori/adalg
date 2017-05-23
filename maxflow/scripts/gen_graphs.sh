@@ -61,17 +61,19 @@ set xlabel "Num. Arestas (m)"
 set ylabel "tempo (s)"
 set samples 10000
 plot "../data/dt1_k100.dat" u 2:13 w lp pt 7 title "Type 1: C = 100    "
-replot "../data/dt1_k100.dat" u 2:13 w p pt 7 title "Type 1: C = 100    "
-#plot "../data/dt1_k100.dat" u 2:13 w lp pt 7 title "Type 1: C = 100    "
-#replot "../data/dt1_k10000.dat" u 2:13 w lp pt 7 title "Type 1: C = 10000"
+replot "../data/dt1_k10000.dat" u 2:13 w lp pt 7 title "Type 1: C = 10000"
+replot "../data/dt2_k100.dat" u 2:13 w lp pt 7 title "Type 2: C = 100    "
+replot "../data/dt2_k10000.dat" u 2:13 w lp pt 7 title "Type 2: C = 10000"
+replot "../data/dt3_k100.dat" u 2:13 w lp pt 7 title "Type 3: C = 100    "
+replot "../data/dt3_k10000.dat" u 2:13 w lp pt 7 title "Type 3: C = 10000"
 set output "../data/graphs/gt1Time.eps"
 replot
 unset output
 
 set xlabel "Num. Arestas (m)"
 set ylabel "tempo/Comp."
-plot "../data/dt1_k100.dat" u 2:14 w lp pt 7 title "Type 1: C = 100    "
-replot "../data/dt1_k10000.dat" u 2:14 w lp pt 7 title "Type 1: C = 10000"
+plot "../data/dt1_k100.dat" u 2:11 w lp pt 7 title "Type 1: C = 100    "
+replot "../data/dt1_k10000.dat" u 2:11 w lp pt 7 title "Type 1: C = 10000"
 set output "../data/graphs/gt1TimeComp.eps"
 replot
 unset output

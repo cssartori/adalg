@@ -72,7 +72,7 @@ def __proc_data_file__(filename, op):
                 mem_avg  = float(mem/nexp)
                 time_avg = float(time/nexp)
                 
-                comp = (n*math.log10(n)+m)*m*math.log10(flow)
+                comp = ((n+m)*math.log10(n))*m*math.log10(flow)
                        
                 l = [k, n, m, ndij_avg, nins_avg, ndel_avg, nupd_avg, nswp_avg, nitr_avg, nlog_avg, nitr_avg/nlog_avg, mem_avg, time_avg, time_avg/comp]
             else: #generate tables
