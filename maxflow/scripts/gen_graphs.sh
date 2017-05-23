@@ -59,8 +59,11 @@ set key top left
 # Type 1
 set xlabel "Num. Arestas (m)"
 set ylabel "tempo (s)"
+set samples 10000
 plot "../data/dt1_k100.dat" u 2:13 w lp pt 7 title "Type 1: C = 100    "
-replot "../data/dt1_k10000.dat" u 2:13 w lp pt 7 title "Type 1: C = 10000"
+replot "../data/dt1_k100.dat" u 2:13 w p pt 7 title "Type 1: C = 100    "
+#plot "../data/dt1_k100.dat" u 2:13 w lp pt 7 title "Type 1: C = 100    "
+#replot "../data/dt1_k10000.dat" u 2:13 w lp pt 7 title "Type 1: C = 10000"
 set output "../data/graphs/gt1Time.eps"
 replot
 unset output

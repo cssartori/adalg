@@ -4,6 +4,7 @@
 #include "../../common/cc_gv.h"
 #include <vector>
 #include <chrono>
+#include <map>
 
 using namespace std;
 using namespace boost;
@@ -53,6 +54,7 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
     }
   	
   	//read arcs  	
+  	map<pair<unsigned, unsigned>, bool> edge_exists;
   	unsigned i=0;
   	while (i<*m) {
     	getline(in,line);
@@ -61,12 +63,33 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
       		sscanf(line.c_str(), "a %u %u %u\n", &u, &v, &c);
         	
         	//gv_connect(u-1,v-1,c);
+//        	pair<Edge, bool> fep;
+//        	if(edge_exists.count(make_pair(u-1,v-1)) > 0){
+//        	    fep = edge(u-1,v-1,g);
+//        	    g[fep.first].capacity = c;
+//        	    g[fep.first].residual_capacity += c;
+//        	}else{
+//        	   	fep.first = add_edge(u-1,v-1,g).first;
+//        	   	edge_exists[make_pair(u-1,v-1)] = true;
+//	    		g[fep.first].capacity = c;
+//	    		g[fep.first].residual_capacity = c;
+//        	}
+//        	
+//        	pair<Edge, bool> rep;
+//        	if(edge_exists.count(make_pair(v-1,u-1)) <= 0){
+//        	    rep.first = add_edge(v-1,u-1,g).first;
+//        	    edge_exists[make_pair(v-1,u-1)] = true;
+//	    		g[rep.first].residual_capacity = 0;
+//        	}else{
+//        	    rep = edge(v-1,u-1,g);
+//        	}
         	
         	//forward edge	
         	pair<Edge, bool> fep;
         	fep.first = add_edge(u-1,v-1,g).first;
     		g[fep.first].capacity = c;
     		g[fep.first].residual_capacity = c;
+    		
     		
     		//code comment to be used only when backwards edges are allowed in the input data
 //        	pair<Edge, bool> fep = edge(u-1,v-1,g);
