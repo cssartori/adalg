@@ -74,9 +74,9 @@ def __proc_data_file__(filename, op):
                 
                 comp = ((n+m)*math.log10(n))*m*math.log10(flow)
                        
-                l = [k, n, m, ndij_avg, nins_avg, ndel_avg, nupd_avg, nswp_avg, nitr_avg, nlog_avg, nitr_avg/nlog_avg, mem_avg, time_avg, time_avg/comp]
+                l = [k, n, m, ndij_avg, nins_avg, ndel_avg, nupd_avg, nswp_avg, nitr_avg, nlog_avg, nitr_avg/nlog_avg, mem_avg, time_avg, time_avg/comp, flow]
             else: #generate tables
-                cdata = csv.reader(cfile, delimiter=" ")
+                cdata = csv.reader(cfile, delimiter=",")                     
                 
                 k = 0
                 n = 0
@@ -106,8 +106,9 @@ def __proc_data_file__(filename, op):
                     mem  = float(row[11])
                     time = float(row[12])
                     tO = float(row[13])
+                    flow = int(row[14])
                         
-                    lt = [n, m, k, dij, ins, des, upd, swp, itr, ilg, mem, time, tO]
+                    lt = [n, m, k, dij, ins, des, upd, swp, itr, ilg, mem, time, tO, flow]
                     l.append(lt)
 
     return l
@@ -125,16 +126,16 @@ def __proc_dir_average__(dirname, outfname, rfext):
         lr.append(lf)
   
     # Generate graph file       
-	lr = sorted(lr, key = lambda x: (x[2])) #sort by number of edgess
+	lr = sorted(lr, key = lambda x: (x[2])) #sort by number of edges
 
     for l in lr:
         # n m k dij I D U swp itr log itr/log mem t t/O
-        outf.write("%u,%u,%u,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%f,%f,%f,%Le,%Le\n" % (l[1], l[2], l[0], l[3], l[4], l[5], l[6], l[7], l[8], l[9], l[10], float(l[11]/(1024*1024)), l[12], l[13]))
+        outf.write("%u,%u,%u,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%f,%f,%f,%Le,%Le,%u\n" % (l[1], l[2], l[0], l[3], l[4], l[5], l[6], l[7], l[8], l[9], l[10], float(l[11]/(1024*1024)), l[12], l[13], l[14]))
         
     outf.close()
 
 
-def __proc_dir_table__(dirname, outfname, rfext):
+def __proc_dir_table__(dirname, outfname, rfext, exp=2):
     outf = open(outfname, "w")
     
     print("reading files")
@@ -142,56 +143,65 @@ def __proc_dir_table__(dirname, outfname, rfext):
     lr = [] 
     for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
         print("Reading file "+file)
-        
         lf = __proc_data_file__(dirname+file, "table")
-        for l in lf:        
+        C = 0
+        if exp == 2:
+            ind = file.find("k")
+            if ind > 0:
+                ind += 1
+                str = ""
+                while file[ind] != '.':
+                    str += file[ind]
+                    ind += 1
+            
+                C = int(str)
+            
+        for l in lf:    
+            l.append(C)    
             lr.append(l)
  
     
     #print ("vr = " % (vr))
     # Generate table file       
-    lr = sorted(lr, key = lambda x: (x[vr], x[1])) #sort by number of vertices and k
+    lr = sorted(lr, key = lambda x: (x[1], x[-1])) #sort by number of edges and capacity
 	
     avg = dict({})
     for l in lr:
-        # ins des ups mem time
-        avg[l[1]] = [0.0,0.0,0.0,0.0,0.0]
+        # iter time flow
+        avg[l[-1]] = [0.0,0.0,0.0]
     
     nn = -1
     c=0
     mavg = 0
     navg = 0
+    memavg = 0
    
     for l in lr:
-        if nn != l[vr]:
+        if nn != l[1]:
             if nn != -1:
                 outf.write("\\\\")
             c += 1
-            navg += l[2]
-            mavg += l[3]
+            navg += l[0]
+            mavg += l[1]
+            memavg += l[10]
                       
-            outf.write("\n%u & %u & %u " % (c, l[2], l[3]))            
-            nn = l[vr]
+            outf.write("\n%u & %u & %u & %.2f" % (c, l[0], l[1], l[10]))            
+            nn = l[1]
         
-        if x == 3 or x == 4: # print operations, but not memory (complexity)
-            outf.write(" & %i & %i & %i & %.2Le " % (l[4], l[5], l[6], l[8]))            
-        elif x == 5: # print memory, but not operations (scale)
-            outf.write(" & %.2Le & %.2Le " % (l[7], l[8]))
+        outf.write(" & %u & %.2Le & %u" % (l[8], l[11], l[13]))            
             
-        avg[l[1]][0] += l[4]
-        avg[l[1]][1] += l[5]
-        avg[l[1]][2] += l[6]
-        avg[l[1]][3] += l[7]
-        avg[l[1]][4] += l[8]
+        avg[l[-1]][0] += l[8]
+        avg[l[-1]][1] += l[11]
+        avg[l[-1]][2] += l[13]
         
-    outf.write("\\\\\n\\textbf{Media} & %.2f & %.2f " % (navg/c, mavg/c))
+        
+        
+    outf.write("\\\\\n\\textbf{Media} & %.2f & %.2f & %.2f" % (navg/c, mavg/c, memavg/c))
     
-    for a in avg:
-        if x == 3 or x == 4:
-            outf.write(" & %.2Le & %.2Le & %.2Le & %.2Le" % (avg[a][0]/c, avg[a][1]/c, avg[a][2]/c, avg[a][4]/c))
-        elif x == 5:
-            outf.write(" & %.2Le & %.2Le" % (avg[a][3]/c, avg[a][4]/c))
-    
+    for a in sorted(avg.iterkeys()):
+        outf.write(" & %.2f & %.2Le & %.2f" % (avg[a][0]/c, avg[a][1]/c, avg[a][2]/c))
+
+
     outf.write("\\\\")
     outf.close()
     
