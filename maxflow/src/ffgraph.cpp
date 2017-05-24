@@ -63,6 +63,8 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
       		sscanf(line.c_str(), "a %u %u %u\n", &u, &v, &c);
         	
         	//gv_connect(u-1,v-1,c);
+        	
+        	//code below used to read graphs faster with possible backward edges
 //        	pair<Edge, bool> fep;
 //        	if(edge_exists.count(make_pair(u-1,v-1)) > 0){
 //        	    fep = edge(u-1,v-1,g);
@@ -85,33 +87,33 @@ Graph& read_dimacs_max_flow(Graph& g, std::istream& in, unsigned int* n, unsigne
 //        	}
         	
         	//forward edge	
-        	pair<Edge, bool> fep;
-        	fep.first = add_edge(u-1,v-1,g).first;
-    		g[fep.first].capacity = c;
-    		g[fep.first].residual_capacity = c;
+//        	pair<Edge, bool> fep;
+//        	fep.first = add_edge(u-1,v-1,g).first;
+//    		g[fep.first].capacity = c;
+//    		g[fep.first].residual_capacity = c;
     		
     		
     		//code comment to be used only when backwards edges are allowed in the input data
-//        	pair<Edge, bool> fep = edge(u-1,v-1,g);
-//        	if(fep.second){ //edge already exists as reverse edge
-//        	    g[fep.first].capacity = c;
-//        	    g[fep.first].residual_capacity += c;
-//        	}else{ //create new edge    	
-//          	fep.first = add_edge(u-1,v-1,g).first;
-//	    		g[fep.first].capacity = c;
-//	    		g[fep.first].residual_capacity = c;
-//			}
+        	pair<Edge, bool> fep = edge(u-1,v-1,g);
+        	if(fep.second){ //edge already exists as reverse edge
+        	    g[fep.first].capacity = c;
+        	    g[fep.first].residual_capacity += c;
+        	}else{ //create new edge    	
+          	fep.first = add_edge(u-1,v-1,g).first;
+	    		g[fep.first].capacity = c;
+	    		g[fep.first].residual_capacity = c;
+			}
 			
 			//reverse edge
-			pair<Edge, bool> rep;
-			rep.first = add_edge(v-1,u-1,g).first;
-	    	g[rep.first].residual_capacity = 0;
+//			pair<Edge, bool> rep;
+//			rep.first = add_edge(v-1,u-1,g).first;
+//	    	g[rep.first].residual_capacity = 0;
 	    	
-//         	pair<Edge, bool> rep = edge(v-1,u-1,g);
-//         	if(!rep.second){ //create new edge
-//   			rep.first = add_edge(v-1,u-1,g).first;
-//	    		g[rep.first].residual_capacity = 0;
-//	        }
+         	pair<Edge, bool> rep = edge(v-1,u-1,g);
+         	if(!rep.second){ //create new edge
+   			rep.first = add_edge(v-1,u-1,g).first;
+	    		g[rep.first].residual_capacity = 0;
+	        }
 
 			g[fep.first].reverse_edge = rep.first;		
 			g[rep.first].reverse_edge = fep.first;

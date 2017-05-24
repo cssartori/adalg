@@ -1,4 +1,4 @@
-gcc -O3 new_washington.c -o new_washington 2> /dev/null
+gcc -O3 ../instances/new_washington.c -o ../instances/new_washington 2> /dev/null
 
 mkdir "../instances/exp"
 
