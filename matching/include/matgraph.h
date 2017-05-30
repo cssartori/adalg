@@ -1,0 +1,31 @@
+#ifndef __FFGRAPH_H__
+#define __FFGRAPH_H__
+
+/**
+ * Code adapted from https://www.inf.ufrgs.br/~MRPRITT/doku.php?id=inf05016:2017-1-trabalhos
+ * Implementation of Ford Fulkerson's algorithm as Fattest Path augmenting path.
+ * Definition of data strutuctures for Graph representation and function call.
+ * Carlo S. Sartori - 2017/1
+ * CMP588 - Advanced Algorithms, UFRGS, Prof. Marcus Ritt
+ */
+
+#include <iostream>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/connected_components.hpp>
+
+// max value for fattest path
+static const unsigned int MAX_FLOW = std::numeric_limits<unsigned int>::max(); 
+
+typedef adjacency_list_traits<vecS, vecS, undirectedS>::vertex_descriptor Node;
+typedef adjacency_list_traits<vecS, vecS, undirectedS>::edge_descriptor Edge;
+
+//a vertex's data
+struct VertexData{ };
+ 
+//an edge's data
+struct EdgeData{ };
+ 
+//A graph is an adjacency list represented by vectors (vecS)
+typedef adjacency_list<vecS, vecS, undirectedS, VertexData, EdgeData> Graph;
+
+
