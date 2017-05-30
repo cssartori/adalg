@@ -22,13 +22,16 @@ int main(int argc, char *argv[]) {
 	read_parameters(argc, argv, &n, &p, &seed);
     srand48(seed);
 	 
+	fprintf(stderr, "n = %u | p = %.2f\n", n, p); 
 	Graph g;
 	for(unsigned i=0; i<2*n; i++)
 		add_vertex(g);
 	
 	for(unsigned i=0; i<n; i++){
         for(unsigned j=n; j<2*n; j++){
-            if (drand48() < p) {
+            double r = drand48();
+            fprintf(stderr, "r = %.2f\n", r);
+            if (r < p) {
                 Edge e = add_edge(i,j,g).first;
             }
         }
@@ -37,12 +40,10 @@ int main(int argc, char *argv[]) {
  	
   	//print out in DIMACS challenge format
   	printf("c Bi-partite graph\n\n");
-    printf("p edge %u %u\n", num_vertices(g), num_edges(g));
-	for(unsigned int i=0;i<n;i++){
-		graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
-		for(tie(ie, fe) = out_edges(i, g); ie != fe; ie++){
-	  		printf("e %u %u\n", i+1, target(*ie, g)+1);
-	  	}
+    printf("p edge %lu %lu\n", num_vertices(g), num_edges(g));
+	graph_traits<Graph>::edge_iterator ie, fe;
+    for ( tie(ie, fe)=edges(g); ie != fe; ie++){
+	  		printf("e %lu %lu\n", source(*ie, g)+1, target(*ie, g)+1);
   	}	
 }
 
@@ -73,7 +74,7 @@ void read_parameters(int argc, char **argv, unsigned int *n, double *p, unsigned
 					break;
 			    case 's':
 			        i++;
-			        *s = atoi(argv[i]);
+			        *seed = atoi(argv[i]);
 			        break;
 				default:
 					fprintf(stderr, "Parameter %c unkown.\n", argv[i][1]);

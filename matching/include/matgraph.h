@@ -1,5 +1,5 @@
-#ifndef __FFGRAPH_H__
-#define __FFGRAPH_H__
+#ifndef __MATGRAPH_H__
+#define __MATGRAPH_H__
 
 /**
  * Code adapted from https://www.inf.ufrgs.br/~MRPRITT/doku.php?id=inf05016:2017-1-trabalhos
@@ -16,8 +16,8 @@
 // max value for fattest path
 static const unsigned int MAX_FLOW = std::numeric_limits<unsigned int>::max(); 
 
-typedef adjacency_list_traits<vecS, vecS, undirectedS>::vertex_descriptor Node;
-typedef adjacency_list_traits<vecS, vecS, undirectedS>::edge_descriptor Edge;
+typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirectedS>::vertex_descriptor Node;
+typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirectedS>::edge_descriptor Edge;
 
 //a vertex's data
 struct VertexData{ };
@@ -26,6 +26,8 @@ struct VertexData{ };
 struct EdgeData{ };
  
 //A graph is an adjacency list represented by vectors (vecS)
-typedef adjacency_list<vecS, vecS, undirectedS, VertexData, EdgeData> Graph;
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, VertexData, EdgeData> Graph;
 
+void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, unsigned int* m);
 
+#endif //__MATGRAPH_H__
