@@ -8,6 +8,8 @@
 using namespace std;
 using namespace boost;
 
+#define graph_traits<Graph>::null_vertex() NULL_NODE
+
 // Read a graph in DIMACS format from an input stream and return a Graph
 void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, unsigned int* m) {
 	std::string line="", dummy;
@@ -33,4 +35,20 @@ void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, uns
     	}
   	}
 
+}
+
+unsigned int hopcroft_karp(const Graph& g){
+    
+    unsigned int n = num_vertices(g);
+    vector<Node> mates(n, NULL_NODE);
+
+    vector<unsigned int> v1(n/2);
+    vector<unsigned int> v2(n/2);
+    for(int i=0;i<n/2;i++){
+        v1[i] = i;
+        v2[i] = i+n/2;    
+    }
+    
+    
+    
 }
