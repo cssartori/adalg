@@ -12,6 +12,16 @@ using namespace boost;
 
 #define NULL_NODE num_vertices(g)+1
 
+struct HTreeNode{
+    bool edge_used;
+    unsigned int dest;
+    Edge edge;
+    
+    HTreeNode(){
+        edge_used = false;
+    }
+};
+
 // Read a graph in DIMACS format from an input stream and return a Graph
 void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, unsigned int* m) {
 	std::string line="", dummy;
@@ -42,7 +52,7 @@ void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, uns
 
 
 //BFS
-vector<bool> search_paths(const Graph& g, vector<unsigned int>& mates, vector<unsigned int>& v1){
+vector<HTreeNode> search_paths(const Graph& g, vector<unsigned int>& mates, vector<unsigned int>& v1){
     //TODO: change to queue
     //TODO: use vertex 0 as dummy (maybe)
     //TODO: check how to represent tree H
@@ -51,7 +61,7 @@ vector<bool> search_paths(const Graph& g, vector<unsigned int>& mates, vector<un
     
     vector<bool> visited(num_vertices(g), false);
     vector<unsigned int> dist(num_vertices(g), 0);
-    vector<bool> h(num_edges(g), false); //hungarian tree H
+    vector<HTreeNode> h(num_edges(g)); //hungarian tree H
     queue<unsigned int> u1, u2;
     for(unsigned int i=0;i<v1.size();i++){
         if(mates[i] == NULL_NODE)
@@ -75,7 +85,9 @@ vector<bool> search_paths(const Graph& g, vector<unsigned int>& mates, vector<un
 			    if(visited[v] == false){
 			        dist[v] = dist[u]+1;
 			        u2.push(v);
-			        h[g[*ie].id] = true; //mark edge as used in H
+			        h[g[*ie].id].edge_used = true; //mark edge as used in H
+			        h[g[*ie].id].edge = *ie;
+			        h[g[*ie].id].dest = u;
 			    }
 			}
         }
@@ -95,7 +107,10 @@ vector<bool> search_paths(const Graph& g, vector<unsigned int>& mates, vector<un
                 if(visited[v] == false){
                     dist[v] = dist[u]+1;
                     u1.push(v);
-                    h[g[edge(u,v,g).first].id] = true;
+                    Edge e = edge(u,v,g).first;
+                    h[g[e].id].edge_used = true;
+                    h[g[e].id].edge = e;
+                    h[g[e].id].dest = u;
                 }
             }
         }
@@ -105,7 +120,7 @@ vector<bool> search_paths(const Graph& g, vector<unsigned int>& mates, vector<un
     return h;
 }
 
-bool extract_paths(const Graph& g, vector<unsigned int>& mates, vector<unsigned int> v2, vector<bool>& h, vector<bool>& matching){
+bool extract_paths(const Graph& g, vector<unsigned int>& mates, vector<unsigned int> v2, vector<HTreeNode>& h, vector<bool>& matching){
     vector<bool> visited(num_vertices(g), false);
     unsigned int mp = 0;
     
@@ -128,10 +143,10 @@ bool extract_paths(const Graph& g, vector<unsigned int>& mates, vector<unsigned 
             graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		    for(tie(ie, fe) = out_edges(u, g); ie != fe; ie++){
     		    unsigned int v = target(*ie, g);
-		        if(h[g[*ie].id] == false || (mates[u] != NULL_NODE && mates[u] != v)) continue;
+		        if(h[g[*ie].id].edge_used == false || h[g[*ie].id].dest == u) continue;
 			    
 			    printf("\t%u\n", v);
-                if(v == u) v = source(*ie, g);
+                //if(v == u) v = source(*ie, g);
                 
                 if(visited[v] == false){
                     printf("\t\tpushed %u\n", v);
@@ -213,7 +228,7 @@ unsigned int hopcroft_karp(const Graph& g){
 //    mates[8] = 4;
     
     printf("Calling search paths...\n");   
-    vector<bool> h = search_paths(g, mates, v1);
+    vector<HTreeNode> h = search_paths(g, mates, v1);
     extract_paths(g, mates, v2, h, matching);
     
     graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
