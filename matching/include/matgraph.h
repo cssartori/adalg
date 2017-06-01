@@ -23,7 +23,9 @@ typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirected
 struct VertexData{ };
  
 //an edge's data
-struct EdgeData{ };
+struct EdgeData{
+    unsigned int id; //every edge has an unique ID
+};
  
 //A graph is an adjacency list represented by vectors (vecS)
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, VertexData, EdgeData> Graph;

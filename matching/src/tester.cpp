@@ -29,7 +29,7 @@ void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, uns
  
   	//get nodes and edges
     sscanf(line.c_str(), "p edge %u %u\n", n, m);
-    printf("n = %u m = %u\n", *n, *m);
+    
 	for(unsigned int x=0;x<*n;x++)
 		add_vertex(g);
   	  	
@@ -39,8 +39,7 @@ void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, uns
     	if (line[0] == 'e' && line[1] == ' ') {
       		unsigned int u,v;
       		sscanf(line.c_str(), "e %u %u\n", &u, &v);
-        	printf("e %u %u\n", u, v);	
-      		Edge e = add_edge(u-1,v-1,g).first;
+      		add_edge(u-1,v-1,g);
       		
       		i++;
     	}
