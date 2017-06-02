@@ -33,11 +33,12 @@ int main(int argc, char *argv[]) {
             //fprintf(stderr, "r = %.2f\n", r);
             if (r < p) {
                 Edge e = add_edge(i,j,g).first;
+                //fprintf(stderr, "Edge size %u\n", sizeof(Edge));
             }
         }
     }
  	
- 	
+ 	fprintf(stderr, "Printing graph\n");
   	//print out in DIMACS challenge format
   	printf("c Bi-partite graph\n\n");
     printf("p edge %lu %lu\n", num_vertices(g), num_edges(g));

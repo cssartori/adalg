@@ -148,19 +148,19 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<unsign
             if(visited[u]) continue;            
             visited[u] = true;
                         
-            printf("Back from node %u\n", u);
-            printf("mate[] = %i\n", mates[v2[i]] == NULL_NODE ? -1 : v2[i]);
+           // printf("Back from node %u\n", u);
+            //printf("mate[] = %i\n", mates[v2[i]] == NULL_NODE ? -1 : v2[i]);
             unsigned int ps = path.size();
             graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		    for(tie(ie, fe) = out_edges(u, g); ie != fe; ie++){
     		    unsigned int v = target(*ie, g);
 		        if(h[g[*ie].id].edge_used == false || h[g[*ie].id].dest == u) continue;
 			    
-			    printf("\t%u\n", v);
+			  //  printf("\t%u\n", v);
                 //if(v == u) v = source(*ie, g);
                 
                 if(visited[v] == false){
-                    printf("\t\tpushed %u\n", v);
+                //    printf("\t\tpushed %u\n", v);
                     s.push(v);
                     //path[g[*ie].id] = true;
                     path.push(*ie);
@@ -172,15 +172,15 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<unsign
                     }
                 }  
 			}
-			printf("Finished loop edges\n");
+			//printf("Finished loop edges\n");
 			if(path.size() == ps && path.size() != 0){
 			    while(s.size() != 0 && source(path.top(), g) != s.top() && target(path.top(), g) != s.top())
 			        path.pop();
 			}
-			printf("next dfs...\n");
+			//printf("next dfs...\n");
         }
         
-        printf("Finished DFS for %u\n", v2[i]);
+        //printf("Finished DFS for %u\n", v2[i]);
         if(found_path){
 //            printf("========\nPath:\n");
 //            graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
@@ -203,7 +203,7 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<unsign
 //            printf("==========\n");
 //        }
 
-printf("========\nPath:\n");
+//printf("========\nPath:\n");
            
             bool origin_found = false;
             vector<bool> updated(num_vertices(g), false);
@@ -211,7 +211,7 @@ printf("========\nPath:\n");
             while(!origin_found){
                 Edge e = path.top();
                 path.pop();
-                printf("\t %u %u\n", source(e,g), target(e,g));
+//                printf("\t %u %u\n", source(e,g), target(e,g));
                 if(back != target(e, g)) continue;
                 back = source(e,g);
                 if(source(e, g) == v2[i] || target(e, g) == v2[i])
@@ -236,7 +236,7 @@ printf("========\nPath:\n");
                     }
                 
             }
-            printf("==========\n");
+//            printf("==========\n");
         }
     }
     
@@ -310,33 +310,33 @@ unsigned int hopcroft_karp(const Graph& g){
             break;
          
          
-         vector<bool> vu(num_vertices(g), false);   
-         graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
-        for(tie(ie, fe) = edges(g); ie != fe; ie++){
-            if(mat.m[g[*ie].id]){
-                unsigned u = source(*ie, g);
-                unsigned v = target(*ie, g);
-                                printf("* %u -> %u\n", u, v);
-                if(!vu[u] && !vu[v]){
-                    vu[u] = true;
-                    vu[v] = true;
-                }else{
-                    printf("Conflict on iteration %i\n", i);
-                    exit(-1);
-                }
-            }   
-        }
-        i++;  
-        printf("-------------------------------------------------\n"); 
+//         vector<bool> vu(num_vertices(g), false);   
+//         graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
+//        for(tie(ie, fe) = edges(g); ie != fe; ie++){
+//            if(mat.m[g[*ie].id]){
+//                unsigned u = source(*ie, g);
+//                unsigned v = target(*ie, g);
+//                                printf("* %u -> %u\n", u, v);
+//                if(!vu[u] && !vu[v]){
+//                    vu[u] = true;
+//                    vu[v] = true;
+//                }else{
+//                    printf("Conflict on iteration %i\n", i);
+//                    exit(-1);
+//                }
+//            }   
+//        }
+//        i++;  
+//        printf("-------------------------------------------------\n"); 
     }
     
-    int ii=0;
-    graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
-    for(tie(ie, fe) = edges(g); ie != fe; ie++){
-        if(mat.m[g[*ie].id]){
-            printf("%i %lu -> %lu\n", ii++, source(*ie, g), target(*ie, g));
-        }   
-    }
+//    int ii=0;
+//    graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
+//    for(tie(ie, fe) = edges(g); ie != fe; ie++){
+//        if(mat.m[g[*ie].id]){
+//            printf("%i %lu -> %lu\n", ii++, source(*ie, g), target(*ie, g));
+//        }   
+//    }
     
     //printf("Card = %u\n", mat.card);
     
