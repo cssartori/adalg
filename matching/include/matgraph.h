@@ -32,4 +32,6 @@ typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, Vert
 
 void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, unsigned int* m);
 
+unsigned int hopcroft_karp(const Graph& g);
+
 #endif //__MATGRAPH_H__

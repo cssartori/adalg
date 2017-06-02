@@ -8,46 +8,42 @@
 
 #include <cstdio>
 #include <chrono>
-#include "../include/ffgraph.h"
+#include "../include/matgraph.h"
 
 using namespace boost;
 using namespace std;
 
-static const int DEFAULT_HDIM = 2; //binary k-heap (2-heap)
-
 //Read command line parameters
-void read_parameters(int argc, char **argv, int *hdim, bool *time_info);
+void read_parameters(int argc, char **argv, bool *time_info);
 void usage(char **argv);
 
 int main(int argc, char **argv){
-	//heap dimension
-	int hdim;	
 	//time information
 	bool time_info;
 
-	read_parameters(argc, argv, &hdim, &time_info);
+	read_parameters(argc, argv, &time_info);
 	
 	//graph dimensions, source and sink
-	unsigned int n, m, s, t;
+	unsigned int n, m;
 			
 	std::chrono::time_point<std::chrono::system_clock> start, end;
 	std::chrono::duration<double> elapsed_seconds;	
 
 	//read graph from stdin	
 	Graph g;
-	g = read_dimacs_max_flow(g, std::cin, &n, &m, &s, &t);
+	read_dimacs_matching_graph(g, std::cin, &n, &m);
 	
 	if(time_info)		
    		start = std::chrono::system_clock::now();
    		
 	//compute max-flow
-    unsigned int mflow = fattest_path(g, s, t, hdim);
+    unsigned int mat_card = hopcroft_karp(g);
 	    
 	//print result
-	if(mflow != MAX_FLOW)
-		printf("%u\n", mflow);
-	else
-		printf("inf\n");
+	//if(mflow != MAX_FLOW)
+		printf("%u\n", mat_card);
+	//else
+		//printf("inf\n");
 	
 	if(time_info){
 		end = std::chrono::system_clock::now();
@@ -60,20 +56,15 @@ int main(int argc, char **argv){
 
 
 //Read command line parameters
-void read_parameters(int argc, char **argv, int *hdim, bool *time_info){
+void read_parameters(int argc, char **argv, bool *time_info){
 
     //default values
-	*hdim = DEFAULT_HDIM;
 	*time_info = false;
 	
 	if(argc > 1){
 	    for(int i=1;i<argc;i++){
 	        if(argv[i][0]=='-'){
 	            switch(argv[i][1]){
-	                case 'k':
-	                    i++;
-	                    *hdim = atoi(argv[i]);
-	                    break;
 	                case 't':
 	                    *time_info = true;
 	                    break;
@@ -92,7 +83,7 @@ void read_parameters(int argc, char **argv, int *hdim, bool *time_info){
 }
 
 void usage(char **argv){
-	fprintf(stderr, "usage:\n%s [-k <k-heap dimension>] [-t <print time information>]\n\t-k-heap dimension: \tnatural numbers (default k=2)\n\t-time information: \ttoogle opton (default not toogled)\n", argv[0]);
+	fprintf(stderr, "usage:\n%s [-t <print time information>]\n\t-time information: \ttoogle opton (default not toogled)\n", argv[0]);
 }
 
 

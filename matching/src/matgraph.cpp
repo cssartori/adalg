@@ -22,6 +22,16 @@ struct HTreeNode{
     }
 };
 
+struct Matching{
+    unsigned int card; //set cardinality
+    vector<bool> m;
+    
+    Matching(unsigned int sz){
+        card = 0;
+        m.assign(sz, false);
+    }
+};
+
 // Read a graph in DIMACS format from an input stream and return a Graph
 void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, unsigned int* m) {
 	std::string line="", dummy;
@@ -52,7 +62,7 @@ void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, uns
 
 
 //BFS
-vector<HTreeNode> search_paths(const Graph& g, vector<unsigned int>& mates, vector<unsigned int>& v1){
+bool search_paths(const Graph& g, const vector<unsigned int>& v1, const vector<unsigned int>& mates, vector<HTreeNode>& h){
     //TODO: change to queue
     //TODO: use vertex 0 as dummy (maybe)
     //TODO: check how to represent tree H
@@ -61,7 +71,6 @@ vector<HTreeNode> search_paths(const Graph& g, vector<unsigned int>& mates, vect
     
     vector<bool> visited(num_vertices(g), false);
     vector<unsigned int> dist(num_vertices(g), 0);
-    vector<HTreeNode> h(num_edges(g)); //hungarian tree H
     queue<unsigned int> u1, u2;
     for(unsigned int i=0;i<v1.size();i++){
         if(mates[i] == NULL_NODE)
@@ -117,10 +126,10 @@ vector<HTreeNode> search_paths(const Graph& g, vector<unsigned int>& mates, vect
         
     }while(!found); 
     
-    return h;
+    return found;
 }
 
-bool extract_paths(const Graph& g, vector<unsigned int>& mates, vector<unsigned int> v2, vector<HTreeNode>& h, vector<bool>& matching){
+bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<unsigned int>& mates, vector<HTreeNode>& h, Matching& mat){
     vector<bool> visited(num_vertices(g), false);
     unsigned int mp = 0;
     
@@ -138,18 +147,18 @@ bool extract_paths(const Graph& g, vector<unsigned int>& mates, vector<unsigned 
             if(visited[u]) continue;            
             visited[u] = true;
                         
-            printf("Back from node %u\n", u);
+            //printf("Back from node %u\n", u);
             
             graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		    for(tie(ie, fe) = out_edges(u, g); ie != fe; ie++){
     		    unsigned int v = target(*ie, g);
 		        if(h[g[*ie].id].edge_used == false || h[g[*ie].id].dest == u) continue;
 			    
-			    printf("\t%u\n", v);
+			    //printf("\t%u\n", v);
                 //if(v == u) v = source(*ie, g);
                 
                 if(visited[v] == false){
-                    printf("\t\tpushed %u\n", v);
+                   // printf("\t\tpushed %u\n", v);
                     s.push(v);
                     path[g[*ie].id] = true;
                     //visited[v] = true;
@@ -166,12 +175,13 @@ bool extract_paths(const Graph& g, vector<unsigned int>& mates, vector<unsigned 
             graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
             for(tie(ie, fe) = edges(g); ie != fe; ie++){
                 if(path[g[*ie].id]){
-                    if(matching[g[*ie].id]){
-                        matching[g[*ie].id] = false;
+                    if(mat.m[g[*ie].id]){
+                        mat.m[g[*ie].id] = false;
                         mates[source(*ie,g)] = NULL_NODE;
                         mates[target(*ie,g)] = NULL_NODE;
+                        mat.card -= 1;
                     }else{
-                        matching[g[*ie].id] = true;
+                        mat.m[g[*ie].id] = true;
                         mates[source(*ie,g)] = target(*ie,g);
                         mates[target(*ie,g)] = source(*ie,g);                            
                         mp++;
@@ -180,6 +190,8 @@ bool extract_paths(const Graph& g, vector<unsigned int>& mates, vector<unsigned 
             }
         }
     }
+    
+    mat.card += mp;
     
     if(mp != 0)
         return true;
@@ -190,8 +202,9 @@ bool extract_paths(const Graph& g, vector<unsigned int>& mates, vector<unsigned 
 unsigned int hopcroft_karp(const Graph& g){
     
     unsigned int n = num_vertices(g);
-    vector<unsigned int> mates(n, NULL_NODE);
-    vector<bool> matching(num_edges(g), false);
+    vector<unsigned int> mates(n, NULL_NODE); //vector mates
+    vector<HTreeNode> h(num_edges(g)); //hungarian tree H
+    Matching mat(num_edges(g)); //matching set M
     
     
     vector<unsigned int> v1(n/2);
@@ -200,12 +213,16 @@ unsigned int hopcroft_karp(const Graph& g){
         v1[i] = i;
         v2[i] = i+n/2;    
     }
-    mates[0] = vertex(5, g);
-    mates[5] = vertex(0, g);
-    mates[2] = vertex(8, g);
-    mates[8] = vertex(2, g);
-    mates[3] = vertex(9, g);
-    mates[9] = vertex(3, g);
+//    mates[0] = vertex(5, g);
+//    mates[5] = vertex(0, g);
+//    mates[2] = vertex(8, g);
+//    mates[8] = vertex(2, g);
+//    mates[3] = vertex(9, g);
+//    mates[9] = vertex(3, g);
+    
+//    matching[g[edge(3,9,g).first].id] = true;
+//    matching[g[edge(2,8,g).first].id] = true;
+//    matching[g[edge(0,5,g).first].id] = true;
     
 //    mates[0] = 5;
 //    mates[5] = 0;
@@ -215,6 +232,11 @@ unsigned int hopcroft_karp(const Graph& g){
 //    mates[9] = 3;
 //    mates[4] = 8;
 //    mates[8] = 4;
+//    
+//        matching[g[edge(4,8,g).first].id] = true;
+//    matching[g[edge(3,9,g).first].id] = true;
+//    matching[g[edge(0,5,g).first].id] = true;
+//            matching[g[edge(2,6,g).first].id] = true;
     
 //    mates[0] = 9;
 //    mates[9] = 0;
@@ -227,31 +249,40 @@ unsigned int hopcroft_karp(const Graph& g){
 //    mates[4] = 8;
 //    mates[8] = 4;
     
-    printf("Calling search paths...\n");   
-    vector<HTreeNode> h = search_paths(g, mates, v1);
-    extract_paths(g, mates, v2, h, matching);
+
     
-    graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
-    for(tie(ie, fe) = edges(g); ie != fe; ie++){
-        if(matching[g[*ie].id]){
-            printf("e %lu -> %lu\n", source(*ie, g), target(*ie, g));
-        }   
+    //printf("Looping...\n");   
+    while(search_paths(g, v1, mates, h)){
+        if(extract_paths(g, v2, mates, h, mat)){
+            for(unsigned int i=0;i<h.size();i++){
+                h[i].edge_used = false;
+            }    
+        }
     }
     
-    return 0;
+//    graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
+//    for(tie(ie, fe) = edges(g); ie != fe; ie++){
+//        if(matching[g[*ie].id]){
+//            printf("e %lu -> %lu\n", source(*ie, g), target(*ie, g));
+//        }   
+//    }
+    
+    //printf("Card = %u\n", mat.card);
+    
+    return mat.card;
 }
 
 
-int main(){
-    Graph g;
-    unsigned int n,m;
-    printf("Reading graph...\n");
-    read_dimacs_matching_graph(g, cin, &n, &m);
-    
-    
-    printf("Calling hopcroft-karp...\n");
-    int h = hopcroft_karp(g);
-    
-    return 0;
-}
+//int main(){
+//    Graph g;
+//    unsigned int n,m;
+//    printf("Reading graph...\n");
+//    read_dimacs_matching_graph(g, cin, &n, &m);
+//    
+//    
+//    printf("Calling hopcroft-karp...\n");
+//    int h = hopcroft_karp(g);
+//    
+//    return 0;
+//}
 

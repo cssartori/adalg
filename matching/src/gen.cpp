@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 	for(unsigned i=0; i<n; i++){
         for(unsigned j=n; j<2*n; j++){
             double r = drand48();
-            fprintf(stderr, "r = %.2f\n", r);
+            //fprintf(stderr, "r = %.2f\n", r);
             if (r < p) {
                 Edge e = add_edge(i,j,g).first;
             }
