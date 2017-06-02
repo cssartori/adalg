@@ -147,66 +147,32 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<unsign
             s.pop();
             if(visited[u]) continue;            
             visited[u] = true;
-                        
-           // printf("Back from node %u\n", u);
-            //printf("mate[] = %i\n", mates[v2[i]] == NULL_NODE ? -1 : v2[i]);
-            unsigned int ps = path.size();
+
             graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		    for(tie(ie, fe) = out_edges(u, g); ie != fe; ie++){
     		    unsigned int v = target(*ie, g);
 		        if(h[g[*ie].id].edge_used == false || h[g[*ie].id].dest == u) continue;
-			    
-			  //  printf("\t%u\n", v);
-                //if(v == u) v = source(*ie, g);
                 
                 if(visited[v] == false){
-                //    printf("\t\tpushed %u\n", v);
                     s.push(v);
-                    //path[g[*ie].id] = true;
                     path.push(*ie);
-                    //visited[v] = true;
-                    if(v < num_vertices(g)/2 && mates[v] == NULL_NODE){
+                    if(/*v < num_vertices(g)/2 && */mates[v] == NULL_NODE){ //if v in V1 is free
                        found_path = true;
                        visited[v] = true;
                        break;
                     }
                 }  
 			}
-			//printf("Finished loop edges\n");
-			if(path.size() == ps && path.size() != 0){
-			    while(s.size() != 0 && source(path.top(), g) != s.top() && target(path.top(), g) != s.top())
-			        path.pop();
-			}
-			//printf("next dfs...\n");
+
+//			if(path.size() == ps && path.size() != 0){
+//			    while(s.size() != 0 && source(path.top(), g) != s.top() && target(path.top(), g) != s.top())
+//			        path.pop();
+//			}
         }
         
         //printf("Finished DFS for %u\n", v2[i]);
-        if(found_path){
-//            printf("========\nPath:\n");
-//            graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
-//            for(tie(ie, fe) = edges(g); ie != fe; ie++){
-//                if(path[g[*ie].id]){
-//                    printf("\t %u %u\n", source(*ie,g), target(*ie,g));
-//                    if(mat.m[g[*ie].id]){
-//                        mat.m[g[*ie].id] = false;
-//                        mates[source(*ie,g)] = NULL_NODE;
-//                        mates[target(*ie,g)] = NULL_NODE;
-//                        mat.card -= 1;
-//                    }else{
-//                        mat.m[g[*ie].id] = true;
-//                        mates[source(*ie,g)] = target(*ie,g);
-//                        mates[target(*ie,g)] = source(*ie,g);                            
-//                        mp++;
-//                    }
-//                }
-//            }
-//            printf("==========\n");
-//        }
-
-//printf("========\nPath:\n");
-           
+        if(found_path){         
             bool origin_found = false;
-            vector<bool> updated(num_vertices(g), false);
             unsigned int back = target(path.top(), g);
             while(!origin_found){
                 Edge e = path.top();
@@ -217,8 +183,6 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<unsign
                 if(source(e, g) == v2[i] || target(e, g) == v2[i])
                     origin_found = true;
                 
-                
-                    
                     if(mat.m[g[e].id]){
                         mat.m[g[e].id] = false;
 //                        if(!updated[source(e,g)])
@@ -229,9 +193,7 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<unsign
                     }else{
                         mat.m[g[e].id] = true;
                         mates[source(e,g)] = target(e,g);
-                        mates[target(e,g)] = source(e,g); 
-                        updated[target(e,g)] = true;
-                        updated[source(e,g)] = true;                           
+                        mates[target(e,g)] = source(e,g);                            
                         mp++;
                     }
                 
