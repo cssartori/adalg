@@ -15,7 +15,7 @@ using namespace boost;
 struct HTreeNode{
     bool edge_used;
     unsigned int dest;
-    Edge edge;
+    //Edge edge;
     
     HTreeNode(){
         edge_used = false;
@@ -95,7 +95,7 @@ bool search_paths(const Graph& g, const vector<unsigned int>& v1, const vector<u
 			        dist[v] = dist[u]+1;
 			        u2.push(v);
 			        h[g[*ie].id].edge_used = true; //mark edge as used in H
-			        h[g[*ie].id].edge = *ie;
+			       // h[g[*ie].id].edge = *ie;
 			        h[g[*ie].id].dest = u;
 			    }
 			}
@@ -118,7 +118,7 @@ bool search_paths(const Graph& g, const vector<unsigned int>& v1, const vector<u
                     u1.push(v);
                     Edge e = edge(u,v,g).first;
                     h[g[e].id].edge_used = true;
-                    h[g[e].id].edge = e;
+                    //h[g[e].id].edge = e;
                     h[g[e].id].dest = u;
                 }
             }
@@ -185,10 +185,6 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<unsign
                 
                     if(mat.m[g[e].id]){
                         mat.m[g[e].id] = false;
-//                        if(!updated[source(e,g)])
-//                            mates[source(e,g)] = NULL_NODE;
-//                        if(!updated[target(e,g)])
-//                            mates[target(e,g)] = NULL_NODE;
                         mat.card -= 1;
                     }else{
                         mat.m[g[e].id] = true;
@@ -261,17 +257,16 @@ unsigned int hopcroft_karp(const Graph& g){
 //    mates[8] = 4;
     
     
-        int i=0;    
+        int phases = 0;  
     //printf("Looping...\n");   
     while(search_paths(g, v1, mates, h)){
         if(extract_paths(g, v2, mates, h, mat)){
             for(unsigned int i=0;i<h.size();i++){
                 h[i].edge_used = false;
             }    
-        }else
-            break;
+        }
          
-         
+         phases++;
 //         vector<bool> vu(num_vertices(g), false);   
 //         graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
 //        for(tie(ie, fe) = edges(g); ie != fe; ie++){
@@ -292,15 +287,15 @@ unsigned int hopcroft_karp(const Graph& g){
 //        printf("-------------------------------------------------\n"); 
     }
     
-//    int ii=0;
-//    graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
-//    for(tie(ie, fe) = edges(g); ie != fe; ie++){
-//        if(mat.m[g[*ie].id]){
-//            printf("%i %lu -> %lu\n", ii++, source(*ie, g), target(*ie, g));
-//        }   
-//    }
+    int ii=0;
+    graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
+    for(tie(ie, fe) = edges(g); ie != fe; ie++){
+        if(mat.m[g[*ie].id]){
+            printf("%i %lu -> %lu\n", ii++, source(*ie, g), target(*ie, g));
+        }   
+    }
     
-    //printf("Card = %u\n", mat.card);
+    printf("phases = %u | sqrt(n) = %.2f\n", phases, sqrt(n));
     
     return mat.card;
 }
