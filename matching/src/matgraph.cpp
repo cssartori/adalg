@@ -1,6 +1,4 @@
 #include "../include/matgraph.h"
-#include "../../heap/include/nheap.h"
-#include "../../heap/include/hheap.h"
 //#include "../include/mem_used.hpp"
 #include <vector>
 #include <chrono>
@@ -14,7 +12,7 @@ using namespace boost;
 
 struct HTreeNode{
     bool edge_used;
-    unsigned int dest;
+    unsigned int dest; //desteny of edge in H tree backward search
     
     HTreeNode(){
         edge_used = false;
@@ -23,11 +21,11 @@ struct HTreeNode{
 
 struct Matching{
     unsigned int card; //set cardinality
-    vector<bool> m;
+    vector<unsigned int> m; //vector of mates
     
-    Matching(unsigned int sz){
+    Matching(unsigned int sz, unsigned int def=0){
         card = 0;
-        m.assign(sz, false);
+        m.assign(sz, def);
     }
 };
 
@@ -61,27 +59,25 @@ void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, uns
 
 
 //BFS
-bool search_paths(const Graph& g, const vector<unsigned int>& v1, const vector<unsigned int>& mates, vector<HTreeNode>& h){
-    //TODO: change to queue
-    //TODO: use vertex 0 as dummy (maybe)
-    //TODO: check how to represent tree H
-    //TODO: check how to represent matching M
-    //TODO: check how to represent path P
-    
+bool search_paths(const Graph& g, const vector<unsigned int>& v1, vector<HTreeNode>& h, Matching& mat){    
     vector<bool> visited(num_vertices(g), false);
     vector<unsigned int> dist(num_vertices(g), 0);
     queue<unsigned int> u1, u2;
+    
+    //get free nodes in v1 into queue u1
     for(unsigned int i=0;i<v1.size();i++){
-        if(mates[i] == NULL_NODE)
-            u1.push(i);
+        if(mat.m[v1[i]] == NULL_NODE)
+            u1.push(v1[i]);
     }
+    
     
     bool found = false;
     do{
-    
+        //if there is no vertex in u1, can't continue
         if(u1.size() == 0)
             break;
-        //select neighbors in V2 throughout free edges    
+            
+        //BFS: select neighbors in V2 throughout free edges    
         while(u1.size() > 0){
             unsigned int u = u1.front();
             visited[u] = true;
@@ -99,18 +95,20 @@ bool search_paths(const Graph& g, const vector<unsigned int>& v1, const vector<u
 			}
         }
         
+        //if there is no vertex in u2 can't continue
         if(u2.size() == 0)
             break;
-        //select neighbors in V1 throughout matched edges
+            
+        //BFS: select neighbors in V1 throughout matched edges
         while(u2.size() > 0){
             unsigned int u = u2.front();
             visited[u] = true;
             u2.pop();
             
-            if(mates[u] == NULL_NODE){ //free way found
+            if(mat.m[u] == NULL_NODE){ //free way found
                 found = true;
             }else{
-                unsigned int v = mates[u];
+                unsigned int v = mat.m[u];
                 if(not visited[v]){
                     dist[v] = dist[u]+1;
                     u1.push(v);
@@ -119,25 +117,27 @@ bool search_paths(const Graph& g, const vector<unsigned int>& v1, const vector<u
                     h[g[e].id].dest = u;
                 }
             }
-        }
-        
+        }   
     }while(not found); 
     
+    //return wheter a path was found or not
     return found;
 }
 
-bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<unsigned int>& mates, vector<HTreeNode>& h, Matching& mat){
+bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<HTreeNode>& h, Matching& mat){
     vector<bool> visited(num_vertices(g), false);
     unsigned int mp = mat.card;
     
+    //for each free vertex in v2 run a DFS : TODO: check complexity, should be O(m+n)
     for(unsigned int i=0;i<v2.size();i++){
-        if(mates[v2[i]] != NULL_NODE) continue;
+        if(mat.m[v2[i]] != NULL_NODE) continue;
         
         stack<unsigned int> s;
         stack<Edge> path;
         s.push(v2[i]);
         
         bool found_path = false;
+        //DFS search for paths in the H tree
         while(s.size() > 0 && not found_path){
             unsigned int u = s.top();
             s.pop();
@@ -147,12 +147,13 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<unsign
             graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		    for(tie(ie, fe) = out_edges(u, g); ie != fe; ie++){
     		    unsigned int v = target(*ie, g);
-		        if( not h[g[*ie].id].edge_used || h[g[*ie].id].dest == u) continue;
+    		    //edge should be used in tree H and its destination in the reversed DAG cannot be u itself (it would mean another edge of same class)
+		        if(not h[g[*ie].id].edge_used || h[g[*ie].id].dest == u) continue;
                 
                 if(not visited[v]){
                     s.push(v);
                     path.push(*ie);
-                    if(mates[v] == NULL_NODE){ //if v is free, then it is in V1 and we found what we wanted
+                    if(mat.m[v] == NULL_NODE){ //if v is free, then it is in V1 and we found what we wanted
                        found_path = true;   //set that a path has been found
                        visited[v] = true;   //mark node v as visited so that it is not used in another path
                        break; //a valid path has been found, stop search
@@ -161,38 +162,40 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<unsign
 			}
         }
         
+        //In case a M-alternating path has been found
         if(found_path){         
-            bool origin_found = false;
-            unsigned int back = target(path.top(), g);
-            while(!origin_found){
+            bool free_edge = true; //indicates wheter the current edge being processed is free or not (M-alternating path)
+            unsigned int next = target(path.top(), g); //indicates the next node in the path from v1 -> v2
+            
+            while(next != v2[i]){ //while the free vertex in v2 has not been reached
+                //get an edge from the path stack
                 Edge e = path.top();
                 path.pop();
                 
-                if(back != target(e, g)) continue;
+                //check if the edge belongs to this path (it may not)
+                if(next != target(e, g)) continue;
+                next = source(e,g);
                 
-                back = source(e,g);
-                if(source(e, g) == v2[i] || target(e, g) == v2[i]){
-                    origin_found = true;
-                    //printf("Origin found and path size is %u\n", path.size());
-                    }
+                //Check if it is a matched edge, in this case there is nothing to do
+                if(not free_edge){
+                    free_edge = true;
+                    continue;
+                }
                 
-                    if(mat.m[g[e].id]){
-                        mat.m[g[e].id] = false;
-                        mat.card -= 1;
-                    }else{
-                        mat.m[g[e].id] = true;
-                        mates[source(e,g)] = target(e,g);
-                        mates[target(e,g)] = source(e,g);                            
-                        mat.card += 1;
-                    }
+                //update the matching information (free edge becomes matched: update matching of both vertices)
+                mat.m[source(e,g)] = target(e,g);
+                mat.m[target(e,g)] = source(e,g);
                 
+                //set the next edge as matched (M-alternating path)
+                free_edge = false;
             }
-//            printf("==========\n");
+            
+            //always increases by 1 if a path is found
+            mat.card += 1;
         }
     }
     
-    //mat.card += mp;
-    
+    //a path was found
     if(mp < mat.card)
         return true;
     
@@ -204,87 +207,28 @@ unsigned int hopcroft_karp(const Graph& g){
     unsigned int n = num_vertices(g);
     vector<unsigned int> mates(n, NULL_NODE); //vector mates
     vector<HTreeNode> h(num_edges(g)); //hungarian tree H
-    Matching mat(num_edges(g)); //matching set M
-        
+    Matching mat(num_vertices(g), NULL_NODE); //matching set M
+    
+    //default definition of vertex sets v1 and v2: v1 U v2 = V : G=(V,E)    
     vector<unsigned int> v1(n/2);
     vector<unsigned int> v2(n/2);
-    for(int i=0;i<n/2;i++){
+    for(unsigned int i=0;i<n/2;i++){
         v1[i] = i;
         v2[i] = i+n/2;    
-    }
-
-//    mates[0] = vertex(5, g);
-//    mates[5] = vertex(0, g);
-//    mates[2] = vertex(8, g);
-//    mates[8] = vertex(2, g);
-//    mates[3] = vertex(9, g);
-//    mates[9] = vertex(3, g);
+    }   
     
-//    matching[g[edge(3,9,g).first].id] = true;
-//    matching[g[edge(2,8,g).first].id] = true;
-//    matching[g[edge(0,5,g).first].id] = true;
-    
-//    mates[0] = 5;
-//    mates[5] = 0;
-//    mates[2] = 6;
-//    mates[6] = 2;
-//    mates[3] = 9;
-//    mates[9] = 3;
-//    mates[4] = 8;
-//    mates[8] = 4;
-//    
-//        matching[g[edge(4,8,g).first].id] = true;
-//    matching[g[edge(3,9,g).first].id] = true;
-//    matching[g[edge(0,5,g).first].id] = true;
-//            matching[g[edge(2,6,g).first].id] = true;
-    
-//    mates[0] = 9;
-//    mates[9] = 0;
-//    mates[1] = 5;
-//    mates[5] = 1;
-//    mates[2] = 7;
-//    mates[7] = 2;
-//    mates[3] = 6;
-//    mates[6] = 3;
-//    mates[4] = 8;
-//    mates[8] = 4;
-    
-    
+    //the main loop of the algorithm
     int phases = 0;      
-    while(search_paths(g, v1, mates, h)){
-        if(extract_paths(g, v2, mates, h, mat)){
-            for(unsigned int i=0;i<h.size();i++){
-                h[i].edge_used = false;
-            }    
-        }
+    while(search_paths(g, v1, h, mat)){
+        bool has_extract = extract_paths(g, v2, h, mat);
+        if(not has_extract)
+            break;           
+        for(unsigned int i=0;i<h.size();i++)
+            h[i].edge_used = false;
          
         phases++;
     }
     
-//    int ii=0;
-//    graph_traits<Graph>::edge_iterator ie, fe;  //initial edge iterator and final edge
-//    for(tie(ie, fe) = edges(g); ie != fe; ie++){
-//        if(mat.m[g[*ie].id]){
-//            printf("%i %lu -> %lu\n", ii++, source(*ie, g), target(*ie, g));
-//        }   
-//    }
-    
-    printf("phases = %u | sqrt(n) = %.2f\n", phases, sqrt(n));
-    
     return mat.card;
 }
-
-
-//int main(){
-//    Graph g;
-//    unsigned int n,m;
-//    printf("Reading graph...\n");
-//    read_dimacs_matching_graph(g, cin, &n, &m);
-//    
-//    
-//    printf("Calling hopcroft-karp...\n");
-//    int h = hopcroft_karp(g);
-//    
-//    return 0;
-//}
 
