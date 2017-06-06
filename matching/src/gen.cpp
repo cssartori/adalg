@@ -20,23 +20,33 @@ int main(int argc, char *argv[]) {
 	double p;
 	  
 	read_parameters(argc, argv, &n, &p, &seed);
-    srand48(seed);
+    srand(seed);
+	
+	m = ceil(n*(n*p));
 	 
-	fprintf(stderr, "n = %u | p = %.2f\n", n, p); 
+	fprintf(stderr, "n = %u | p = %.2f | m = %u\n", n, p, m); 
 	Graph g;
 	for(unsigned i=0; i<2*n; i++)
 		add_vertex(g);
 	
-	for(unsigned i=0; i<n; i++){
-        for(unsigned j=n; j<2*n; j++){
-            double r = drand48();
-            //fprintf(stderr, "r = %.2f\n", r);
-            if (r < p) {
-                Edge e = add_edge(i,j,g).first;
-                //fprintf(stderr, "Edge size %u\n", sizeof(Edge));
-            }
-        }
-    }
+//	for(unsigned i=0; i<n; i++){
+//        for(unsigned j=n; j<2*n; j++){
+//            double r = drand48();
+//            //fprintf(stderr, "r = %.2f\n", r);
+//            if (r < p) {
+//                Edge e = add_edge(i,j,g).first;
+//                //fprintf(stderr, "Edge size %u\n", sizeof(Edge));
+//            }
+//        }
+//    }
+ 	unsigned int mc = 0; //edge counter
+ 	while(mc < m){
+ 	    unsigned int s = rand()%n;
+ 	    unsigned int t = rand()%n+n;
+ 	    bool added_edge = add_edge(s,t,g).second;
+ 	    if(added_edge)
+ 	        mc++;
+ 	}
  	
  	fprintf(stderr, "Printing graph\n");
   	//print out in DIMACS challenge format
