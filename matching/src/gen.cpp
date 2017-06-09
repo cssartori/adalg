@@ -22,8 +22,8 @@ int main(int argc, char *argv[]) {
 	read_parameters(argc, argv, &n, &p, &seed);
     srand(seed);
 	
-	m = ceil(n*(n*p));
-	 
+	//m = ceil(n*(n*p));
+    m = p*n*log2(n);	 
 	fprintf(stderr, "n = %u | p = %.2f | m = %u\n", n, p, m); 
 	Graph g;
 	for(unsigned i=0; i<2*n; i++)
@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
 //            }
 //        }
 //    }
+
  	unsigned int mc = 0; //edge counter
  	while(mc < m){
  	    unsigned int s = rand()%n;

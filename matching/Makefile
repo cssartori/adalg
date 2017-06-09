@@ -10,7 +10,7 @@ LIBS = -lm
 
 # define the C++ source files
 SMAIN = $(SRCDIR)matgraph.cpp $(SRCDIR)main.cpp
-#SEXP = $(SRCDIR)exp.cpp $(SRCDIR)dgraph.cpp
+SEXP =  $(SRCDIR)exp.cpp $(SRCDIR)matgraph.cpp
 SGEN = $(SRCDIR)gen.cpp
 STST = $(SRCDIR)tester.cpp
 
@@ -21,27 +21,28 @@ OTST = $(STST:.cpp=.o)
 
 # define the executable file 
 MAIN = mat
-#EXP = exp
+EXP = exp
 GEN = gen
 TEST = tester
 
 .PHONY: depend clean
 
-all:    $(MAIN) $(GEN) $(TEST)
+all:    $(MAIN) $(GEN) $(TEST) $(EXP)
 	@echo  Mat, Gen and Tester compiled
 
 #$(OBJS) 
 $(MAIN): $(OMAIN)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OMAIN) $(LIBS)
 	
-#$(EXP): $(OEXP)
-#	$(CC) $(CFLAGS) $(INCLUDES) -o $(EXP) $(OEXP) $(LIBS)
+$(EXP): $(OEXP)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(EXP) $(OEXP) $(LIBS)
 
 $(GEN): $(OGEN)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(GEN) $(OGEN) $(LIBS)
 
 $(TEST): $(OTST)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(TEST) $(OTST) $(LIBS)
+	
 .cpp.o: 
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
