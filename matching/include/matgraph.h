@@ -13,8 +13,6 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 
-// max value for fattest path
-static const unsigned int MAX_FLOW = std::numeric_limits<unsigned int>::max(); 
 
 typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirectedS>::vertex_descriptor Node;
 typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirectedS>::edge_descriptor Edge;

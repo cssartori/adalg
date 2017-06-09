@@ -1,5 +1,4 @@
 #include "../include/matgraph.h"
-//#include "../include/mem_used.hpp"
 #include <vector>
 #include <chrono>
 #include <queue>
@@ -8,7 +7,9 @@
 using namespace std;
 using namespace boost;
 
-#define NULL_NODE num_vertices(g)+1
+//null node: when the vertex is not matched to any other valid vertex
+static const unsigned int NULL_NODE = std::numeric_limits<unsigned int>::max();
+
 
 struct HTreeNode{
     bool edge_used;
@@ -23,7 +24,7 @@ struct Matching{
     unsigned int card; //set cardinality
     vector<unsigned int> m; //vector of mates
     
-    Matching(unsigned int sz, unsigned int def=0){
+    Matching(unsigned int sz, unsigned int def=NULL_NODE){
         card = 0;
         m.assign(sz, def);
     }
@@ -61,7 +62,7 @@ void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, uns
 //BFS
 bool search_paths(const Graph& g, const vector<unsigned int>& v1, vector<HTreeNode>& h, Matching& mat){    
     vector<bool> visited(num_vertices(g), false);
-    vector<unsigned int> dist(num_vertices(g), 0);
+    //vector<unsigned int> dist(num_vertices(g), 0);
     queue<unsigned int> u1, u2;
     
     //get free nodes in v1 into queue u1
@@ -87,7 +88,7 @@ bool search_paths(const Graph& g, const vector<unsigned int>& v1, vector<HTreeNo
 		    for(tie(ie, fe) = out_edges(u, g); ie != fe; ie++){
 			    unsigned int v = target(*ie, g);
 			    if(not visited[v]){
-			        dist[v] = dist[u]+1;
+			        //dist[v] = dist[u]+1;
 			        u2.push(v);
 			        h[g[*ie].id].edge_used = true; //mark edge as used in H
 			        h[g[*ie].id].dest = u;
@@ -110,7 +111,7 @@ bool search_paths(const Graph& g, const vector<unsigned int>& v1, vector<HTreeNo
             }else{
                 unsigned int v = mat.m[u];
                 if(not visited[v]){
-                    dist[v] = dist[u]+1;
+                    //dist[v] = dist[u]+1;
                     u1.push(v);
                     Edge e = edge(u,v,g).first;
                     h[g[e].id].edge_used = true;
@@ -203,7 +204,6 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<HTreeN
 }
 
 unsigned int hopcroft_karp(const Graph& g){
-    
     unsigned int n = num_vertices(g);
     vector<unsigned int> mates(n, NULL_NODE); //vector mates
     vector<HTreeNode> h(num_edges(g)); //hungarian tree H
