@@ -28,12 +28,12 @@ echo "================================================"
 
 
 echo "================================================"
-echo "Generating instances with p = 0.1"
+echo "Generating instances with p = 0.5"
 
 for n in {8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304}
 do
     fname=$dirn0"bg_n"$n".gr"
-    ../gen -n $n -p 0.1 > $fname
+    ../gen -n $n -p 0.5 > $fname
     echo "Finished "$n" in file "$fname
     timestamp
 done    
