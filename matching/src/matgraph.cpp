@@ -23,10 +23,12 @@ struct HTreeNode{
 struct Matching{
     unsigned int card; //set cardinality
     vector<unsigned int> m; //vector of mates
+    vector<Edge> e;
     
     Matching(unsigned int sz, unsigned int def=NULL_NODE){
         card = 0;
         m.assign(sz, def);
+        e.assign(sz, Edge());
     }
 };
 
@@ -113,7 +115,7 @@ bool search_paths(const Graph& g, const vector<unsigned int>& v1, vector<HTreeNo
                 if(not visited[v]){
                     //dist[v] = dist[u]+1;
                     u1.push(v);
-                    Edge e = edge(u,v,g).first;
+                    Edge e = mat.e[u];
                     h[g[e].id].edge_used = true;
                     h[g[e].id].dest = u;
                 }
@@ -187,6 +189,8 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<HTreeN
                 mat.m[source(e,g)] = target(e,g);
                 mat.m[target(e,g)] = source(e,g);
                 
+                mat.e[source(e,g)] = e;
+                mat.e[target(e,g)] = e;
                 //set the next edge as matched (M-alternating path)
                 free_edge = false;
             }

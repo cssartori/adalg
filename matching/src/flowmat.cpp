@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstring>
+#include <cstdio>
+#include <chrono>
 using namespace std;
  
 #include <boost/graph/adjacency_list.hpp>
@@ -96,15 +98,18 @@ int main(int argc, char *argv[]) {
     unsigned int n,m,s,t;
  
     read_dimacs_flow_matching_graph(g, cin, &n,&m,&s,&t);
-
+std::chrono::time_point<std::chrono::system_clock> tstart, tend;
+            std::chrono::duration<long double> elapsed_seconds;
+            tstart = std::chrono::system_clock::now();
     // (1) determine maximum flow
     unsigned int fat = push_relabel_max_flow(g, s, t,
                                             get(&EdgeInformation::edge_capacity,g),
                                             get(&EdgeInformation::edge_residual_capacity,g),
                                             get(&EdgeInformation::reverse_edge,g),
                                             get(boost::vertex_index, g));
-    
+                tend = std::chrono::system_clock::now();
+	        elapsed_seconds = tend-tstart;	
     cout << fat << endl;
-   
+    printf("%.2Lf\n", elapsed_seconds.count());
     return fat;
 }
