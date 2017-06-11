@@ -23,12 +23,10 @@ struct HTreeNode{
 struct Matching{
     unsigned int card; //set cardinality
     vector<unsigned int> m; //vector of mates
-    vector<Edge> e;
     
     Matching(unsigned int sz, unsigned int def=NULL_NODE){
         card = 0;
         m.assign(sz, def);
-        e.assign(sz, Edge());
     }
 };
 
@@ -62,7 +60,7 @@ void read_dimacs_matching_graph(Graph& g, std::istream& in, unsigned int* n, uns
 
 
 //BFS
-bool search_paths(const Graph& g, const vector<unsigned int>& v1, vector<HTreeNode>& h, Matching& mat){    
+bool search_paths(const Graph& g, const vector<unsigned int>& v1, vector<HTreeNode>& h, const vector<Edge>& pe, Matching& mat){    
     vector<bool> visited(num_vertices(g), false);
     //vector<unsigned int> dist(num_vertices(g), 0);
     queue<unsigned int> u1, u2;
@@ -115,7 +113,7 @@ bool search_paths(const Graph& g, const vector<unsigned int>& v1, vector<HTreeNo
                 if(not visited[v]){
                     //dist[v] = dist[u]+1;
                     u1.push(v);
-                    Edge e = mat.e[u];
+                    Edge e = pe[u];
                     h[g[e].id].edge_used = true;
                     h[g[e].id].dest = u;
                 }
@@ -127,7 +125,7 @@ bool search_paths(const Graph& g, const vector<unsigned int>& v1, vector<HTreeNo
     return found;
 }
 
-bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<HTreeNode>& h, Matching& mat){
+bool extract_paths(const Graph& g, const vector<unsigned int>& v2, const vector<HTreeNode>& h, vector<Edge>& pe, Matching& mat){
     vector<bool> visited(num_vertices(g), false);
     unsigned int mp = mat.card;
     
@@ -189,8 +187,8 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<HTreeN
                 mat.m[source(e,g)] = target(e,g);
                 mat.m[target(e,g)] = source(e,g);
                 
-                mat.e[source(e,g)] = e;
-                mat.e[target(e,g)] = e;
+                pe[source(e,g)] = e;
+                pe[target(e,g)] = e;
                 //set the next edge as matched (M-alternating path)
                 free_edge = false;
             }
@@ -209,7 +207,8 @@ bool extract_paths(const Graph& g, const vector<unsigned int>& v2, vector<HTreeN
 
 unsigned int hopcroft_karp(const Graph& g){
     unsigned int n = num_vertices(g);
-    vector<unsigned int> mates(n, NULL_NODE); //vector mates
+    unsigned int m = num_edges(g);
+    vector<Edge> pe(n, Edge()); //paired edges
     vector<HTreeNode> h(num_edges(g)); //hungarian tree H
     Matching mat(num_vertices(g), NULL_NODE); //matching set M
     
@@ -223,12 +222,11 @@ unsigned int hopcroft_karp(const Graph& g){
     
     //the main loop of the algorithm
     int phases = 0;      
-    while(search_paths(g, v1, h, mat)){
-        bool has_extract = extract_paths(g, v2, h, mat);
+    while(search_paths(g, v1, h, pe, mat)){
+        bool has_extract = extract_paths(g, v2, h, pe, mat);
         if(not has_extract)
             break;           
-        for(unsigned int i=0;i<h.size();i++)
-            h[i].edge_used = false;
+        h.assign(m, HTreeNode());
          
         phases++;
     }
