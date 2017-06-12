@@ -129,8 +129,9 @@ struct TestData{
 
 
 //BFS
-bool search_paths_test(const Graph& g, const vector<unsigned int>& v1, vector<HTreeNode>& h, Matching& mat){    
+bool search_paths_test(const Graph& g, const vector<unsigned int>& v1, vector<HTreeNode>& h, const vector<Edge>& pe, Matching& mat){    
     vector<bool> visited(num_vertices(g), false);
+    //vector<unsigned int> dist(num_vertices(g), 0);
     std::queue<unsigned int> u1, u2;
     
     //get free nodes in v1 into queue u1
@@ -156,6 +157,7 @@ bool search_paths_test(const Graph& g, const vector<unsigned int>& v1, vector<HT
 		    for(tie(ie, fe) = out_edges(u, g); ie != fe; ie++){
 			    unsigned int v = target(*ie, g);
 			    if(not visited[v]){
+			        //dist[v] = dist[u]+1;
 			        u2.push(v);
 			        h[g[*ie].id].edge_used = true; //mark edge as used in H
 			        h[g[*ie].id].dest = u;
@@ -178,8 +180,9 @@ bool search_paths_test(const Graph& g, const vector<unsigned int>& v1, vector<HT
             }else{
                 unsigned int v = mat.m[u];
                 if(not visited[v]){
+                    //dist[v] = dist[u]+1;
                     u1.push(v);
-                    Edge e = edge(u,v,g).first;
+                    Edge e = pe[u];
                     h[g[e].id].edge_used = true;
                     h[g[e].id].dest = u;
                 }
@@ -191,7 +194,7 @@ bool search_paths_test(const Graph& g, const vector<unsigned int>& v1, vector<HT
     return found;
 }
 
-bool extract_paths_test(const Graph& g, const vector<unsigned int>& v2, vector<HTreeNode>& h, Matching& mat, TestData& td){
+bool extract_paths_test(const Graph& g, const vector<unsigned int>& v2, vector<HTreeNode>& h, vector<Edge>& pe, Matching& mat, TestData& td){
     vector<bool> visited(num_vertices(g), false);
     unsigned int mp = mat.card;
     
@@ -199,8 +202,8 @@ bool extract_paths_test(const Graph& g, const vector<unsigned int>& v2, vector<H
     for(unsigned int i=0;i<v2.size();i++){
         if(mat.m[v2[i]] != NULL_NODE) continue;
         
-        stack<unsigned int> s;
-        stack<Edge> path;
+        std::stack<unsigned int> s;
+        std::stack<Edge> path;
         s.push(v2[i]);
         
         bool found_path = false;
@@ -213,8 +216,8 @@ bool extract_paths_test(const Graph& g, const vector<unsigned int>& v2, vector<H
 
             graph_traits<Graph>::out_edge_iterator ie, fe;  //initial edge iterator and final edge
 		    for(tie(ie, fe) = out_edges(u, g); ie != fe; ie++){
+		        td.dfsiter += 1;
     		    unsigned int v = target(*ie, g);
-    		    td.dfsiter += 1;
     		    //edge should be used in tree H and its destination in the reversed DAG cannot be u itself (it would mean another edge of same class)
 		        if(not h[g[*ie].id].edge_used || h[g[*ie].id].dest == u) continue;
                 
@@ -254,6 +257,8 @@ bool extract_paths_test(const Graph& g, const vector<unsigned int>& v2, vector<H
                 mat.m[source(e,g)] = target(e,g);
                 mat.m[target(e,g)] = source(e,g);
                 
+                pe[source(e,g)] = e;
+                pe[target(e,g)] = e;
                 //set the next edge as matched (M-alternating path)
                 free_edge = false;
             }
@@ -271,16 +276,19 @@ bool extract_paths_test(const Graph& g, const vector<unsigned int>& v2, vector<H
 }
 
 TestData hopcroft_karp_test(const Graph& g){
-    std::chrono::time_point<std::chrono::system_clock> tstart, tend;
-    std::chrono::duration<long double> elapsed_seconds;
-    tstart = std::chrono::system_clock::now();  
-    
     TestData td;
     
     unsigned int n = num_vertices(g);
-    vector<unsigned int> mates(n, NULL_NODE); //vector mates
+    unsigned int m = num_edges(g);
+    vector<Edge> pe(n, Edge());
     vector<HTreeNode> h(num_edges(g)); //hungarian tree H
     Matching mat(num_vertices(g), NULL_NODE); //matching set M
+    
+    td.mem = memory_used();
+    
+    std::chrono::time_point<std::chrono::system_clock> tstart, tend;
+    std::chrono::duration<long double> elapsed_seconds;
+    tstart = std::chrono::system_clock::now();  
     
     //default definition of vertex sets v1 and v2: v1 U v2 = V : G=(V,E)    
     vector<unsigned int> v1(n/2);
@@ -290,20 +298,17 @@ TestData hopcroft_karp_test(const Graph& g){
         v2[i] = i+n/2;    
     }   
     
-    td.mem = memory_used();
-    
     //the main loop of the algorithm 
     td.dfsiter = 0;
     td.phases = 0;   
-    while(search_paths_test(g, v1, h, mat)){
+    while(search_paths_test(g, v1, h, pe, mat)){
         unsigned int mdi = td.dfsiter;
         td.dfsiter = 0;
-        bool has_extract = extract_paths_test(g, v2, h, mat, td);
+        bool has_extract = extract_paths_test(g, v2, h, pe, mat, td);
         td.dfsiter = max(td.dfsiter, mdi);
         if(not has_extract)
             break;           
-        for(unsigned int i=0;i<h.size();i++)
-            h[i].edge_used = false;
+        h.assign(m, HTreeNode());
                         
         td.phases += 1;
     }
@@ -335,10 +340,10 @@ int main(int argc, char **argv){
         FlowGraph g;
         read_dimacs_flow_matching_graph(g, cin, &n,&m,&s,&t);
         for(unsigned int i=0;i<NUM_EXP;i++){
+            size_t mem = memory_used();
             std::chrono::time_point<std::chrono::system_clock> tstart, tend;
             std::chrono::duration<long double> elapsed_seconds;
-            tstart = std::chrono::system_clock::now();
-            size_t mem = memory_used();  
+            tstart = std::chrono::system_clock::now();  
             unsigned int fat = push_relabel_max_flow(g, s, t,
                                                 get(&EdgeInformation::edge_capacity,g),
                                                 get(&EdgeInformation::edge_residual_capacity,g),
