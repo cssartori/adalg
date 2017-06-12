@@ -119,7 +119,7 @@ int main(int argc, char **argv){
     }else if(op == 3){
         FlowGraph g;
         read_dimacs_flow_matching_graph(g, cin, &n,&m,&s,&t);
-        if(n > pow(2,15)){
+        if(n > pow(2,16)){
             fprintf(stderr, "Warning! Graph is too big for fattest path.\n");
             exit(-1);
         }
