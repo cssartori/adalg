@@ -65,7 +65,7 @@ def __proc_data_file__(filename, op):
                 
                 comp = max_phases*max_dfsi
                       
-                l = [n, m, phases, max_phases, ndfsi, max_dfsi, comp, mem_avg, time_avg, float(phases/max_phases), float(float(ndfsi)/float(max_dfsi)), float((phases*ndfsi)/comp), time_avg/comp]
+                l = [n, m, phases, max_phases, ndfsi, max_dfsi, comp, mem_avg, time_avg, float(phases/max_phases), float(float(ndfsi)/float(max_dfsi)), float((phases*ndfsi)/comp), time_avg/comp, mat]
             else: #generate average file for flow
                 cdata = csv.reader(cfile, delimiter=",")
 
@@ -93,7 +93,7 @@ def __proc_data_file__(filename, op):
                 
                 comp = n*m
                        
-                l = [n, m, 0, 0, 0, 0, comp, mem_avg, time_avg, 0, 0, 0, time_avg/comp]
+                l = [n, m, 0, 0, 0, 0, comp, mem_avg, time_avg, 0, 0, 0, time_avg/comp, mat]
     return l
 
 
@@ -112,7 +112,7 @@ def __proc_dir_average__(dirname, op, outfname, rfext):
 
     for l in lr:
         # n m phases max_phases ndfsi max_dfsi comp mem time phases/max_phases ndfsi/max_dfsi pd/comp time/comp
-        outf.write("%u,%u,%u,%.2f,%u,%.2f,%.2f,%.2f,%.2Le,%.2Le,%.2Le,%.2Le,%.2Le\n" % (l[0], l[1], l[2], l[3], l[4], l[5], l[6], l[7]/(1024*1024), l[8], l[9], l[10], l[11], l[12]))
+        outf.write("%u,%u,%u,%.2f,%u,%.2f,%.2f,%.2f,%.2Le,%.2Le,%.2Le,%.2Le,%.2Le,%u\n" % (l[0], l[1], l[2], l[3], l[4], l[5], l[6], l[7]/(1024*1024), l[8], l[9], l[10], l[11], l[12],l[13]))
         
     outf.close()
 
@@ -136,8 +136,8 @@ def __proc_table_file__(dirname, outfname, rfext):
             
             #lf = []
             for row in cdata:
-                # op n m phases ndfsi mem time
-                l = [op, int(row[0]), int(row[1]), int(row[2]), int(row[4]), float(row[7]), float(row[8])]  
+                # op n m phases ndfsi mem time mat
+                l = [op, int(row[0]), int(row[1]), int(row[2]), int(row[4]), float(row[7]), float(row[8]), int(row[13])]  
                 lr.append(l)    
         
     lr = sorted(lr, key = lambda x: (x[1], x[0])) #sort by number of nodes and type
@@ -150,7 +150,7 @@ def __proc_table_file__(dirname, outfname, rfext):
     while i < len(lr):
         c += 1
         k = 1          
-        outf.write("\n%u & %u & %u & %u & %u & %.2Le & " % (c, lr[i][1], lr[i][2], lr[i][3], lr[i][4], lr[i][6]))
+        outf.write("\n%u & %u & %u & %u & %u & %u & %.2Le & " % (c, lr[i][1], lr[i][2], lr[i][7], lr[i][3], lr[i][4], lr[i][6]))
         
         if i+1 < len(lr) and lr[i+1][0] == o+1:
             outf.write("%.2Le & " % (lr[i+1][6]))
