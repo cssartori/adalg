@@ -7,7 +7,7 @@ def __prepareargs__():
     parser = argparse.ArgumentParser(description='Creates result tables for Fattest Path Max-FLow')
     parser.add_argument('-d', nargs=1, type=str, help='directory with results', required=True)
     parser.add_argument('-o', nargs=1, type=str, help='output file name', required=True)
-    parser.add_argument('-x', nargs=1, type=int, help='experiment identifier (<generate average files> = 1, <generate tables> = 2)', required=True)
+    parser.add_argument('-x', nargs=1, type=int, help='experiment identifier (<graphics matching files> = 1, <graphics flow files> = 2)', required=True)
     parser.add_argument('-e', nargs=1, type=str, help='result files extension (default = \'.dat\')', required=False, default = ['.dat'])
 
         
@@ -96,6 +96,7 @@ def __proc_data_file__(filename, op):
                 l = [n, m, 0, 0, 0, 0, comp, mem_avg, time_avg, 0, 0, 0, time_avg/comp]
     return l
 
+
 def __proc_dir_average__(dirname, op, outfname, rfext):
     outf = open(outfname, "w")
     print("reading files")
@@ -116,75 +117,57 @@ def __proc_dir_average__(dirname, op, outfname, rfext):
     outf.close()
 
 
-#def __proc_dir_table__(dirname, outfname, rfext, exp=2):
-#    outf = open(outfname, "w")
-#    
-#    print("reading files")
-#    
-#    lr = [] 
-#    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
-#        print("Reading file "+file)
-#        lf = __proc_data_file__(dirname+file, "table")
-#        C = 0
-#        if exp == 2:
-#            ind = file.find("k")
-#            if ind > 0:
-#                ind += 1
-#                str = ""
-#                while file[ind] != '.':
-#                    str += file[ind]
-#                    ind += 1
-#            
-#                C = int(str)
-#            
-#        for l in lf:    
-#            l.append(C)    
-#            lr.append(l)
-# 
-#    
-#    #print ("vr = " % (vr))
-#    # Generate table file       
-#    lr = sorted(lr, key = lambda x: (x[1], x[-1])) #sort by number of edges and capacity
-#	
-#    avg = dict({})
-#    for l in lr:
-#        # iter time flow
-#        avg[l[-1]] = [0.0,0.0,0.0]
-#    
-#    nn = -1
-#    c=0
-#    mavg = 0
-#    navg = 0
-#    memavg = 0
-#   
-#    for l in lr:
-#        if nn != l[1]:
-#            if nn != -1:
-#                outf.write("\\\\")
-#            c += 1
-#            navg += l[0]
-#            mavg += l[1]
-#            memavg += l[10]
-#                      
-#            outf.write("\n%u & %u & %u & %.2f" % (c, l[0], l[1], l[10]))            
-#            nn = l[1]
-#        
-#        outf.write(" & %u & %.2Le & %u" % (l[8], l[11], l[13]))            
-#            
-#        avg[l[-1]][0] += l[8]
-#        avg[l[-1]][1] += l[11]
-#        avg[l[-1]][2] += l[13]
-#        
-#        
-#        
-#    outf.write("\\\\\n\\textbf{Media} & %.2f & %.2f & %.2f" % (navg/c, mavg/c, memavg/c))
-#    
-#    for a in sorted(avg.iterkeys()):
-#        outf.write(" & %.2f & %.2Le & %.2f" % (avg[a][0]/c, avg[a][1]/c, avg[a][2]/c))
+def __proc_table_file__(dirname, outfname, rfext):
+    outf = open(outfname, "w")
+    
+    lr = [] 
+    for file in [f for f in os.listdir(dirname) if f.endswith(rfext)]:
+        print("Reading file "+dirname+file)
+        with open(dirname+file, 'rb') as cfile:
+            cdata = csv.reader(cfile, delimiter=",")
+            op = 1
+            #print "file[1:3] = "+file[1:3]
+            if file[1:4] == "mat":
+                op = 1
+            elif file[1:4] == "flo":
+                op = 2
+            elif file[1:4] == "fat":
+                op = 3
+            
+            #lf = []
+            for row in cdata:
+                # op n m phases ndfsi mem time
+                l = [op, int(row[0]), int(row[1]), int(row[2]), int(row[4]), float(row[7]), float(row[8])]  
+                lr.append(l)    
+        
+    lr = sorted(lr, key = lambda x: (x[1], x[0])) #sort by number of nodes and type
+    
+    nn = -1
+    c=0
+    o=1
+    i = 0
 
-
-#    outf.write("\\\\")
-#    outf.close()
+    while i < len(lr):
+        c += 1
+        k = 1          
+        outf.write("\n%u & %u & %u & %u & %u & %.2Le & " % (c, lr[i][1], lr[i][2], lr[i][3], lr[i][4], lr[i][6]))
+        
+        if i+1 < len(lr) and lr[i+1][0] == o+1:
+            outf.write("%.2Le & " % (lr[i+1][6]))
+            k += 1
+        else:
+            outf.write("- & ")
+            
+        if i+2 < len(lr) and lr[i+2][0] == o+2:
+            outf.write("%.2Le \\\\" % (lr[i+2][6]))
+            k += 1
+        else:
+            outf.write("- \\\\")
+            
+        i += k         
+            
+    outf.close()                
+            
     
 
 
@@ -204,6 +187,8 @@ if __name__ == '__main__':
         __proc_dir_average__(dirname, "avgmat", outfname, rfext)    
     elif exp == 2:
         __proc_dir_average__(dirname, "avgflow", outfname, rfext)
+    elif exp == 3:
+        __proc_table_file__(dirname, outfname, rfext)
         #__proc_dir_table__(dirname, outfname, rfext)
     
    
