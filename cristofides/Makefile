@@ -20,7 +20,7 @@ OGEN = $(SGEN:.cpp=.o)
 OTST = $(STST:.cpp=.o)
 
 # define the executable file 
-MAIN = mat
+MAIN = main
 EXP = exp
 GEN = gen
 TEST = tester
