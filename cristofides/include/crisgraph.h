@@ -11,7 +11,7 @@ typedef unsigned Distance;
 namespace Cristofides{
 
     enum DistType{ EUC_2D = 1024, EUC_3D, MAX_2D, MAX_3D, MAN_2D, MAN_3D,
-                     CEIL_2D};
+                     CEIL_2D, GEO};
 
     struct CrisGraph{
         std::vector<double> px;
@@ -27,6 +27,8 @@ namespace Cristofides{
         
         Distance dist(unsigned int i, unsigned int j){
             double xd, yd, zd;
+            double q1, q2, q3;
+            const double RRR = 6378.388;
             switch(this->dtype){
                 case EUC_2D:
                     xd = this->px[i] - this->px[j];
@@ -59,6 +61,11 @@ namespace Cristofides{
 		            xd = this->px[i] - this->px[j];
 		            yd = this->py[i] - this->py[j];
 		            return Distance(ceil(sqrt(xd*xd+yd*yd)));
+		        case GEO:
+		            q1 = cos(this->py[i] - this->py[j]);
+		            q2 = cos(this->px[i] - this->px[j]);
+		            q3 = cos(this->px[i] + this->px[j]);
+		            return Distance(RRR * acos(0.5*((1.0+q1)*q2-(1.0-q1)*q3))+1.0);
 		        default:
 		            throw std::string("Invalid distance type ")+this->type+std::string(" \n");
             }
@@ -85,8 +92,12 @@ namespace Cristofides{
     unsigned int read_specification(CrisGraph& g, std::istream& f){
         std::string keyword;
         g.node_coord_type = "TWOD_COORDS";
+        
+        //std::cout << "reading specs...\n";
+        
         do {
             keyword = read_keyword(f);
+            //std::cout << "reading "+keyword << std::endl;
             if (keyword[keyword.length()-1] == ':') {
                 keyword = keyword.substr(0,keyword.length()-1);
                 f.putback(':');
@@ -134,8 +145,10 @@ namespace Cristofides{
                     g.dtype = MAN_3D;
                 else if(g.edge_weight_type == "CEIL_2D")
                     g.dtype = CEIL_2D;
+                else if(g.edge_weight_type == "GEO")
+                    g.dtype = GEO;    
                 else{
-                    throw "Unkown edge weight type "+g.edge_weight_type+" \n";
+                    throw std::string("Unkown edge weight type ")+g.edge_weight_type;
                     return -1;
                 }
             }else if(keyword == "EDGE_WEIGHT_FORMAT"){
@@ -158,6 +171,18 @@ namespace Cristofides{
         } while (true);
     }
     
+    
+    std::pair<double,double> latlong(double x, double y){
+        double deg = lrint(x);
+        double min = x - deg;
+        double lat = M_PI * (deg + 5.0 * min / 3.0 ) / 180.0;
+        deg = lrint(y);
+        min = y - deg;
+        double lon = M_PI * (deg + 5.0 * min / 3.0 ) / 180.0; 
+        
+        return std::make_pair(lat, lon);
+    }
+    
     unsigned int read_data(CrisGraph& g, std::istream& f){
         //allocate memory
         g.px.assign(g.dim, 0.0);
@@ -173,12 +198,18 @@ namespace Cristofides{
 	                        unsigned int j;
 	                        double x,y;
 	                        f >> j >> x >> y;
-	                        g.px[j-1] = x;
-	                        g.py[j-1] = y;
+	                        if(g.dtype != GEO){
+	                            g.px[j-1] = x;
+	                            g.py[j-1] = y;
+	                        }else{
+	                            std::pair<double,double> ll = latlong(x,y);
+	                            g.px[j-1] = ll.first;
+	                            g.py[j-1] = ll.second;
+	                        } 
 	                    }                   	                
 	                }else 
 	                    throw std::string("Unsupported coordinate type ")+g.node_coord_type;
-            }else if (keyword == "DEPOT_SECTION") {
+                }else if (keyword == "DEPOT_SECTION") {
                 	throw std::string("Unsupported data section ")+keyword;
                 }else if (keyword == "DEMAND_SECTION") {
 	                throw std::string("Unsupported data section ")+keyword;
@@ -211,13 +242,18 @@ namespace Cristofides{
     }
         
     unsigned int read(CrisGraph& g, std::istream& f){
-        if(read_specification(g, f) != 0){
-            std::cout << "Error reading specification of input file\n" << std::endl;
-            return -1;
-        }
-        
-        if(read_data(g, f) != 0){
-            std::cout << "Error reading data of input file\n" << std::endl;
+        try{
+            if(read_specification(g, f) != 0){
+                std::cout << "Error reading specification of input file\n" << std::endl;
+                return -1;
+            }
+            
+            if(read_data(g, f) != 0){
+                std::cout << "Error reading data of input file\n" << std::endl;
+                return -1;
+            }
+        }catch(const std::string& s){
+            std::cout << s << std::endl;
             return -1;
         }
         
