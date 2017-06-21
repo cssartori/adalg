@@ -5,13 +5,19 @@
 #include <iostream>
 #include <string>
 #include <math.h>
+#include <limits>
+#include "../../heap/include/heap.h"
+#include "../../heap/include/nheap.h"
 
-typedef unsigned Distance;
 
 namespace Cristofides{
 
+    typedef unsigned int Distance; //the type of the distance data
+    typedef std::vector< std::vector<unsigned int> > MST; //minimum spanning tree of a graph is an adjacency list
+    static const Distance MAX_WEIGHT = std::numeric_limits<Distance>::max(); 
+    
     enum DistType{ EUC_2D = 1024, EUC_3D, MAX_2D, MAX_3D, MAN_2D, MAN_3D,
-                     CEIL_2D, GEO};
+                     CEIL_2D, GEO}; //the type of calculation to find the distance
 
     struct CrisGraph{
         std::vector<double> px;
@@ -25,7 +31,7 @@ namespace Cristofides{
         unsigned int dim; //dimension of the problem (num nodes)
         
         
-        Distance dist(unsigned int i, unsigned int j){
+        Distance dist(unsigned int i, unsigned int j) const{
             double xd, yd, zd;
             double q1, q2, q3;
             const double RRR = 6378.388;
@@ -259,7 +265,59 @@ namespace Cristofides{
         
         return 0;
     }
+    
+    MST findMST(const CrisGraph& g){
+        std::vector<bool> visited(g.dim, false);
+        std::vector<unsigned int> prev(g.dim, MAX_WEIGHT); //the previous of each node in the MST construction
+        std::vector<Distance> weight(g.dim, MAX_WEIGHT);
+        
+        NHeap h(g.dim, 4);
+        weight[0] = 0; //starting at node 0 (graph is complete, does not make much difference)
+        h.insert(0, weight[0]);
+        for(unsigned int u=1;u<g.dim;u++)
+            h.insert(u,weight[u]);
+        
+        while(not h.is_empty()){
+            unsigned int u = h.gettop();
+            h.deletetop();
+            visited[u] = true;
+            for(unsigned int v=0;v<g.dim;v++){
+                if(u == v || visited[v]) continue;
+                
+                if(g.dist(u,v) < weight[v]){
+                    h.update_key(v, g.dist(u,v));
+                    prev[v] = u;
+                }
+            }
+        }
+        
+        
+        MST mt(g.dim);
+        Distance cost = 0;
+        for(unsigned int u=1;u<g.dim;u++){
+            if(prev[u] == MAX_WEIGHT){
+                std::cout << "An error occurred during MST creation " << std::endl;
+                exit(-1);
+            }
+            mt[u].push_back(prev[u]);
+            mt[prev[u]].push_back(u);    
+            cost += g.dist(u, prev[u]);
+        }
+        std::cout << "MST cost = " << cost << std::endl;
+        
+        return mt;
+    }
 
+
+    void findMatching(const MST& mt){
+        std::vector<unsigned int> oddn; // nodes with odd number of neighbors
+        for(unsigned int u=0;u<mt.size();u++){
+            if(mt[u].size() % 2 != 0)
+                oddn.push_back(u);
+        }
+        
+        std::cout << "There are " << oddn.size() << " nodes of odd degree\n";
+    }
 }
 
 #endif //__CRISGRAPH_H__

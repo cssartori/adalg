@@ -15,5 +15,12 @@ int main(){
     }
 
     cout << "Read input file...\n";
+    
+    MST mt = findMST(g);
+    
+    cout << "Created MST\n";
 
+    findMatching(mt);
+
+    cout << "Matching found\n";
 }
