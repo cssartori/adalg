@@ -1,13 +1,13 @@
 #include <cstdio>
 #include <iostream>
-#include "../include/crisgraph.h"
+#include "../include/chrisgraph.h"
 
 using namespace std;
-using namespace Cristofides;
+using namespace Christofides;
 
 int main(){
 
-    CrisGraph g;
+    ChrisGraph g;
     
     if(read(g, std::cin) != 0){
         cout << "Error reading input file\n";
@@ -20,7 +20,7 @@ int main(){
     
     cout << "Created MST\n";
 
-    findMatching(mt);
+    findMatching(mt, g);
 
     cout << "Matching found\n";
 }

@@ -5,11 +5,12 @@ CFLAGS = -Wall -O3 -std=c++11
 
 INCLUDES = -I include/
 SRCDIR = src/
+BLOSSRC = blossomv/
 
-LIBS = -lm
+LIBS = -lm -lrt
 
 # define the C++ source files
-SMAIN = $(SRCDIR)main.cpp $(SRCDIR)crisgraph.cpp
+SMAIN = $(SRCDIR)main.cpp $(SRCDIR)chrisgraph.cpp $(BLOSSRC)PMinterface.cpp $(BLOSSRC)PMmain.cpp $(BLOSSRC)PMinit.cpp $(BLOSSRC)PMexpand.cpp $(BLOSSRC)PMshrink.cpp $(BLOSSRC)PMduals.cpp $(BLOSSRC)PMrepair.cpp $(BLOSSRC)misc.cpp $(BLOSSRC)MinCost/MinCost.cpp
 #SEXP =  $(SRCDIR)exp.cpp $(SRCDIR)matgraph.cpp
 #SGEN = $(SRCDIR)gen.cpp
 #STST = $(SRCDIR)tester.cpp
@@ -47,7 +48,7 @@ $(MAIN): $(OMAIN)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 clean:
-	$(RM) $(SRCDIR)*.o
+	$(RM) $(SRCDIR)*.o $(BLOSSRC)*.o
 	$(RM) *.bak 
 
 depend: $(SMAIN)

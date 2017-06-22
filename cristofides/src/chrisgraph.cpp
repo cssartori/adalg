@@ -1,13 +1,14 @@
-#include "../include/crisgraph.h"
+#include "../include/chrisgraph.h"
 #include "../../heap/include/heap.h"
 #include "../../heap/include/nheap.h"
+#include "../blossomv/PerfectMatching.h"
 #include <cmath>
 
 using namespace std;
 
-namespace Cristofides{
+namespace Christofides{
     
-    Distance CrisGraph::dist(unsigned int i, unsigned int j) const{
+    Distance ChrisGraph::dist(unsigned int i, unsigned int j) const{
             double xd, yd, zd;
             double q1, q2, q3;
             const double RRR = 6378.388;
@@ -86,7 +87,7 @@ namespace Cristofides{
     
        
     //read the specification area of the input stream
-    unsigned int read_specification(CrisGraph& g, std::istream& f){
+    unsigned int read_specification(ChrisGraph& g, std::istream& f){
         std::string keyword;
         g.node_coord_type = "TWOD_COORDS";
         
@@ -165,7 +166,7 @@ namespace Cristofides{
     }
        
     //read the data part of the input stream
-    unsigned int read_data(CrisGraph& g, std::istream& f){
+    unsigned int read_data(ChrisGraph& g, std::istream& f){
         //allocate memory
         g.px.assign(g.dim, 0.0);
         g.py.assign(g.dim, 0.0);
@@ -237,7 +238,7 @@ namespace Cristofides{
     }
     
     //read the input stream into a graph for chirstofides algorithm    
-    unsigned int read(CrisGraph& g, std::istream& f){
+    unsigned int read(ChrisGraph& g, std::istream& f){
         try{
             if(read_specification(g, f) != 0){
                 std::cout << "Error reading specification of input file\n" << std::endl;
@@ -257,7 +258,7 @@ namespace Cristofides{
     }
     
     //find a MST in the graph
-    MST findMST(const CrisGraph& g){
+    MST findMST(const ChrisGraph& g){
         std::vector<bool> visited(g.dim, false);
         std::vector<unsigned int> prev(g.dim, MAX_WEIGHT); //the previous of each node in the MST construction
         std::vector<Distance> weight(g.dim, MAX_WEIGHT);
@@ -299,12 +300,19 @@ namespace Cristofides{
     }
 
     //find a matching in the mst generated from the input graph
-    void findMatching(const MST& mt){
+    void findMatching(const MST& mt, const ChrisGraph& g){
         std::vector<unsigned int> oddn; // nodes with odd number of neighbors
         for(unsigned int u=0;u<mt.size();u++){
             if(mt[u].size() % 2 != 0)
                 oddn.push_back(u);
         }
+        
+        PerfectMatching pm(oddn.size(), oddn.size()*oddn.size());
+        for(unsigned int u=0;u<oddn.size();u++)
+            for(unsigned int v=u+1;v<oddn.size();v++)
+                pm.AddEdge(u,v,g.dist(u,v));
+                
+        pm.Solve();
         
         std::cout << "There are " << oddn.size() << " nodes of odd degree\n";
     }    

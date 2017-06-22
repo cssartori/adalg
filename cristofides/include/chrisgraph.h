@@ -1,5 +1,5 @@
-#ifndef __CRISGRAPH_H__
-#define __CRISGRAPH_H__
+#ifndef __CHRISGRAPH_H__
+#define __CHRISGRAPH_H__
 
 #include <vector>
 #include <iostream>
@@ -7,7 +7,7 @@
 #include <limits>
 
 
-namespace Cristofides{
+namespace Christofides{
 
     typedef unsigned int Distance; //the type of the distance data
     typedef std::vector< std::vector<unsigned int> > MST; //minimum spanning tree of a graph is an adjacency list
@@ -17,7 +17,7 @@ namespace Cristofides{
                      CEIL_2D, GEO}; //the type of calculation to find the distance
     
     //struct of a graph/instance
-    struct CrisGraph{
+    struct ChrisGraph{
         //3 vectors allow up to 3 dimension instances
         std::vector<double> px;
         std::vector<double> py;
@@ -35,19 +35,19 @@ namespace Cristofides{
     };
     
     //read the specification area of the input stream
-    unsigned int read_specification(CrisGraph& g, std::istream& f);
+    unsigned int read_specification(ChrisGraph& g, std::istream& f);
     
     //read the data part of the input stream
-    unsigned int read_data(CrisGraph& g, std::istream& f);
+    unsigned int read_data(ChrisGraph& g, std::istream& f);
     
     //read the input stream into a graph for chirstofides algorithm    
-    unsigned int read(CrisGraph& g, std::istream& f);
+    unsigned int read(ChrisGraph& g, std::istream& f);
     
     //find a MST in the graph
-    MST findMST(const CrisGraph& g);
+    MST findMST(const ChrisGraph& g);
 
     //find a matching in the mst generated from the input graph
-    void findMatching(const MST& mt);
+    void findMatching(const MST& mt, const ChrisGraph& g);
 }
 
 #endif //__CRISGRAPH_H__
