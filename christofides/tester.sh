@@ -39,11 +39,11 @@ for filename in instances/*.tsp
 
 		comp=$(bc -l <<< $dev">0.5")
 		echo "comp = "$comp
-		if $comp ; then
+		if (($comp == 0)) ; then
 		    echo -n "Correct"   
 		    c=$((c + 1))
 		else
-		    echo -n "Incorrect"
+		    echo -n "WARNING: approx. is not right"
 		fi
 		echo "  ( "$rmain" = "${bks[$ni]}" )"
 		echo -n -e "Finished:\t" 
