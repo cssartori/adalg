@@ -9,7 +9,7 @@ SRCDIR = src/
 LIBS = -lm
 
 # define the C++ source files
-SMAIN = $(SRCDIR)main.cpp
+SMAIN = $(SRCDIR)main.cpp $(SRCDIR)crisgraph.cpp
 #SEXP =  $(SRCDIR)exp.cpp $(SRCDIR)matgraph.cpp
 #SGEN = $(SRCDIR)gen.cpp
 #STST = $(SRCDIR)tester.cpp
