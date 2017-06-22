@@ -10,7 +10,6 @@
 namespace Christofides{
 
     typedef unsigned int Distance; //the type of the distance data
-    typedef std::vector< std::vector<unsigned int> > MST; //minimum spanning tree of a graph is an adjacency list
     static const Distance MAX_WEIGHT = std::numeric_limits<Distance>::max(); 
     
     enum DistType{ EUC_2D = 1024, EUC_3D, MAX_2D, MAX_3D, MAN_2D, MAN_3D,
@@ -32,6 +31,11 @@ namespace Christofides{
         
         //returns the distance between two nodes according to the distance computation given in the input file
         Distance dist(unsigned int i, unsigned int j) const;
+    };
+    
+    struct TSPSolution{
+        std::vector<unsigned int> perm; //permutation of nodes to be visited
+        Distance cost; //total cost of the solution
     };
     
     //read the input stream into a graph for chirstofides algorithm    
