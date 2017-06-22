@@ -14,9 +14,12 @@ int main(){
         return -1;
     }
 
-    cout << "Read input file...\n";
+    //cout << "Read input file...\n";
     
     Distance d = chris_algorithm(g);
     
-    cout << "Christofides algorithm finished with " << d << endl;
+    //cout << "Christofides algorithm finished with " << d << endl;
+    cout << d << endl;
+    
+    return 0;
 }

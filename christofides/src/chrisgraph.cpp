@@ -307,7 +307,7 @@ namespace Christofides{
             mt.nedges += 1;
         }
         
-        std::cout << "MST cost = " << mt.cost << std::endl;
+        //std::cout << "MST cost = " << mt.cost << std::endl;
         
         return mt;
     }
@@ -324,7 +324,7 @@ namespace Christofides{
         PerfectMatching pm(oddn.size(), oddn.size()*oddn.size());
         for(unsigned int u=0;u<oddn.size();u++)
             for(unsigned int v=u+1;v<oddn.size();v++)
-                pm.AddEdge(u,v,g.dist(u,v));
+                pm.AddEdge(u,v,g.dist(oddn[u],oddn[v]));
                        
         pm.Solve();
         
@@ -334,9 +334,10 @@ namespace Christofides{
         for(unsigned int u=0;u<oddn.size();u++){
             for(unsigned int v=u+1;v<oddn.size();v++){
                 if(pm.GetSolution(edge)){
-                    meuler.g[u].push_back(v);
-                    meuler.g[v].push_back(u);    
+                    meuler.g[oddn[u]].push_back(oddn[v]);
+                    meuler.g[oddn[v]].push_back(oddn[u]);    
                     meuler.nedges += 1;
+                    meuler.cost += g.dist(oddn[u],oddn[v]);
                 }
                 edge++;
             }
@@ -348,6 +349,8 @@ namespace Christofides{
     TSPSolution findEulerTour(const MST& meuler, const ChrisGraph& g){
         TSPSolution sol;
         sol.cost = 0;
+        
+       //  cout << " = " << 
         
         unsigned int u = 0; //starting at node 0
         sol.perm.push_back(u);
@@ -363,7 +366,8 @@ namespace Christofides{
                 break;
             }
         }
-        cout << "EC = " << sol.cost << endl << "MST = " << meuler.cost << endl;
+        sol.cost += g.dist(sol.perm[0], sol.perm[*sol.perm.end()]);
+        //cout << "EC = " << sol.cost << endl << "MST = " << meuler.cost << endl;
         return sol;
     }
     
@@ -378,13 +382,42 @@ namespace Christofides{
                 i++;
                 u = sol.perm[i];
             }else{
-                sol.cost -= g.dist(sol.perm[i-1], u);
                 sol.perm.erase(sol.perm.begin()+i);
                 u = sol.perm[i];
             }
         }
         
+        sol.cost = 0;
+        for(unsigned int i=0;i<sol.perm.size();i++){
+            unsigned int j = i+1;
+            if(sol.perm.size() == j)
+                j = 0;
+                
+            sol.cost += g.dist(i,j);    
+        }
+        
         return sol;
+    }
+    
+    void check_solution(TSPSolution sol, const ChrisGraph& g){
+        Distance cost = 0;
+        for(unsigned int i=0;i<sol.perm.size();i++){
+            unsigned int j = i+1;
+            if(sol.perm.size() == j)
+                j = 0;
+                
+            cost += g.dist(i,j);    
+        }
+        
+        cout << "Checked Dist: " << cost << endl << "Calc. Dist: " << sol.cost << endl;        
+    }
+    
+    void printTSPSolution(const TSPSolution& sol){
+        cout << "Tour ( " << sol.perm.size() << " ):  " << sol.perm[0];
+        for(unsigned i = 1;i<sol.perm.size();i++){
+            cout << " , " << sol.perm[i];
+        }
+        cout << endl;
     }
     
     //runs christofides algorithm to get an approximation of a TSP solution
@@ -395,12 +428,9 @@ namespace Christofides{
         
         TSPSolution sol = findEulerTour(meuler, g);
         sol = findHamiltonianTour(sol, g);
-        
-        cout << "Tour ( " << sol.perm.size() << " ):  ";
-        for(unsigned i = 0;i<sol.perm.size();i++){
-            cout << sol.perm[i] << " , ";
-        }
-        cout << endl;
+       
+        //printTSPSolution(sol); 
+        //check_solution(sol, g);
         
         return sol.cost;
     }
