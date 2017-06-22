@@ -238,7 +238,7 @@ namespace Christofides{
     }
     
     //read the input stream into a graph for chirstofides algorithm    
-    unsigned int read(ChrisGraph& g, std::istream& f){
+    unsigned int read_instance(ChrisGraph& g, std::istream& f){
         try{
             if(read_specification(g, f) != 0){
                 std::cout << "Error reading specification of input file\n" << std::endl;
@@ -317,8 +317,14 @@ namespace Christofides{
         std::cout << "There are " << oddn.size() << " nodes of odd degree\n";
     }    
     
-    
-    
+    //runs christofides algorithm to get an approximation of a TSP solution
+    Distance chris_algorithm(const ChrisGraph& g){
+        MST mt = findMST(g);
+        
+        findMatching(mt, g);
+        
+        return 0;
+    }
   
     
 }

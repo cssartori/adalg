@@ -9,18 +9,14 @@ int main(){
 
     ChrisGraph g;
     
-    if(read(g, std::cin) != 0){
+    if(read_instance(g, std::cin) != 0){
         cout << "Error reading input file\n";
         return -1;
     }
 
     cout << "Read input file...\n";
     
-    MST mt = findMST(g);
+    Distance d = chris_algorithm(g);
     
-    cout << "Created MST\n";
-
-    findMatching(mt, g);
-
-    cout << "Matching found\n";
+    cout << "Christofides algorithm finished with " << d << endl;
 }

@@ -14,7 +14,7 @@ namespace Christofides{
     static const Distance MAX_WEIGHT = std::numeric_limits<Distance>::max(); 
     
     enum DistType{ EUC_2D = 1024, EUC_3D, MAX_2D, MAX_3D, MAN_2D, MAN_3D,
-                     CEIL_2D, GEO}; //the type of calculation to find the distance
+                     CEIL_2D, GEO }; //the type of calculation to find the distance
     
     //struct of a graph/instance
     struct ChrisGraph{
@@ -34,20 +34,11 @@ namespace Christofides{
         Distance dist(unsigned int i, unsigned int j) const;
     };
     
-    //read the specification area of the input stream
-    unsigned int read_specification(ChrisGraph& g, std::istream& f);
-    
-    //read the data part of the input stream
-    unsigned int read_data(ChrisGraph& g, std::istream& f);
-    
     //read the input stream into a graph for chirstofides algorithm    
-    unsigned int read(ChrisGraph& g, std::istream& f);
+    unsigned int read_instance(ChrisGraph& g, std::istream& f);
     
-    //find a MST in the graph
-    MST findMST(const ChrisGraph& g);
-
-    //find a matching in the mst generated from the input graph
-    void findMatching(const MST& mt, const ChrisGraph& g);
+    //runs christofides algorithm to get an approximation of a TSP solution
+    Distance chris_algorithm(const ChrisGraph& g);
 }
 
 #endif //__CRISGRAPH_H__
