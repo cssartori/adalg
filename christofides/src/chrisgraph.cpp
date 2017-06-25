@@ -3,6 +3,7 @@
 #include "../../heap/include/nheap.h"
 #include "../blossomv/PerfectMatching.h"
 #include <cmath>
+#include "../../common/cc_gv.h"
 
 using namespace std;
 
@@ -266,6 +267,7 @@ namespace Christofides{
         return 0;
     }
     
+       
     //find a MST in the graph
     MST findMST(const ChrisGraph& g){
         std::vector<bool> visited(g.dim, false);
@@ -285,6 +287,7 @@ namespace Christofides{
             for(unsigned int v=0;v<g.dim;v++){                
                 if(not visited[v] && g.dist(u,v) < weight[v]){
                     h.update_key(v, g.dist(u,v));
+                    weight[v] = g.dist(u,v);
                     prev[v] = u;
                 }
             }
@@ -307,7 +310,7 @@ namespace Christofides{
             mt.nedges += 1;
         }
         
-        //std::cout << "MST cost = " << mt.cost << std::endl;
+        std::cout << "MST cost = " << mt.cost << std::endl;
         
         return mt;
     }
@@ -319,7 +322,7 @@ namespace Christofides{
             if(mt.g[u].size() % 2 != 0)
                 oddn.push_back(u);
         }
-        //std::cout << "There are " << oddn.size() << " nodes of odd degree\n";
+        std::cout << "There are " << oddn.size() << " nodes of odd degree\n";
                 
         PerfectMatching pm(oddn.size(), oddn.size()*oddn.size());
         for(unsigned int u=0;u<oddn.size();u++)
@@ -350,15 +353,17 @@ namespace Christofides{
         TSPSolution sol;
         sol.cost = 0;
         
-       //  cout << " = " << 
+         cout << "meuler.size = " << meuler.nedges << endl; 
         
         unsigned int u = 0; //starting at node 0
         sol.perm.push_back(u);
+        cout << "Tour:\n " << u << endl;
         unsigned int last = 0;
-        while(sol.perm.size() < meuler.nedges){ //while all edges have not been visited
+        while(sol.perm.size() < meuler.nedges-1){ //while all edges have not been visited
             for(unsigned int i=0;i<meuler.g[u].size();i++){ //for each neighbor of u in MST
                 unsigned int v = meuler.g[u][i];
                 if(v == last) continue;
+                cout << v << endl;
                 sol.perm.push_back(v);
                 sol.cost += g.dist(u,v);
                 last = u;
@@ -420,13 +425,35 @@ namespace Christofides{
         cout << endl;
     }
     
+    void prin_mst(const MST& mt, const char* fname){
+        gv_init(fname);
+        
+        for(unsigned i=0;i<mt.g.size();i++){
+            gv_declare(i);
+        }
+        
+        for(unsigned i=0;i<mt.g.size();i++){
+            for(unsigned j=0;j<mt.g[i].size();j++){
+                gv_connect(i, mt.g[i][j],(unsigned)1);
+            }
+        }
+        
+        gv_close();
+    }
+    
     //runs christofides algorithm to get an approximation of a TSP solution
     Distance chris_algorithm(const ChrisGraph& g){
+        cout << "Searching MST..." << endl;
         MST mt = findMST(g);
         
+        cout << "Finding match..." << endl;
         MST meuler = findMatching(mt, g);
         
+        prin_mst(meuler, "mst.dot");
+        cout << "Finding euler tour..." << endl;        
         TSPSolution sol = findEulerTour(meuler, g);
+        
+        cout << "Finding hamiltonian tour..." << endl;
         sol = findHamiltonianTour(sol, g);
        
         //printTSPSolution(sol); 
