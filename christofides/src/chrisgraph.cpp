@@ -3,6 +3,8 @@
 #include "../../heap/include/nheap.h"
 #include "../blossomv/PerfectMatching.h"
 #include <cmath>
+#include <list>
+#include <stack>
 #include "../../common/cc_gv.h"
 
 using namespace std;
@@ -10,9 +12,24 @@ using namespace std;
 namespace Christofides{
     
     //typedef std::vector< std::vector<unsigned int> > MST; //minimum spanning tree of a graph is an adjacency list
+    static const unsigned int NULL_NODE = std::numeric_limits<unsigned int>::max();
+    
+    struct MSTEdge{ //edge of the MST tree
+        //v1 and v2 are the vertices connected by this undirected edge
+        unsigned int v1; 
+        unsigned int v2;
+        bool used;
+        
+        MSTEdge(unsigned int v1, unsigned int v2, bool used=false){
+            this->v1 = v1;
+            this->v2 = v2;
+            this->used = used;
+        }
+    };
     
     struct MST{
-        std::vector< std::vector<unsigned int> > g; //graph of the mst
+        std::vector< std::list<unsigned int> > g; //graph of the mst, each vertex i, has a list g[i] of edges connected, which refers to the vector of edges: g[i][j] refers to the edges[g[i][j]]
+        std::vector< MSTEdge > edges;
         unsigned int nedges;
         unsigned int nnodes;
         Distance cost;
@@ -271,7 +288,7 @@ namespace Christofides{
     //find a MST in the graph
     MST findMST(const ChrisGraph& g){
         std::vector<bool> visited(g.dim, false);
-        std::vector<unsigned int> prev(g.dim, MAX_WEIGHT); //the previous of each node in the MST construction
+        std::vector<unsigned int> prev(g.dim, NULL_NODE); //the previous of each node in the MST construction
         std::vector<Distance> weight(g.dim, MAX_WEIGHT);
         
         NHeap h(g.dim, 4);
@@ -294,23 +311,24 @@ namespace Christofides{
         }
 
         MST mt;
-        mt.g.assign(g.dim, std::vector<unsigned int>());
+        mt.g.assign(g.dim, std::list<unsigned int>());
         mt.nnodes = g.dim;
         mt.nedges = 0;
         mt.cost = 0;
-                
+        //build MST        
         for(unsigned int u=1;u<g.dim;u++){
-            if(prev[u] == MAX_WEIGHT){
-                std::cout << "An error occurred during MST creation " << std::endl;
-                exit(-1);
-            }
-            mt.g[u].push_back(prev[u]);
-            mt.g[prev[u]].push_back(u);    
+//            if(prev[u] == NULL_NODE){
+//                std::cout << "An error occurred during MST creation " << std::endl;
+//                exit(-1);
+//            }
+            mt.edges.push_back(MSTEdge(u,prev[u]));
+            mt.g[u].push_back(mt.edges.size()-1);
+            mt.g[prev[u]].push_back(mt.edges.size()-1);    
             mt.cost += g.dist(u, prev[u]);
             mt.nedges += 1;
         }
         
-        std::cout << "MST cost = " << mt.cost << std::endl;
+      //  std::cout << "MST cost = " << mt.cost << std::endl;
         
         return mt;
     }
@@ -319,11 +337,14 @@ namespace Christofides{
     MST findMatching(const MST& mt, const ChrisGraph& g){
         std::vector<unsigned int> oddn; // nodes with odd number of neighbors
         for(unsigned int u=0;u<mt.g.size();u++){
-            if(mt.g[u].size() % 2 != 0)
+            if(mt.g[u].size() % 2 != 0){
                 oddn.push_back(u);
+                //cout << u << endl;
+            }
         }
-        std::cout << "There are " << oddn.size() << " nodes of odd degree\n";
-                
+        //std::cout << "There are " << oddn.size() << " nodes of odd degree\n";
+        
+        //TODO: change to GeoPerfectMatching        
         PerfectMatching pm(oddn.size(), oddn.size()*oddn.size());
         for(unsigned int u=0;u<oddn.size();u++)
             for(unsigned int v=u+1;v<oddn.size();v++)
@@ -337,8 +358,9 @@ namespace Christofides{
         for(unsigned int u=0;u<oddn.size();u++){
             for(unsigned int v=u+1;v<oddn.size();v++){
                 if(pm.GetSolution(edge)){
-                    meuler.g[oddn[u]].push_back(oddn[v]);
-                    meuler.g[oddn[v]].push_back(oddn[u]);    
+                    meuler.edges.push_back(MSTEdge(oddn[u], oddn[v]));
+                    meuler.g[oddn[u]].push_back(meuler.edges.size()-1);
+                    meuler.g[oddn[v]].push_back(meuler.edges.size()-1);    
                     meuler.nedges += 1;
                     meuler.cost += g.dist(oddn[u],oddn[v]);
                 }
@@ -349,32 +371,49 @@ namespace Christofides{
         return meuler;        
     }    
     
-    TSPSolution findEulerTour(const MST& meuler, const ChrisGraph& g){
+    TSPSolution findEulerTour(MST& meuler, const ChrisGraph& g){
         TSPSolution sol;
         sol.cost = 0;
-        
-         cout << "meuler.size = " << meuler.nedges << endl; 
-        
-        unsigned int u = 0; //starting at node 0
-        sol.perm.push_back(u);
-        cout << "Tour:\n " << u << endl;
-        unsigned int last = 0;
-        while(sol.perm.size() < meuler.nedges-1){ //while all edges have not been visited
-            for(unsigned int i=0;i<meuler.g[u].size();i++){ //for each neighbor of u in MST
-                unsigned int v = meuler.g[u][i];
-                if(v == last) continue;
-                cout << v << endl;
-                sol.perm.push_back(v);
-                sol.cost += g.dist(u,v);
-                last = u;
-                u = v;
-                break;
-            }
+        //TODO: probably can remove edges vector from MST
+       // vector<bool> visited(g.dim, false);
+        //list<unsigned int> av; //active vertices: those that have unused edges
+        stack<unsigned int> av;
+        unsigned int u=0;
+        // cout << "meuler.size = " << meuler.nedges << endl;
+        av.push(u); 
+      //  visited[0] = true;
+        while(av.size() > 0){ //while there are vertices with unused edges
+            //unsigned int u = av.back(); //get last added vertex
+            
+           // visited[u] = true;
+       //     cout << "Getting edge e" << endl;
+            if(meuler.g[u].size() == 0){
+              //  cout << u << endl;
+                sol.perm.push_back(u);
+                u = av.top();
+                av.pop();            
+            }else{
+                av.push(u);    
+                unsigned int e = meuler.g[u].front();            
+                meuler.g[u].pop_front();
+
+                meuler.edges[e].used = true;
+                unsigned int v = meuler.edges[e].v1 == u ? meuler.edges[e].v2 : meuler.edges[e].v1;
+                for(std::list<unsigned int>::iterator ei = meuler.g[v].begin(); ei != meuler.g[v].end(); ei++){ //for each connected edge of this vertex    
+                    if(*ei == e){
+                        meuler.g[v].erase(ei);
+                        break;
+                    }
+                }
+                
+                u=v;   
+            }           
         }
-        sol.cost += g.dist(sol.perm[0], sol.perm[*sol.perm.end()]);
-        //cout << "EC = " << sol.cost << endl << "MST = " << meuler.cost << endl;
-        return sol;
+        
+        return sol;        
     }
+    
+
     
     TSPSolution findHamiltonianTour(TSPSolution sol, const ChrisGraph& g){
         vector<bool> visited(g.dim, false);
@@ -398,7 +437,7 @@ namespace Christofides{
             if(sol.perm.size() == j)
                 j = 0;
                 
-            sol.cost += g.dist(i,j);    
+            sol.cost += g.dist(sol.perm[i],sol.perm[j]);    
         }
         
         return sol;
@@ -425,7 +464,7 @@ namespace Christofides{
         cout << endl;
     }
     
-    void prin_mst(const MST& mt, const char* fname){
+    void prin_mst(MST mt, const char* fname){
         gv_init(fname);
         
         for(unsigned i=0;i<mt.g.size();i++){
@@ -433,8 +472,11 @@ namespace Christofides{
         }
         
         for(unsigned i=0;i<mt.g.size();i++){
-            for(unsigned j=0;j<mt.g[i].size();j++){
-                gv_connect(i, mt.g[i][j],(unsigned)1);
+            for(std::list<unsigned int>::const_iterator it = mt.g[i].begin(); it != mt.g[i].end(); it++){
+                if(mt.edges[*it].used) continue;
+                unsigned int v = mt.edges[*it].v1 == i ? mt.edges[*it].v2 : mt.edges[*it].v1;
+                gv_connect(i, v ,(unsigned)1);
+                mt.edges[*it].used = true;
             }
         }
         
@@ -443,21 +485,21 @@ namespace Christofides{
     
     //runs christofides algorithm to get an approximation of a TSP solution
     Distance chris_algorithm(const ChrisGraph& g){
-        cout << "Searching MST..." << endl;
+       // cout << "Searching MST..." << endl;
         MST mt = findMST(g);
         
-        cout << "Finding match..." << endl;
+      //  cout << "Finding match..." << endl;
         MST meuler = findMatching(mt, g);
         
-        prin_mst(meuler, "mst.dot");
-        cout << "Finding euler tour..." << endl;        
+      //  prin_mst(meuler, "mst.dot");
+      //  cout << "Finding euler tour..." << endl;        
         TSPSolution sol = findEulerTour(meuler, g);
         
-        cout << "Finding hamiltonian tour..." << endl;
+       // cout << "Finding hamiltonian tour..." << endl;
         sol = findHamiltonianTour(sol, g);
        
-        //printTSPSolution(sol); 
-        //check_solution(sol, g);
+   //     printTSPSolution(sol); 
+    //    check_solution(sol, g);
         
         return sol.cost;
     }
