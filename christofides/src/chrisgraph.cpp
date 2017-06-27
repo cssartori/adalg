@@ -364,20 +364,22 @@ namespace Christofides{
         }
         
         //unite matching and MST
-//        MST meuler = mt;
-//        for(unsigned int u=0;u<oddn.size();u++){
-//            for(unsigned int v=u+1;v<oddn.size();v++){
-//                if(pm.GetSolution(edge)){
-//                    meuler.edges.push_back(MSTEdge(oddn[u], oddn[v]));
-//                    meuler.g[oddn[u]].push_back(meuler.edges.size()-1);
-//                    meuler.g[oddn[v]].push_back(meuler.edges.size()-1);    
-//                    meuler.nedges += 1;
-//                    meuler.cost += g.dist(oddn[u],oddn[v]);
-//                }
-//                edge++;
-//            }
-//        }
+        MST meuler = mt;
+        for(unsigned int i=0;i<oddn.size();i++){
+            if(mates[oddn[i]] == NULL_NODE) continue;    
+            
+            unsigned int u = oddn[i];
+            unsigned int v = mates[oddn[i]];
+            meuler.g[u].push_back(v);
+            meuler.g[v].push_back(u);    
+            meuler.nedges += 1;
+            meuler.cost += g.dist(u,v);
+            
+            mates[u] = NULL_NODE;
+            mates[v] = NULL_NODE;   
+        }
         
+        return meuler;
     }
     
     //find a matching in the mst generated from the input graph
@@ -390,7 +392,8 @@ namespace Christofides{
             }
         }
                
-        return blossomMatching(oddn, mt, g);        
+        //return blossomMatching(oddn, mt, g);        
+        return greedyMatching(oddn, mt, g);
     }    
     
     TSPSolution findEulerTour(MST& meuler, const ChrisGraph& g){
@@ -510,7 +513,7 @@ namespace Christofides{
         sol = findHamiltonianTour(sol, g);
        
       //  printTSPSolution(sol); 
-        //check_solution(sol, g);
+       // check_solution(sol, g);
         
         return sol.cost;
     }
