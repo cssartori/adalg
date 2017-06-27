@@ -22,6 +22,7 @@ namespace Christofides{
     };
     
     Distance ChrisGraph::dist(unsigned int i, unsigned int j) const{
+            if(i == j) return Distance(0);
             double xd, yd, zd;
             double q1, q2, q3;
             const double RRR = 6378.388;
@@ -382,8 +383,8 @@ namespace Christofides{
         return meuler;
     }
     
-    //find a matching in the mst generated from the input graph
-    MST findMatching(const MST& mt, const ChrisGraph& g){
+    //find an Eulerian Graph with the mst generated from the input graph and a matching subgraph
+    MST findEulerianGraph(const MST& mt, const ChrisGraph& g, int opmat = BLOSSOM_MAT_ALG){
         std::vector<unsigned int> oddn; // nodes with odd number of neighbors
         //by the handshaking lemma, oddn has even size
         for(unsigned int u=0;u<mt.g.size();u++){
@@ -391,12 +392,14 @@ namespace Christofides{
                 oddn.push_back(u);
             }
         }
-               
-        //return blossomMatching(oddn, mt, g);        
-        return greedyMatching(oddn, mt, g);
+        
+        if(opmat == BLOSSOM_MAT_ALG)
+            return blossomMatching(oddn, mt, g);        
+        else
+            return greedyMatching(oddn, mt, g);
     }    
     
-    TSPSolution findEulerTour(MST& meuler, const ChrisGraph& g){
+    TSPSolution extractEulerTour(MST& meuler, const ChrisGraph& g){
         TSPSolution sol;
         sol.cost = 0;
         
@@ -429,30 +432,29 @@ namespace Christofides{
     
 
     
-    TSPSolution findHamiltonianTour(TSPSolution sol, const ChrisGraph& g){
+    TSPSolution extractHamiltonianTour(TSPSolution sol, const ChrisGraph& g){
         vector<bool> visited(g.dim, false);
         
+        sol.cost = 0;
         unsigned int u = sol.perm[0];
         unsigned int i = 0;
-        while(i < sol.perm.size()-1 /*sol.perm.size() != g.dim+1*/){ //while the permutation has repeated nodes
+        while(i < sol.perm.size() /*sol.perm.size() != g.dim+1*/){ //while the permutation has repeated nodes
             if(not visited[u]){
+                unsigned int prev = i == 0 ? 0 : i-1;
+                //printf("d[%u,%u] = %u\n", sol.perm[prev], u, g.dist(sol.perm[prev], u));
+                sol.cost += g.dist(sol.perm[prev], u);
                 visited[u] = true;
                 i++;
                 u = sol.perm[i];
             }else{
                 sol.perm.erase(sol.perm.begin()+i);
-                u = sol.perm[i];
+                if(i < sol.perm.size());
+                    u = sol.perm[i];
             }
         }
         
-        sol.cost = 0;
-        for(unsigned int i=0;i<sol.perm.size();i++){
-            unsigned int j = i+1;
-            if(sol.perm.size() == j)
-                j = 0;
-                
-            sol.cost += g.dist(sol.perm[i],sol.perm[j]);    
-        }
+        u = sol.perm[sol.perm.size()-1];
+        sol.cost += g.dist(u, sol.perm[0]);
         
         return sol;
     }
@@ -467,7 +469,11 @@ namespace Christofides{
             cost += g.dist(sol.perm[i],sol.perm[j]);    
         }
         
-        cout << "Checked Dist: " << cost << endl << "Calc. Dist: " << sol.cost << endl;        
+        //cout << "Checked Dist: " << cost << endl << "Calc. Dist: " << sol.cost << endl;        
+        if(cost != sol.cost){
+            cout << "Error by : " << cost << " != " << sol.cost << endl;
+            exit(-1);
+        }
     }
     
     void printTSPSolution(const TSPSolution& sol){
@@ -503,17 +509,17 @@ namespace Christofides{
         MST mt = findMST(g);
         
        // cout << "Finding match..." << endl;
-        MST meuler = findMatching(mt, g);
+        MST meuler = findEulerianGraph(mt, g);
         
       //  prin_mst(meuler, "mst.dot");
        // cout << "Finding euler tour..." << endl;        
-        TSPSolution sol = findEulerTour(meuler, g);
+        TSPSolution sol = extractEulerTour(meuler, g);
         
        //cout << "Finding hamiltonian tour..." << endl;
-        sol = findHamiltonianTour(sol, g);
+        sol = extractHamiltonianTour(sol, g);
        
       //  printTSPSolution(sol); 
-       // check_solution(sol, g);
+      //  check_solution(sol, g);
         
         return sol.cost;
     }

@@ -10,6 +10,9 @@
 namespace Christofides{
 
     typedef unsigned int Distance; //the type of the distance data
+    //options to use the greedy algorithm or the Blossom V for calculating a matching
+    static const unsigned int GREEDY_MAT_ALG = 1;
+    static const unsigned int BLOSSOM_MAT_ALG = 2;    
     static const Distance MAX_WEIGHT = std::numeric_limits<Distance>::max(); 
     
     enum DistType{ EUC_2D = 1024, EUC_3D, MAX_2D, MAX_3D, MAN_2D, MAN_3D,
