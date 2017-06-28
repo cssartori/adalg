@@ -45,7 +45,7 @@ namespace Christofides{
     unsigned int read_instance(ChrisGraph& g, std::istream& f);
     
     //runs christofides algorithm to get an approximation of a TSP solution
-    Distance chris_algorithm(const ChrisGraph& g);
+    Distance run_christofides(const ChrisGraph& g, int opmat=BLOSSOM_MAT_ALG);
 }
 
 #endif //__CRISGRAPH_H__

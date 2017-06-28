@@ -274,7 +274,7 @@ namespace Christofides{
     
        
     //find a MST in the graph
-    MST findMST(const ChrisGraph& g){
+    MST find_mst(const ChrisGraph& g){
         std::vector<bool> visited(g.dim, false);
         std::vector<unsigned int> prev(g.dim, NULL_NODE); //the previous of each node in the MST construction
         std::vector<Distance> weight(g.dim, MAX_WEIGHT);
@@ -314,7 +314,7 @@ namespace Christofides{
         return mt;
     }
     
-    MST blossomMatching(std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g){
+    MST blossom_matching(std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g){
 //        unsigned int dimension = g.pz.size() > 0 ? 3 : 2;
 //        GeomPerfectMatching gpm(oddn.size(), dimension);
 //        
@@ -370,7 +370,7 @@ namespace Christofides{
         return meuler;
     }
     
-    MST greedyMatching(const std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g){
+    MST greedy_matching(const std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g){
         vector<unsigned int> mates(g.dim, NULL_NODE);
         unsigned int matched = 0;
         
@@ -414,7 +414,7 @@ namespace Christofides{
     }
     
     //find an Eulerian Graph with the mst generated from the input graph and a matching subgraph
-    MST findEulerianGraph(const MST& mt, const ChrisGraph& g, int opmat = BLOSSOM_MAT_ALG){
+    MST find_eulerian_graph(const MST& mt, const ChrisGraph& g, int opmat = BLOSSOM_MAT_ALG){
         std::vector<unsigned int> oddn; // nodes with odd number of neighbors
         //by the handshaking lemma, oddn has even size
         for(unsigned int u=0;u<mt.g.size();u++){
@@ -424,12 +424,12 @@ namespace Christofides{
         }
         
         if(opmat == BLOSSOM_MAT_ALG)
-            return blossomMatching(oddn, mt, g);        
+            return blossom_matching(oddn, mt, g);        
         else
-            return greedyMatching(oddn, mt, g);
+            return greedy_matching(oddn, mt, g);
     }    
     
-    TSPSolution extractEulerTour(MST& meuler, const ChrisGraph& g){
+    TSPSolution extract_eulerian_tour(MST& meuler, const ChrisGraph& g){
         TSPSolution sol;
         sol.cost = 0;
         
@@ -462,7 +462,7 @@ namespace Christofides{
     
 
     
-    TSPSolution extractHamiltonianTour(TSPSolution sol, const ChrisGraph& g){
+    TSPSolution extract_hamiltonian_tour(TSPSolution sol, const ChrisGraph& g){
         vector<bool> visited(g.dim, false);
         
         sol.cost = 0;
@@ -489,30 +489,30 @@ namespace Christofides{
         return sol;
     }
     
-    void check_solution(TSPSolution sol, const ChrisGraph& g){
-        Distance cost = 0;
-        for(unsigned int i=0;i<sol.perm.size();i++){
-            unsigned int j = i+1;
-            if(sol.perm.size() == j)
-                j = 0;
-                
-            cost += g.dist(sol.perm[i],sol.perm[j]);    
-        }
-        
-        //cout << "Checked Dist: " << cost << endl << "Calc. Dist: " << sol.cost << endl;        
-        if(cost != sol.cost){
-            cout << "Error by : " << cost << " != " << sol.cost << endl;
-            exit(-1);
-        }
-    }
+//    void check_solution(TSPSolution sol, const ChrisGraph& g){
+//        Distance cost = 0;
+//        for(unsigned int i=0;i<sol.perm.size();i++){
+//            unsigned int j = i+1;
+//            if(sol.perm.size() == j)
+//                j = 0;
+//                
+//            cost += g.dist(sol.perm[i],sol.perm[j]);    
+//        }
+//        
+//        //cout << "Checked Dist: " << cost << endl << "Calc. Dist: " << sol.cost << endl;        
+//        if(cost != sol.cost){
+//            cout << "Error by : " << cost << " != " << sol.cost << endl;
+//            exit(-1);
+//        }
+//    }
     
-    void printTSPSolution(const TSPSolution& sol){
-        cout << "Tour ( " << sol.perm.size() << " ):  " << sol.perm[0];
-        for(unsigned i = 1;i<sol.perm.size();i++){
-            cout << " , " << sol.perm[i];
-        }
-        cout << endl;
-    }
+//    void printTSPSolution(const TSPSolution& sol){
+//        cout << "Tour ( " << sol.perm.size() << " ):  " << sol.perm[0];
+//        for(unsigned i = 1;i<sol.perm.size();i++){
+//            cout << " , " << sol.perm[i];
+//        }
+//        cout << endl;
+//    }
     
 //    void prin_mst(MST mt, const char* fname){
 //        gv_init(fname);
@@ -534,19 +534,19 @@ namespace Christofides{
 //    }
     
     //runs christofides algorithm to get an approximation of a TSP solution
-    Distance chris_algorithm(const ChrisGraph& g){
+    Distance run_christofides(const ChrisGraph& g, int opmat){
      //   cout << "Searching MST..." << endl;
-        MST mt = findMST(g);
+        MST mt = find_mst(g);
         
        // cout << "Finding match..." << endl;
-        MST meuler = findEulerianGraph(mt, g);
+        MST meuler = find_eulerian_graph(mt, g, opmat);
         
       //  prin_mst(meuler, "mst.dot");
        // cout << "Finding euler tour..." << endl;        
-        TSPSolution sol = extractEulerTour(meuler, g);
+        TSPSolution sol = extract_eulerian_tour(meuler, g);
         
        //cout << "Finding hamiltonian tour..." << endl;
-        sol = extractHamiltonianTour(sol, g);
+        sol = extract_hamiltonian_tour(sol, g);
        
       //  printTSPSolution(sol); 
       //  check_solution(sol, g);
