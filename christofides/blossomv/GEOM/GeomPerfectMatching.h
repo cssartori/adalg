@@ -26,14 +26,15 @@
 #include <math.h>
 #include "../PerfectMatching.h"
 
-//#define DELAUNAY_TRIANGLE
+#define DELAUNAY_TRIANGLE
 
 struct GPMKDTree;
 
 class GeomPerfectMatching
 {
 public:
-	typedef int REAL; // if you change it to double, you should also change PerfectMatching::REAL to double!
+	//typedef int REAL; // if you change it to double, you should also change PerfectMatching::REAL to double!
+	typedef double REAL;
 	typedef int PointId;
 
 	// pointNum must be a positive even number.

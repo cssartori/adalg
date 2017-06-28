@@ -166,7 +166,7 @@ void GeomPerfectMatching::InitDelaunay()
 	vorout.edgelist = (int *) NULL;
 	vorout.normlist = (REAL *) NULL;
 
-	triangulate("pczAevn", &in, &out, &vorout);
+	triangulate("pczAQevn", &in, &out, &vorout);
 
 	free(in.pointlist);
 	free(out.pointlist);

@@ -84,7 +84,7 @@ GeomPerfectMatching::REAL GeomPerfectMatching::Solve()
 
 			for (p=0; p<node_num; p++)
 			{
-				if (options.verbose && (p%(node_num/72)==0)) { printf("+"); fflush(stdout); }
+				if (options.verbose && (p%(1+node_num/72)==0)) { printf("+"); fflush(stdout); }
 				for (e=nodes[p].first[0]; e; e=e->next[0]) nodes[e->head[0]].is_marked = 1;
 				for (e=nodes[p].first[1]; e; e=e->next[1]) nodes[e->head[1]].is_marked = 1;
 				kd_tree->AddNegativeEdges(p, pm);

@@ -10,7 +10,7 @@ BLOSSRC = blossomv/
 LIBS = -lm -lrt
 
 # define the C++ source files
-SMAIN = $(SRCDIR)main.cpp $(SRCDIR)chrisgraph.cpp $(BLOSSRC)PMinterface.cpp $(BLOSSRC)PMmain.cpp $(BLOSSRC)PMinit.cpp $(BLOSSRC)PMexpand.cpp $(BLOSSRC)PMshrink.cpp $(BLOSSRC)PMduals.cpp $(BLOSSRC)PMrepair.cpp $(BLOSSRC)misc.cpp $(BLOSSRC)MinCost/MinCost.cpp
+SMAIN = $(SRCDIR)main.cpp $(SRCDIR)chrisgraph.cpp $(BLOSSRC)PMinterface.cpp $(BLOSSRC)PMmain.cpp $(BLOSSRC)PMinit.cpp $(BLOSSRC)PMexpand.cpp $(BLOSSRC)PMshrink.cpp $(BLOSSRC)PMduals.cpp $(BLOSSRC)PMrepair.cpp $(BLOSSRC)misc.cpp $(BLOSSRC)MinCost/MinCost.cpp $(BLOSSRC)GEOM/GPMmain.cpp $(BLOSSRC)GEOM/GPMinterface.cpp $(BLOSSRC)GEOM/GPMinit.cpp $(BLOSSRC)GEOM/GPMkdtree.cpp 
 #SEXP =  $(SRCDIR)exp.cpp $(SRCDIR)matgraph.cpp
 #SGEN = $(SRCDIR)gen.cpp
 #STST = $(SRCDIR)tester.cpp
@@ -48,7 +48,7 @@ $(MAIN): $(OMAIN)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 clean:
-	$(RM) $(SRCDIR)*.o $(BLOSSRC)*.o
+	$(RM) $(SRCDIR)*.o $(BLOSSRC)*.o $(BLOSSRC)MinCost/*.o $(BLOSSRC)GEOM/*.o $(BLOSSRC)triangle/*.o 
 	$(RM) *.bak 
 
 depend: $(SMAIN)

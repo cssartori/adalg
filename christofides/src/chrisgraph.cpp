@@ -2,6 +2,7 @@
 #include "../../heap/include/heap.h"
 #include "../../heap/include/nheap.h"
 #include "../blossomv/PerfectMatching.h"
+#include "../blossomv/GEOM/GeomPerfectMatching.h"
 #include <cmath>
 #include <list>
 #include <stack>
@@ -313,8 +314,37 @@ namespace Christofides{
         return mt;
     }
     
-    MST blossomMatching(const std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g){
-        //TODO: change to GeoPerfectMatching
+    MST blossomMatching(std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g){
+//        unsigned int dimension = g.pz.size() > 0 ? 3 : 2;
+//        GeomPerfectMatching gpm(oddn.size(), dimension);
+//        
+//        for(unsigned int i=0;i<oddn.size();i++){
+//            double *pi = new double[dimension];
+//            pi[0] = g.px[oddn[i]];
+//            pi[1] = g.py[oddn[i]];
+//            if(dimension > 2)
+//                pi[3] = g.pz[oddn[i]];
+//            
+//            gpm.AddPoint(pi);
+//        }
+//        //cout << "Solving blossom v\n";          
+//        //gpm.SolveComplete();
+//        gpm.Solve();
+//        //cout << "Solved blossom v\n";      
+//        //unite matching and MST
+//        MST meuler = mt;
+//        for(unsigned int i=0;i<oddn.size();i++){
+//            if(oddn[i] == NULL_NODE) continue;
+//            unsigned int j=gpm.GetMatch(i);
+//            meuler.g[oddn[i]].push_back(oddn[j]);
+//            meuler.g[oddn[j]].push_back(oddn[i]);    
+//            meuler.nedges += 1;
+//            meuler.cost += g.dist(oddn[i],oddn[j]);   
+//            oddn[i] = NULL_NODE;
+//            oddn[j] = NULL_NODE;
+//        }        
+
+          //Old code
         PerfectMatching pm(oddn.size(), oddn.size()*oddn.size());
         for(unsigned int i=0;i<oddn.size();i++)
             for(unsigned int j=i+1;j<oddn.size();j++)
