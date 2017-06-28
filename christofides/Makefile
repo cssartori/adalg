@@ -11,7 +11,7 @@ LIBS = -lm -lrt
 
 # define the C++ source files
 SMAIN = $(SRCDIR)main.cpp $(SRCDIR)chrisgraph.cpp $(BLOSSRC)PMinterface.cpp $(BLOSSRC)PMmain.cpp $(BLOSSRC)PMinit.cpp $(BLOSSRC)PMexpand.cpp $(BLOSSRC)PMshrink.cpp $(BLOSSRC)PMduals.cpp $(BLOSSRC)PMrepair.cpp $(BLOSSRC)misc.cpp $(BLOSSRC)MinCost/MinCost.cpp $(BLOSSRC)GEOM/GPMmain.cpp $(BLOSSRC)GEOM/GPMinterface.cpp $(BLOSSRC)GEOM/GPMinit.cpp $(BLOSSRC)GEOM/GPMkdtree.cpp 
-#SEXP =  $(SRCDIR)exp.cpp $(SRCDIR)matgraph.cpp
+SEXP =  $(SRCDIR)exp.cpp $(SRCDIR)chrisgraph.cpp $(BLOSSRC)PMinterface.cpp $(BLOSSRC)PMmain.cpp $(BLOSSRC)PMinit.cpp $(BLOSSRC)PMexpand.cpp $(BLOSSRC)PMshrink.cpp $(BLOSSRC)PMduals.cpp $(BLOSSRC)PMrepair.cpp $(BLOSSRC)misc.cpp $(BLOSSRC)MinCost/MinCost.cpp $(BLOSSRC)GEOM/GPMmain.cpp $(BLOSSRC)GEOM/GPMinterface.cpp $(BLOSSRC)GEOM/GPMinit.cpp $(BLOSSRC)GEOM/GPMkdtree.cpp
 #SGEN = $(SRCDIR)gen.cpp
 #STST = $(SRCDIR)tester.cpp
 
@@ -28,15 +28,15 @@ TEST = tester
 
 .PHONY: depend clean
 
-all:    $(MAIN)
-	@echo  main compiled
+all:    $(MAIN) $(EXP)
+	@echo  main and exp compiled
 
 #$(OBJS) 
 $(MAIN): $(OMAIN)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OMAIN) $(LIBS)
 	
-#$(EXP): $(OEXP)
-#	$(CC) $(CFLAGS) $(INCLUDES) -o $(EXP) $(OEXP) $(LIBS)
+$(EXP): $(OEXP)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(EXP) $(OEXP) $(LIBS)
 
 #$(GEN): $(OGEN)
 #	$(CC) $(CFLAGS) $(INCLUDES) -o $(GEN) $(OGEN) $(LIBS)
