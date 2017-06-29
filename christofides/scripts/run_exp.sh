@@ -16,7 +16,7 @@ mkdir $godir
 unzip -d $idir $idir"instances.zip" 
 gunzip $idir"*.gz"
 
-#make
+make -C ../
 
 #declare a dictionary to keep BKS information
 declare -A bks
@@ -32,7 +32,7 @@ done < $idir"bks.dat"
 #run instances
 c=0
 i=0
-for filename in $idir"*.tsp"
+for filename in ../instances/*.tsp
 	do
 		fn=$(echo $filename| cut -d'/' -f 3)
     	echo -n -e "Started:\t" 
@@ -57,7 +57,7 @@ done
 echo "Executed "$i" instances."
 
 
-make clean
+make -C ../ clean
 #rm main
 #rm instances/*.tsp
 

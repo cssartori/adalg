@@ -4,10 +4,19 @@ timestamp() {
   date +"%Y-%m-%d :: %H:%M:%S"
 }
 
-unzip -d instances/ instances/instances.zip 
-gunzip instances/*.gz
+idir="../instances/"
 
-#make
+odir="../data/"
+mkdir $odir
+bodir=$odir"blossom/"
+godir=$odir"greedy/"
+mkdir $bodir
+mkdir $godir
+
+unzip -d $idir $idir"instances.zip" 
+gunzip $idir"*.gz"
+
+make -C ../
 
 #declare a dictionary to keep BKS information
 declare -A bks
@@ -17,23 +26,22 @@ do
     if [[ $col1 != \#* ]]; then 
         bks+=(["$col1"]="$col2")
     fi
-done < instances/bks.dat
+done < $idir"bks.dat"
 
 #run instances
 c=0
 i=0
-for filename in instances/*.tsp
+for filename in ../instances/*.tsp
 	do
-		fn=$(echo $filename| cut -d'/' -f 2)
+		fn=$(echo $filename| cut -d'/' -f 3)
     	echo -n -e "Started:\t" 
     	timestamp
     	
     	ni=$(echo $fn| cut -d'.' -f 1)
     	echo "Running instance "$ni
     	
-		rmain=$(./main < $filename)
+		rmain=$(../main < $filename)
 
-		
 		dev=$(bc <<< "scale=2; ("$rmain"-"${bks[$ni]}")/"${bks[$ni]})
 		echo $dev
 
@@ -58,7 +66,7 @@ echo "Result:  "$c" out of "$i" correct."
 
 
 
-make clean
+make -C ../ clean
 #rm main
 #rm instances/*.tsp
 
