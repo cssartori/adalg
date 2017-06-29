@@ -8,6 +8,8 @@ idir="../instances/"
 
 odir="../data/"
 mkdir $odir
+odir=$odir"results/"
+mkdir $odir
 bodir=$odir"blossom/"
 godir=$odir"greedy/"
 mkdir $bodir
