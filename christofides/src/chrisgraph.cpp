@@ -327,10 +327,10 @@ namespace Christofides{
             
             gpm.AddPoint(pi);
         }
-        //cout << "Solving blossom v\n";          
+        cout << "Solving blossom v\n";          
         //gpm.SolveComplete();
         gpm.Solve();
-        //cout << "Solved blossom v\n";      
+        cout << "Solved blossom v\n";      
         //unite matching and MST
         MST meuler = mt;
         for(unsigned int i=0;i<oddn.size();i++){
