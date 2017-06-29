@@ -32,7 +32,7 @@ for filename in instances/*.tsp
     	echo "Running instance "$ni
     	
 		rmain=$(./main < $filename)
-#		./main < $filename
+
 		
 		dev=$(bc <<< "scale=2; ("$rmain"-"${bks[$ni]}")/"${bks[$ni]})
 		echo $dev
@@ -50,6 +50,8 @@ for filename in instances/*.tsp
 		timestamp
 		echo "----------"
 		i=$((i + 1))
+		
+#		./main < $filename
 done		
 
 echo "Result:  "$c" out of "$i" correct."

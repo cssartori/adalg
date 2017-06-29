@@ -48,7 +48,7 @@ void test(int opmat){
                 fprintf(stderr, "Approximation is wrong : %f\n", dev);   
         }
         
-        printf("%s,%u,%u,%u,%le,%u,%.5f,%u\n", g.name.c_str(), n, opmat, g.dim, elapsed_seconds.count(), d, dev,cappr);
+        printf("%s,%u,%u,%u,%le,%u,%.5f,%u,%u\n", g.name.c_str(), n, opmat, g.dim, elapsed_seconds.count(), d, dev,cappr,seed);
     }
         	
 }
