@@ -327,6 +327,7 @@ namespace Christofides{
             
             gpm.AddPoint(pi);
         }
+        
         cout << "Solving blossom v\n";          
         //gpm.SolveComplete();
         gpm.Solve();
@@ -378,6 +379,7 @@ namespace Christofides{
             unsigned int u = NULL_NODE;
             unsigned int v = NULL_NODE;
             Distance maxcost = 0;
+            //TODO: review this code - which is not the exact greedy strategy
             for(unsigned int i=0;i<oddn.size();i++){
                 if(mates[oddn[i]] != NULL_NODE) continue;
                 for(unsigned int j=i+1;j<oddn.size();j++){
