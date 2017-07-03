@@ -67,7 +67,7 @@ echo "Result:  "$c" out of "$i" correct."
 
 
 make -C ../ clean
-rm main
-rm instances/*.tsp
+rm ../main
+rm ../instances/*.tsp
 
 echo "DONE"

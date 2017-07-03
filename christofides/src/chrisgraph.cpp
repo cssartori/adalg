@@ -375,11 +375,13 @@ namespace Christofides{
         vector<unsigned int> mates(g.dim, NULL_NODE);
         unsigned int matched = 0;
         
+        //Complexity O(n^3)
+        //TODO: improve code by using a type of cache        
         while(matched < oddn.size()){
             unsigned int u = NULL_NODE;
             unsigned int v = NULL_NODE;
             Distance maxcost = 0;
-            //TODO: review this code - which is not the exact greedy strategy
+
             for(unsigned int i=0;i<oddn.size();i++){
                 if(mates[oddn[i]] != NULL_NODE) continue;
                 for(unsigned int j=i+1;j<oddn.size();j++){
