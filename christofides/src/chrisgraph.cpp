@@ -7,6 +7,7 @@
 #include <list>
 #include <stack>
 #include "../../common/cc_gv.h"
+        #include <map>
 
 using namespace std;
 
@@ -318,16 +319,16 @@ namespace Christofides{
         unsigned int dimension = g.pz.size() > 0 ? 3 : 2;
         GeomPerfectMatching gpm(oddn.size(), dimension);
         
+        vector<double*> ps(oddn.size(), nullptr); //vector of points in order to not lose the references
         for(unsigned int i=0;i<oddn.size();i++){
-            double *pi = new double[dimension];
-            pi[0] = g.px[oddn[i]];
-            pi[1] = g.py[oddn[i]];
+            ps[i] = new double[dimension];
+            ps[i][0] = g.px[oddn[i]];
+            ps[i][1] = g.py[oddn[i]];
             if(dimension > 2)
-                pi[3] = g.pz[oddn[i]];
+                ps[i][3] = g.pz[oddn[i]];
             
-            gpm.AddPoint(pi);
+            gpm.AddPoint(ps[i]);
         }
-        
         //cout << "Solving blossom v\n";          
         gpm.SolveComplete();
         //gpm.Solve();
@@ -343,6 +344,8 @@ namespace Christofides{
             meuler.cost += g.dist(oddn[i],oddn[j]);   
             oddn[i] = NULL_NODE;
             oddn[j] = NULL_NODE;
+            delete [] ps[i];
+            ps[i] = nullptr;
         }        
 
 //          //Old code
@@ -375,20 +378,79 @@ namespace Christofides{
         vector<unsigned int> mates(g.dim, NULL_NODE);
         unsigned int matched = 0;
         
-        //Complexity O(n^3)
-        //TODO: improve code by using a type of cache        
+        #define GCACHE 1
+        
+        #if GCACHE
+
+        map< pair<unsigned , unsigned>, bool > paired;
+        vector< vector< pair<unsigned int, Distance> > > maxed(oddn.size(), vector<pair<unsigned int, Distance> >());
+        unsigned int NE = std::min((size_t)400,oddn.size()-1);
+        for(unsigned int i=0;i<oddn.size();i++){
+            maxed[i].reserve(NE);
+            Distance maxn = 0;
+            //if(mates[oddn[i]] != NULL_NODE) continue;
+            for(unsigned int j=0;j<oddn.size();j++){
+                if(i == j) continue;
+                if(paired.count(make_pair(j,i)) > 0 && paired[make_pair(j,i)]
+                    
+                ) continue;
+                //if(mates[oddn[j]] != NULL_NODE) continue;
+                Distance d = g.dist(oddn[i], oddn[j]);
+                if(maxed[i].size() < NE-1){
+                    maxed[i].push_back(make_pair(j,d));
+                    if(d > maxn)
+                        maxn = d;
+                    paired[make_pair(i,j)] = true;
+                }else if(d < maxn){
+                                            
+                    Distance maxd = 0;
+                    unsigned int l=0;
+                    for(unsigned int k=0;k<NE;k++){
+                        if(maxed[i][k].second > maxd)
+                            l = k;
+                    }
+                    
+                    if(d < maxd){
+                        paired[make_pair(i,j)] = true;
+                        paired[make_pair(i,maxed[i][l].first)] = false;
+                        maxed[i][l].first = j;
+                        maxed[i][l].second = d;
+                    }
+                }  
+            }
+        }
+        
+        
+        unsigned cc = 0;
         while(matched < oddn.size()){
             unsigned int u = NULL_NODE;
             unsigned int v = NULL_NODE;
-            Distance maxcost = 0;
+            Distance maxcost = MAX_WEIGHT;
 
             for(unsigned int i=0;i<oddn.size();i++){
                 if(mates[oddn[i]] != NULL_NODE) continue;
-                for(unsigned int j=i+1;j<oddn.size();j++){
-                    if(mates[oddn[j]] != NULL_NODE) continue;
-                    if(g.dist(oddn[i], oddn[j]) > maxcost){
+                for(unsigned int j=0;j<maxed[i].size();j++){
+                    if(mates[oddn[maxed[i][j].first]] != NULL_NODE) continue;
+                    
+                    if(maxed[i][j].second < maxcost){
                         u = oddn[i];
-                        v = oddn[j];
+                        v = oddn[maxed[i][j].first];
+                        maxcost = maxed[i][j].second;
+                    }
+                }
+            }
+            
+            if(u == NULL_NODE || v == NULL_NODE){
+                cc++;
+                for(unsigned int i=0;i<oddn.size();i++){
+                    if(mates[oddn[i]] != NULL_NODE) continue;
+                    for(unsigned int j=i+1;j<oddn.size();j++){
+                        if(mates[oddn[j]] != NULL_NODE) continue;
+                        if(g.dist(oddn[i], oddn[j]) < maxcost){
+                            u = oddn[i];
+                            v = oddn[j];
+                            maxcost = g.dist(oddn[i], oddn[j]);
+                        }
                     }
                 }
             }
@@ -397,6 +459,36 @@ namespace Christofides{
             mates[v] = u;
             matched+=2;
         }
+        matched = 0;
+        printf("called %u times instead of %u\n", cc, oddn.size());
+
+        #endif
+        
+        #if !GCACHE
+        //Complexity O(n^3)
+        //TODO: improve code by using a type of cache        
+        while(matched < oddn.size()){
+            unsigned int u = NULL_NODE;
+            unsigned int v = NULL_NODE;
+            Distance maxcost = MAX_WEIGHT;
+
+            for(unsigned int i=0;i<oddn.size();i++){
+                if(mates[oddn[i]] != NULL_NODE) continue;
+                for(unsigned int j=i+1;j<oddn.size();j++){
+                    if(mates[oddn[j]] != NULL_NODE) continue;
+                    if(g.dist(oddn[i], oddn[j]) < maxcost){
+                        u = oddn[i];
+                        v = oddn[j];
+                        maxcost = g.dist(oddn[i], oddn[j]);
+                    }
+                }
+            }
+            
+            mates[u] = v;
+            mates[v] = u;
+            matched+=2;
+        }
+        #endif
         
         //unite matching and MST
         MST meuler = mt;

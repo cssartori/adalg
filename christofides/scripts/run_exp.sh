@@ -16,7 +16,6 @@ mkdir $bodir
 mkdir $godir
 
 unzip -d $idir $idir"instances.zip" 
-gunzip $idir"*.gz"
 
 make -C ../
 
@@ -46,9 +45,9 @@ for filename in ../instances/*.tsp
     	bof=$bodir$ni".dat"
     	gof=$godir$ni".dat"
     	echo "Running christofides using blossom v"
-		../exp -b ${bks[$ni]} -m b -s 1 -n 10 < $filename > $bof
+		../exp -b ${bks[$ni]} -m b -n 10 < $filename > $bof
 		echo "Running christofides using greedy"
-		../exp -b ${bks[$ni]} -m g -s 1 -n 10 < $filename > $gof
+		../exp -b ${bks[$ni]} -m g -n 10 < $filename > $gof
 
 		echo -n -e "Finished:\t" 
 		timestamp
@@ -60,7 +59,7 @@ echo "Executed "$i" instances."
 
 
 make -C ../ clean
-#rm main
-#rm instances/*.tsp
+rm ../main
+rm ../instances/*.tsp
 
 echo "DONE"
