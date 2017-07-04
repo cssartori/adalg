@@ -11,8 +11,12 @@ mkdir $odir
 odir=$odir"results/"
 mkdir $odir
 bodir=$odir"blossom/"
-godir=$odir"greedy/"
 mkdir $bodir
+bcodir=$bodir"complete/"
+bsodir=$bodir"solve/"
+mkdir $bcodir
+mkdir $bsodir
+godir=$odir"greedy/"
 mkdir $godir
 
 unzip -d $idir $idir"instances.zip" 
@@ -42,12 +46,15 @@ for filename in ../instances/*.tsp
     	ni=$(echo $fn| cut -d'.' -f 1)
     	echo "Running instance "$ni
     	
-    	bof=$bodir$ni".dat"
+    	bcof=$bcodir$ni".dat"
+    	bsof=$bsodir$ni".dat"
     	gof=$godir$ni".dat"
-    	echo "Running christofides using blossom v"
-		../exp -b ${bks[$ni]} -m b -n 10 < $filename > $bof
+    	echo "Running christofides using blossom v complete"
+		timeout 480 ../exp -b ${bks[$ni]} -m bc -n 10 < $filename > $bcof
+		echo "Running christofides using blossom v solve"
+		timeout 480 ../exp -b ${bks[$ni]} -m bs -n 10 < $filename > $bsof
 		echo "Running christofides using greedy"
-		../exp -b ${bks[$ni]} -m g -n 10 < $filename > $gof
+		timeout 480 ../exp -b ${bks[$ni]} -m g -n 10 < $filename > $gof
 
 		echo -n -e "Finished:\t" 
 		timestamp
@@ -59,7 +66,6 @@ echo "Executed "$i" instances."
 
 
 make -C ../ clean
-rm ../main
 rm ../instances/*.tsp
 
 echo "DONE"

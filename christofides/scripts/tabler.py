@@ -108,17 +108,28 @@ def __proc_table_file__(dirname, outfname, rfext):
         avn += lr[i][2]
         avv += lr[i][5]
         
-        #print Blossom
+        #print Blossom complete
         outf.write("%u & %.2f & %.2Le & " % (lr[i][4], lr[i][6], lr[i][3]))
         bavv += lr[i][4]
         bavd += lr[i][6]
         bavt += lr[i][3]        
         
+        if(lr[i][1] == 2):
+            #print Blossom solve
+            i+=1
+            outf.write("%u & %.2f & %.2Le & " % (lr[i][4], lr[i][6], lr[i][3]))
+            gavv += lr[i][4]
+            gavd += lr[i][6]
+            gavt += lr[i][3]    
+        else:
+            outf.write(" - & - & - & " % (lr[i][4], lr[i][6], lr[i][3]))
+            
         #print Greedy
-        outf.write("%u & %.2f & %.2Le \\\\" % (lr[i+1][4], lr[i+1][6], lr[i+1][3]))
-        gavv += lr[i+!][4]
-        gavd += lr[i+1][6]
-        gavt += lr[i+1][3]
+        i+=1
+        outf.write("%u & %.2f & %.2Le \\\\" % (lr[i][4], lr[i][6], lr[i][3]))
+        gavv += lr[i][4]
+        gavd += lr[i][6]
+        gavt += lr[i][3]
             
         i += 2
             

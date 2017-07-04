@@ -17,16 +17,18 @@ set xlabel "vertices (n)"
 set ylabel "tempo (s)"
 
 #times
-plot "../data/graphics/blossom.dat" u 3:4 w lp pt 7 lw 3 title "CBlossom"
-replot "../data/graphics/greedy.dat" u 3:4 w lp pt 7 lw 3 title "CGreedy"
+plot "../data/graphics/gbc.dat" u 3:4 w lp pt 7 lw 3 title "Blossom Complete"
+replot "../data/graphics/gbs.dat" u 3:4 w lp pt 7 lw 3 title "Blossom"
+replot "../data/graphics/ggc.dat" u 3:4 w lp pt 7 lw 3 title "Greedy"
 set output "../data/graphics/gTime.eps"
 replot
 unset output
 
 
 #deviation
-plot "../data/graphics/blossom.dat" u 3:7 w lp pt 7 lw 3 title "CBlossom"
-replot "../data/graphics/greedy.dat" u 3:7 w lp pt 7 lw 3 title "CGreedy"
+plot "../data/graphics/gbc.dat" u 3:7 w lp pt 7 lw 3 title "Blossom Complete"
+replot "../data/graphics/gbs.dat" u 3:7 w lp pt 7 lw 3 title "Blossom"
+replot "../data/graphics/ggc.dat" u 3:7 w lp pt 7 lw 3 title "Greedy"
 replot 0.5 w l lt 5 # limit line
 set output "../data/graphics/gDev.eps"
 replot
