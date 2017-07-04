@@ -288,13 +288,13 @@ namespace Christofides{
         weight[0] = 0; //starting at node 0 (graph is complete, does not make much difference)
         h.insert(0, weight[0]);
         for(unsigned int u=1;u<g.dim;u++)
-            h.insert(u,weight[u]);
-        
-        //TODO: build mst inside prim
+            h.insert(u,weight[u]);        
+
         while(not h.is_empty()){
             unsigned int u = h.gettop();
             h.deletetop();
             visited[u] = true;
+            
             for(unsigned int v=0;v<g.dim;v++){                
                 if(not visited[v] && g.dist(u,v) < weight[v]){
                     h.update_key(v, g.dist(u,v));
@@ -391,12 +391,13 @@ namespace Christofides{
     
     //Function to build the cache memory of the greedy algorithm, in order to
     //speedup its runtime, and at the same time use less memory than extensive
-    //enumeration of all edges
+    //enumeration of all edges. The proportion value p should be 1 <= p <= 2.
+    //Empirically, the best value for p seems to be p=1.5
     inline void build_greedy_cache(std::vector< pair<unsigned int, unsigned int> >& maxed, 
                             const std::vector<unsigned int>& mates, 
                             const std::vector<unsigned int>& oddn, 
                             const ChrisGraph& g,
-                            const unsigned int p=2){
+                            const double p=1.5){
                             
         static const unsigned int NE = p*oddn.size();            
         maxed = vector< pair<unsigned,unsigned> >();
