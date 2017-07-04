@@ -8,6 +8,10 @@ bcdir=$bdir"complete/"
 bsdir=$bdir"solve/"
 gdir=$rdir"greedy/"
 
+#remove empty files
+find $bcdir -size 0 -delete
+find $bsdir -size 0 -delete
+find $gdir -size 0 -delete
 
 # create graphics folder
 grdir=$ddir"graphics/"

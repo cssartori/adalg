@@ -40,7 +40,7 @@ def __proc_data_file__(filename):
             time += float(row[4])
             value = int(row[5])
             bkv = int(row[6])
-            dev = int(row[7])
+            dev = float(row[7])
             nexp += 1
                                         
             if dev > 0.5:
@@ -64,7 +64,7 @@ def __proc_dir_average__(dirname, outfname, rfext):
         lr.append(lf)
   
     # Generate graph file       
-	lr = sorted(lr, key = lambda x: (x[1])) #sort by number of nodes
+	lr = sorted(lr, key = lambda x: (x[2])) #sort by number of nodes
 
     for l in lr:
         # name opmat n time value bkv dev
@@ -98,12 +98,13 @@ def __proc_table_file__(dirname, outfname, rfext):
     gavv = 0
     gavd = 0.0
     gavt = 0.0
+    bkva = 0
     i = 0
     
-    while i < len(lr):
+    while i+1 < len(lr):
         c += 1
         k = 1
-        #id name bkv          
+        #id name n bkv          
         outf.write("\n%u & %s & %u & %u & " % (c, lr[i][0], lr[i][2], lr[i][5]))
         avn += lr[i][2]
         avv += lr[i][5]
@@ -114,7 +115,7 @@ def __proc_table_file__(dirname, outfname, rfext):
         bavd += lr[i][6]
         bavt += lr[i][3]        
         
-        if(lr[i][1] == 2):
+        if(lr[i+1][1] == 2):
             #print Blossom solve
             i+=1
             outf.write("%u & %.2f & %.2Le & " % (lr[i][4], lr[i][6], lr[i][3]))
@@ -122,7 +123,7 @@ def __proc_table_file__(dirname, outfname, rfext):
             gavd += lr[i][6]
             gavt += lr[i][3]    
         else:
-            outf.write(" - & - & - & " % (lr[i][4], lr[i][6], lr[i][3]))
+            outf.write(" - & - & - & ")
             
         #print Greedy
         i+=1
@@ -130,9 +131,11 @@ def __proc_table_file__(dirname, outfname, rfext):
         gavv += lr[i][4]
         gavd += lr[i][6]
         gavt += lr[i][3]
-            
-        i += 2
-            
+        
+        i+=1    
+    
+    #print average data
+    #outf.write("\\textbf{M\'edia} & & %.1f & %.1f & %.1f &")                
     outf.close()                
             
     
