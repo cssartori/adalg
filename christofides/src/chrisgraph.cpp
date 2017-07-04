@@ -12,7 +12,7 @@
 //at much smaller running times, and without taking too much memory
 #define GREEDY_ALG_CACHE
 
-#define BLOSSOM_GEOM_ALG_COMPLETE
+//#define BLOSSOM_GEOM_ALG_COMPLETE
 
 using namespace std;
 
@@ -320,7 +320,7 @@ namespace Christofides{
         return mt;
     }
     
-    MST blossom_matching(std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g){
+    MST blossom_matching(std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g, int opmat = BLOSSOM_COMPLETE_MAT_ALG){
         unsigned int dimension = g.pz.size() > 0 ? 3 : 2;
         GeomPerfectMatching gpm(oddn.size(), dimension);
         
@@ -340,11 +340,11 @@ namespace Christofides{
         //much less memory, however it may not finish sometimes (or at least iterations
         //takes much more than 30 minutes). On the other hand, the SolveComplete()
         //always terminates, but uses huge amounts of memory
-        #ifdef BLOSSOM_GEOM_ALG_COMPLETE
+        if(opmat == BLOSSOM_COMPLETE_MAT_ALG)
             gpm.SolveComplete();
-        #else
+        else
             gpm.Solve();
-        #endif
+
      
         //unite matching and MST
         MST meuler = mt;
@@ -397,7 +397,7 @@ namespace Christofides{
                             const std::vector<unsigned int>& mates, 
                             const std::vector<unsigned int>& oddn, 
                             const ChrisGraph& g,
-                            const double p=1.5){
+                            double p=1.5){
                             
         static const unsigned int NE = p*oddn.size();            
         maxed = vector< pair<unsigned,unsigned> >();
@@ -433,20 +433,20 @@ namespace Christofides{
     	}                              
     }
     
-    MST greedy_matching(const std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g){
+    MST greedy_matching(const std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g, double p = 1.5){
         vector<unsigned int> mates(g.dim, NULL_NODE);
         unsigned int matched = 0;
                 
         #ifdef GREEDY_ALG_CACHE
             
             //Complexity: build_greedy_cache is O(n^2)
-            //while the main loop happens to be O(n^3), however its average case
+            //while the main loop happens to be O(n^3), its average case
             //is much more efficient and fast than the naive version, without
             //caching. In fact, this version has to call the build_greedy_cache
             //only a few times, which is when complexity is O(n^3). The rest of 
             //the time it has complexity O(n^2).
             vector< pair<unsigned,unsigned> > maxed;
-            build_greedy_cache(maxed, mates, oddn, g);
+            build_greedy_cache(maxed, mates, oddn, g, p);
             unsigned cc = 0;
             unsigned int ui = 0;
             while(matched < oddn.size()){
@@ -466,7 +466,7 @@ namespace Christofides{
                 
                 if(u == NULL_NODE || v == NULL_NODE){
                     cc++;     
-                    build_greedy_cache(maxed, mates, oddn, g);
+                    build_greedy_cache(maxed, mates, oddn, g, p);
                 }
                 
                 if(u != NULL_NODE && v != NULL_NODE){
@@ -524,7 +524,7 @@ namespace Christofides{
     }
     
     //find an Eulerian Graph with the mst generated from the input graph and a matching subgraph
-    MST find_eulerian_graph(const MST& mt, const ChrisGraph& g, int opmat = BLOSSOM_MAT_ALG){
+    MST find_eulerian_graph(const MST& mt, const ChrisGraph& g, int opmat = BLOSSOM_COMPLETE_MAT_ALG, double p = 1.5){
         std::vector<unsigned int> oddn; // nodes with odd number of neighbors
         //by the handshaking lemma, oddn has even size
         for(unsigned int u=0;u<mt.g.size();u++){
@@ -533,10 +533,10 @@ namespace Christofides{
             }
         }
         
-        if(opmat == BLOSSOM_MAT_ALG)
-            return blossom_matching(oddn, mt, g);        
+        if(opmat == BLOSSOM_COMPLETE_MAT_ALG || opmat == BLOSSOM_SOLVE_MAT_ALG)
+            return blossom_matching(oddn, mt, g, opmat);        
         else
-            return greedy_matching(oddn, mt, g);
+            return greedy_matching(oddn, mt, g, p);
     }    
     
     //Extracts an eulerian tour from the eulerian graph given by meuler.
@@ -627,12 +627,12 @@ namespace Christofides{
     
     
     //runs christofides algorithm to get an approximation of a TSP solution
-    Distance run_christofides(const ChrisGraph& g, int opmat){
+    Distance run_christofides(const ChrisGraph& g, int opmat, double p){
         //(1): Find a MST of graph g
         MST mt = find_mst(g);
         
         //(2): Find an eulerian graph in the MST, by solving a perfect matching
-        MST meuler = find_eulerian_graph(mt, g, opmat);
+        MST meuler = find_eulerian_graph(mt, g, opmat, p);
         
         //(3): Extract an eulerian tour in the eulerian graph given (it certainly exists)
         TSPSolution sol = extract_eulerian_tour(meuler, g);

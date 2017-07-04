@@ -10,9 +10,12 @@
 namespace Christofides{
 
     typedef long int Distance; //the type of the distance data
-    //options to use the greedy algorithm or the Blossom V for calculating a matching
-    static const unsigned int BLOSSOM_MAT_ALG = 1;
-    static const unsigned int GREEDY_MAT_ALG = 2;    
+    
+    //options to use the the Blossom V or the greedy algorithm to calculate a matching
+    static const unsigned int BLOSSOM_COMPLETE_MAT_ALG = 1; //calls SolveComplete() : it is inefficient and uses for memory
+    static const unsigned int BLOSSOM_SOLVE_MAT_ALG = 2; //calls Solve() : more efficient, less memory, but may not finish (appears to have some bug)
+    static const unsigned int GREEDY_MAT_ALG = 3; //Calculates an approximation to the perfect matching with an efficient greedy algorithm
+        
     static const Distance MAX_WEIGHT = std::numeric_limits<Distance>::max(); 
     
     enum DistType{ EUC_2D = 1024, EUC_3D, MAX_2D, MAX_3D, MAN_2D, MAN_3D,
@@ -45,7 +48,7 @@ namespace Christofides{
     unsigned int read_instance(ChrisGraph& g, std::istream& f);
     
     //runs christofides algorithm to get an approximation of a TSP solution
-    Distance run_christofides(const ChrisGraph& g, int opmat=BLOSSOM_MAT_ALG);
+    Distance run_christofides(const ChrisGraph& g, int opmat=BLOSSOM_COMPLETE_MAT_ALG, double p=1.5);
 }
 
 #endif //__CRISGRAPH_H__

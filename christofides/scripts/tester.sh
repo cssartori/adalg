@@ -31,6 +31,7 @@ done < $idir"bks.dat"
 #run instances
 c=0
 i=0
+dfile="p15.dat"
 for filename in ../instances/*.tsp
 	do
 		fn=$(echo $filename| cut -d'/' -f 3)
@@ -40,12 +41,13 @@ for filename in ../instances/*.tsp
     	ni=$(echo $fn| cut -d'.' -f 1)
     	echo "Running instance "$ni
     	
-		rmain=$(../main < $filename)
+		rmain=$(../main -m g < $filename)
 
 		dev=$(bc <<< "scale=2; ("$rmain"-"${bks[$ni]}")/"${bks[$ni]})
 		echo $dev
 
 		comp=$(bc -l <<< $dev">0.5")
+		echo $dev >> $dfile
 		echo "comp = "$comp
 		if (($comp == 0)) ; then
 		    echo -n "Correct"   
@@ -67,7 +69,6 @@ echo "Result:  "$c" out of "$i" correct."
 
 
 make -C ../ clean
-rm ../main
 rm ../instances/*.tsp
 
 echo "DONE"
