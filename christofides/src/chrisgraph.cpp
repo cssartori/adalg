@@ -6,14 +6,18 @@
 #include <cmath>
 #include <list>
 #include <stack>
-#include "../../common/cc_gv.h"
-        #include <map>
+        
+//define wheter the greedy algorithm uses the cached version, or the naive version
+//Note: the cached version gives solutions a lot close to the naive, however
+//at much smaller running times, and without taking too much memory
+#define GREEDY_ALG_CACHE
+
+#define BLOSSOM_GEOM_ALG_COMPLETE
 
 using namespace std;
 
 namespace Christofides{
     
-    //typedef std::vector< std::vector<unsigned int> > MST; //minimum spanning tree of a graph is an adjacency list
     static const unsigned int NULL_NODE = std::numeric_limits<unsigned int>::max();
         
     struct MST{
@@ -274,18 +278,19 @@ namespace Christofides{
     }
     
        
-    //find a MST in the graph
+    //find a MST in the graph using Prim's algorithm
     MST find_mst(const ChrisGraph& g){
         std::vector<bool> visited(g.dim, false);
         std::vector<unsigned int> prev(g.dim, NULL_NODE); //the previous of each node in the MST construction
         std::vector<Distance> weight(g.dim, MAX_WEIGHT);
         
-        NHeap h(g.dim, 4);
+        NHeap h(g.dim, 4); //n-ary heap with n=4 (appears to have the best performance)
         weight[0] = 0; //starting at node 0 (graph is complete, does not make much difference)
         h.insert(0, weight[0]);
         for(unsigned int u=1;u<g.dim;u++)
             h.insert(u,weight[u]);
         
+        //TODO: build mst inside prim
         while(not h.is_empty()){
             unsigned int u = h.gettop();
             h.deletetop();
@@ -329,10 +334,18 @@ namespace Christofides{
             
             gpm.AddPoint(ps[i]);
         }
-        //cout << "Solving blossom v\n";          
-        gpm.SolveComplete();
-        //gpm.Solve();
-       // cout << "Solved blossom v\n";      
+        
+        //It appears to have a bug on the Solve() procedure of the GeomPerfectMatching
+        //for certain input graphs. The advantage of the Solve() is that it takes
+        //much less memory, however it may not finish sometimes (or at least iterations
+        //takes much more than 30 minutes). On the other hand, the SolveComplete()
+        //always terminates, but uses huge amounts of memory
+        #ifdef BLOSSOM_GEOM_ALG_COMPLETE
+            gpm.SolveComplete();
+        #else
+            gpm.Solve();
+        #endif
+     
         //unite matching and MST
         MST meuler = mt;
         for(unsigned int i=0;i<oddn.size();i++){
@@ -348,7 +361,9 @@ namespace Christofides{
             ps[i] = nullptr;
         }        
 
-//          //Old code
+//        //Old code: uses the PerfectMatching struct only, adding
+//        //each edge separatedly. In practice, it takes as much memory and
+//        //time as the SolveComplete() procedure of the GeomPerfectMatching.
 //        PerfectMatching pm(oddn.size(), oddn.size()*oddn.size());
 //        for(unsigned int i=0;i<oddn.size();i++)
 //            for(unsigned int j=i+1;j<oddn.size();j++)
@@ -374,134 +389,117 @@ namespace Christofides{
         return meuler;
     }
     
+    //Function to build the cache memory of the greedy algorithm, in order to
+    //speedup its runtime, and at the same time use less memory than extensive
+    //enumeration of all edges
+    inline void build_greedy_cache(std::vector< pair<unsigned int, unsigned int> >& maxed, 
+                            const std::vector<unsigned int>& mates, 
+                            const std::vector<unsigned int>& oddn, 
+                            const ChrisGraph& g,
+                            const unsigned int p=2){
+                            
+        static const unsigned int NE = p*oddn.size();            
+        maxed = vector< pair<unsigned,unsigned> >();
+    	maxed.reserve(NE);
+   		Distance maxd = 0;
+   		unsigned int mi = 0;
+   		for(unsigned int i=0;i<oddn.size();i++){
+    		if(mates[oddn[i]] != NULL_NODE) continue;
+   			for(unsigned int j=i+1;j<oddn.size();j++){
+    			if(mates[oddn[j]] != NULL_NODE) continue;
+    			Distance d = g.dist(oddn[i], oddn[j]);
+        		if(maxed.size() < NE){
+            		maxed.push_back(make_pair(i,j));
+    				if(d > maxd){
+            			maxd = d;
+    					mi = maxed.size()-1;
+    				}
+    			}else if(d < maxd){
+            		unsigned int l=mi;
+    				maxd = d;
+    				for(unsigned int k=0;k<maxed.size();k++){
+            			if(k != mi && g.dist(oddn[maxed[k].first], oddn[maxed[k].second]) > maxd){
+            				l = k;
+    						maxd = g.dist(oddn[maxed[k].first], oddn[maxed[k].second]);
+    					}
+    				}
+       			
+    				maxed[mi].first = i;
+    				maxed[mi].second = j;
+    				mi = l;
+    			}
+    		}
+    	}                              
+    }
+    
     MST greedy_matching(const std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g){
         vector<unsigned int> mates(g.dim, NULL_NODE);
         unsigned int matched = 0;
-        
-        #define GREEDY_ALG_CACHE
-        
+                
         #ifdef GREEDY_ALG_CACHE
-        
-        //TODO: add this part to a callable inline function
-        unsigned int NE = 2*oddn.size();
-        vector< pair<unsigned,unsigned> > maxed;
-        maxed.reserve(NE);
-        Distance maxd = 0;
-        unsigned int mi = 0;
-        for(unsigned int i=0;i<oddn.size();i++){
-        	for(unsigned int j=i+1;j<oddn.size();j++){
-        		Distance d = g.dist(oddn[i], oddn[j]);
-        		if(maxed.size() < NE){
-        			maxed.push_back(make_pair(i,j));
-        			if(d > maxd){
-        				maxd = d;
-        				mi = maxed.size()-1;
-        			}
-        		}else if(d < maxd){
-        			unsigned int l=mi;
-        			maxd = d;
-        			for(unsigned int k=0;k<maxed.size();k++){
-        				if(k != mi && g.dist(oddn[maxed[k].first], oddn[maxed[k].second]) > maxd){
-        					l = k;
-        					maxd = g.dist(oddn[maxed[k].first], oddn[maxed[k].second]);
-        				}
-        			}
-        			maxed[mi].first = i;
-        			maxed[mi].second = j;
-        			mi = l;
-        		}
-        	}
-        }
-        
-//        printf("DONE....\n");
-        
-        unsigned cc = 0;
-        unsigned int ui = 0;
-        while(matched < oddn.size()){
-            unsigned int u = NULL_NODE;
-            unsigned int v = NULL_NODE;
-            Distance maxcost = MAX_WEIGHT;
-			ui++;
             
-            for(unsigned int i=0;i<maxed.size();i++){
-            	if(mates[oddn[maxed[i].first]] != NULL_NODE || mates[oddn[maxed[i].second]] != NULL_NODE) continue;
-            	if(g.dist(oddn[maxed[i].first], oddn[maxed[i].second]) < maxcost){
-            		maxcost = g.dist(oddn[maxed[i].first], oddn[maxed[i].second]);
-            		u = oddn[maxed[i].first];
-            		v = oddn[maxed[i].second];
-            	}
-            }
-            
-            if(u == NULL_NODE || v == NULL_NODE){
-                cc++;              
-				//printf("%u (%u) :: %u - Computing again...\n", ui, matched, maxed.size());
-				maxed = vector< pair<unsigned,unsigned> >();
-				maxed.reserve(NE);
-        		maxd = 0;
-        		mi = 0;
-        		for(unsigned int i=0;i<oddn.size();i++){
-        			if(mates[oddn[i]] != NULL_NODE) continue;
-        			for(unsigned int j=i+1;j<oddn.size();j++){
-        				if(mates[oddn[j]] != NULL_NODE) continue;
-        				Distance d = g.dist(oddn[i], oddn[j]);
-        				if(maxed.size() < NE){
-        					maxed.push_back(make_pair(i,j));
-        					if(d > maxd){
-        						maxd = d;
-        						mi = maxed.size()-1;
-        					}
-        				}else if(d < maxd){
-        					unsigned int l=mi;
-        					maxd = d;
-        					for(unsigned int k=0;k<maxed.size();k++){
-        						if(k != mi && g.dist(oddn[maxed[k].first], oddn[maxed[k].second]) > maxd){
-        							l = k;
-        							maxd = g.dist(oddn[maxed[k].first], oddn[maxed[k].second]);
-        						}
-        					}
-        			
-        					maxed[mi].first = i;
-        					maxed[mi].second = j;
-        					mi = l;
-        				}
-        			}
-        		}
-            }
-            
-            if(u != NULL_NODE && v != NULL_NODE){
-            	mates[u] = v;
-            	mates[v] = u;
-            	matched+=2;
-            }
-        }
-        
-        //matched = 0;
-        //printf("called %u times instead of %u\n", cc, oddn.size());
-        
-        #else
-        //Complexity O(n^3)
-        //TODO: improve code by using a type of cache        
-        while(matched < oddn.size()){
-            unsigned int u = NULL_NODE;
-            unsigned int v = NULL_NODE;
-            Distance maxcost = MAX_WEIGHT;
-
-            for(unsigned int i=0;i<oddn.size();i++){
-                if(mates[oddn[i]] != NULL_NODE) continue;
-                for(unsigned int j=i+1;j<oddn.size();j++){
-                    if(mates[oddn[j]] != NULL_NODE) continue;
-                    if(g.dist(oddn[i], oddn[j]) < maxcost){
-                        u = oddn[i];
-                        v = oddn[j];
-                        maxcost = g.dist(oddn[i], oddn[j]);
-                    }
+            //Complexity: build_greedy_cache is O(n^2)
+            //while the main loop happens to be O(n^3), however its average case
+            //is much more efficient and fast than the naive version, without
+            //caching. In fact, this version has to call the build_greedy_cache
+            //only a few times, which is when complexity is O(n^3). The rest of 
+            //the time it has complexity O(n^2).
+            vector< pair<unsigned,unsigned> > maxed;
+            build_greedy_cache(maxed, mates, oddn, g);
+            unsigned cc = 0;
+            unsigned int ui = 0;
+            while(matched < oddn.size()){
+                unsigned int u = NULL_NODE;
+                unsigned int v = NULL_NODE;
+                Distance maxcost = MAX_WEIGHT;
+			    ui++;
+                
+                for(unsigned int i=0;i<maxed.size();i++){
+                	if(mates[oddn[maxed[i].first]] != NULL_NODE || mates[oddn[maxed[i].second]] != NULL_NODE) continue;
+                	if(g.dist(oddn[maxed[i].first], oddn[maxed[i].second]) < maxcost){
+                		maxcost = g.dist(oddn[maxed[i].first], oddn[maxed[i].second]);
+                		u = oddn[maxed[i].first];
+                		v = oddn[maxed[i].second];
+                	}
+                }
+                
+                if(u == NULL_NODE || v == NULL_NODE){
+                    cc++;     
+                    build_greedy_cache(maxed, mates, oddn, g);
+                }
+                
+                if(u != NULL_NODE && v != NULL_NODE){
+                	mates[u] = v;
+                	mates[v] = u;
+                	matched+=2;
                 }
             }
-            
-            mates[u] = v;
-            mates[v] = u;
-            matched+=2;
-        }
+        
+        
+        #else
+            //Complexity O(n^3): it executes exactly (n^3)/2 iterations
+            //This method is very inefficient for "large" graphs (such as n > 2^13)
+            while(matched < oddn.size()){
+                unsigned int u = NULL_NODE;
+                unsigned int v = NULL_NODE;
+                Distance maxcost = MAX_WEIGHT;
+
+                for(unsigned int i=0;i<oddn.size();i++){
+                    if(mates[oddn[i]] != NULL_NODE) continue;
+                    for(unsigned int j=i+1;j<oddn.size();j++){
+                        if(mates[oddn[j]] != NULL_NODE) continue;
+                        if(g.dist(oddn[i], oddn[j]) < maxcost){
+                            u = oddn[i];
+                            v = oddn[j];
+                            maxcost = g.dist(oddn[i], oddn[j]);
+                        }
+                    }
+                }
+                
+                mates[u] = v;
+                mates[v] = u;
+                matched+=2;
+            }
         #endif
         
         
@@ -540,6 +538,9 @@ namespace Christofides{
             return greedy_matching(oddn, mt, g);
     }    
     
+    //Extracts an eulerian tour from the eulerian graph given by meuler.
+    //It uses the Hierholzer's algorithm, which takes O(E) time, where E is
+    //the number of edges in the input graph
     TSPSolution extract_eulerian_tour(MST& meuler, const ChrisGraph& g){
         TSPSolution sol;
         sol.cost = 0;
@@ -549,21 +550,23 @@ namespace Christofides{
         av.push(u); 
         
         while(av.size() > 0){ //while there are vertices with unused edges
-            if(meuler.g[u].size() == 0){
-                sol.perm.push_back(u);
-                u = av.top();
+            if(meuler.g[u].size() == 0){ //if node u has no neighbors
+                sol.perm.push_back(u); //it is pushed to the solution
+                u = av.top(); //another node must be taken from the stack
                 av.pop();            
             }else{
-                av.push(u);    
-                unsigned int v = meuler.g[u].front();            
-                meuler.g[u].pop_front();
-
+                av.push(u); //u still has neighbors, stack it to be used later    
+                unsigned int v = meuler.g[u].front(); //take the first neighbor of u
+                meuler.g[u].pop_front(); 
+                
+                //remove u from the list of neighbors of v
                 for(std::list<unsigned int>::iterator ni = meuler.g[v].begin(); ni != meuler.g[v].end(); ni++){ //for each connected edge of this vertex    
                     if(*ni == u){
                         meuler.g[v].erase(ni);
                         break;
                     }
                 }
+                //set the current node as the selected neighbor of u
                 u=v;   
             }           
         }
@@ -572,96 +575,71 @@ namespace Christofides{
     }
     
 
-    
+    //Given an eulerian tour in input solution sol, extracts a hamiltonian tour
+    //by removing repeated nodes along the path and connecting those in lying
+    //in both extremes of a repeated sequence.
     TSPSolution extract_hamiltonian_tour(TSPSolution sol, const ChrisGraph& g){
         vector<bool> visited(g.dim, false);
         
         sol.cost = 0;
         unsigned int u = sol.perm[0];
         unsigned int i = 0;
-        while(i < sol.perm.size() /*sol.perm.size() != g.dim+1*/){ //while the permutation has repeated nodes
+        while(i < sol.perm.size()){ //while the permutation has repeated nodes
             if(not visited[u]){
-                unsigned int prev = i == 0 ? 0 : i-1;
-                //printf("d[%u,%u] = %u\n", sol.perm[prev], u, g.dist(sol.perm[prev], u));
+                unsigned int prev = i == 0 ? 0 : i-1; //index of the previous node
                 sol.cost += g.dist(sol.perm[prev], u);
                 visited[u] = true;
                 i++;
                 u = sol.perm[i];
-            }else{
+            }else{ //node is repeated, remove it
                 sol.perm.erase(sol.perm.begin()+i);
-                if(i < sol.perm.size());
+                if(i < sol.perm.size())
                     u = sol.perm[i];
             }
         }
         
+        //add the cost of returning to the initial node
         u = sol.perm[sol.perm.size()-1];
         sol.cost += g.dist(u, sol.perm[0]);
         
         return sol;
     }
     
-//    void check_solution(TSPSolution sol, const ChrisGraph& g){
-//        Distance cost = 0;
-//        for(unsigned int i=0;i<sol.perm.size();i++){
-//            unsigned int j = i+1;
-//            if(sol.perm.size() == j)
-//                j = 0;
-//                
-//            cost += g.dist(sol.perm[i],sol.perm[j]);    
-//        }
-//        
-//        //cout << "Checked Dist: " << cost << endl << "Calc. Dist: " << sol.cost << endl;        
-//        if(cost != sol.cost){
-//            cout << "Error by : " << cost << " != " << sol.cost << endl;
-//            exit(-1);
-//        }
-//    }
+    //Function to check wheter a TSP solution is correct or not
+    void check_solution(TSPSolution sol, const ChrisGraph& g){
+        Distance cost = 0;
+        for(unsigned int i=0;i<sol.perm.size();i++){
+            unsigned int j = i+1;
+            if(sol.perm.size() == j)
+                j = 0;
+                
+            cost += g.dist(sol.perm[i],sol.perm[j]);    
+        }
+        
+        cout << "Checked Dist: " << cost << endl << "Calc. Dist: " << sol.cost << endl;        
+        cout << "Passed by " << sol.perm.size() << " cities\n";
+        if(cost != sol.cost){
+            cout << "Error by : " << cost << " != " << sol.cost << endl;
+            exit(-1);
+        }
+    }
     
-//    void printTSPSolution(const TSPSolution& sol){
-//        cout << "Tour ( " << sol.perm.size() << " ):  " << sol.perm[0];
-//        for(unsigned i = 1;i<sol.perm.size();i++){
-//            cout << " , " << sol.perm[i];
-//        }
-//        cout << endl;
-//    }
-    
-//    void prin_mst(MST mt, const char* fname){
-//        gv_init(fname);
-//        
-//        for(unsigned i=0;i<mt.g.size();i++){
-//            gv_declare(i);
-//        }
-//        
-//        for(unsigned i=0;i<mt.g.size();i++){
-//            for(std::list<unsigned int>::const_iterator it = mt.g[i].begin(); it != mt.g[i].end(); it++){
-//                if(mt.edges[*it].used) continue;
-//                unsigned int v = mt.edges[*it].v1 == i ? mt.edges[*it].v2 : mt.edges[*it].v1;
-//                gv_connect(i, v ,(unsigned)1);
-//                mt.edges[*it].used = true;
-//            }
-//        }
-//        
-//        gv_close();
-//    }
     
     //runs christofides algorithm to get an approximation of a TSP solution
     Distance run_christofides(const ChrisGraph& g, int opmat){
-     //   cout << "Searching MST..." << endl;
+        //(1): Find a MST of graph g
         MST mt = find_mst(g);
         
-       // cout << "Finding match..." << endl;
+        //(2): Find an eulerian graph in the MST, by solving a perfect matching
         MST meuler = find_eulerian_graph(mt, g, opmat);
         
-      //  prin_mst(meuler, "mst.dot");
-       // cout << "Finding euler tour..." << endl;        
+        //(3): Extract an eulerian tour in the eulerian graph given (it certainly exists)
         TSPSolution sol = extract_eulerian_tour(meuler, g);
         
-       //cout << "Finding hamiltonian tour..." << endl;
+        //(4): Extract a hamiltonian tour from the eulerian tour given
         sol = extract_hamiltonian_tour(sol, g);
-       
-      //  printTSPSolution(sol); 
-      //  check_solution(sol, g);
         
+        //return approximated solution        
         return sol.cost;
     }
   
