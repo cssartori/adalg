@@ -625,6 +625,16 @@ namespace Christofides{
         }
     }
     
+    //Function to print a TSP solution
+    void print_tsp(const TSPSolution& sol){
+        printf("===== TSP Tour =====\n");
+        for(unsigned int i=0;i<sol.perm.size();i++){
+            printf("%u\n", sol.perm[i]);
+        }
+        printf("%u\n", sol.perm[0]);
+        printf("====================\n");
+    }
+    
     
     //runs christofides algorithm to get an approximation of a TSP solution
     Distance run_christofides(const ChrisGraph& g, int opmat, double p){
@@ -640,6 +650,7 @@ namespace Christofides{
         //(4): Extract a hamiltonian tour from the eulerian tour given
         sol = extract_hamiltonian_tour(sol, g);
         
+        print_tsp(sol);
         //return approximated solution        
         return sol.cost;
     }
