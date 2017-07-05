@@ -10,7 +10,7 @@ using namespace std;
 using namespace Christofides;
 
 static unsigned int NUM_EXP = 10;
-static const unsigned int DEFAULT_OPMAT = BLOSSOM_COMPLETE_MAT_ALG; //binary k-heap (2-heap)
+static const unsigned int DEFAULT_OPMAT = DEFAULT_MAT_ALG; //binary k-heap (2-heap)
 Distance bksv;
 
 void read_parameters(int argc, char **argv, unsigned int *opmat, double *p);

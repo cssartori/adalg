@@ -15,6 +15,8 @@ namespace Christofides{
     static const unsigned int BLOSSOM_COMPLETE_MAT_ALG = 1; //calls SolveComplete() : it is inefficient and uses for memory
     static const unsigned int BLOSSOM_SOLVE_MAT_ALG = 2; //calls Solve() : more efficient, less memory, but may not finish (appears to have some bug)
     static const unsigned int GREEDY_MAT_ALG = 3; //Calculates an approximation to the perfect matching with an efficient greedy algorithm
+    static const unsigned int DEFAULT_MAT_ALG = BLOSSOM_SOLVE_MAT_ALG;
+    static const double DEFAULT_GREEDY_P = 1.5;
         
     static const Distance MAX_WEIGHT = std::numeric_limits<Distance>::max(); 
     
@@ -48,7 +50,7 @@ namespace Christofides{
     unsigned int read_instance(ChrisGraph& g, std::istream& f);
     
     //runs christofides algorithm to get an approximation of a TSP solution
-    Distance run_christofides(const ChrisGraph& g, int opmat=BLOSSOM_COMPLETE_MAT_ALG, double p=1.5);
+    Distance run_christofides(const ChrisGraph& g, int opmat=DEFAULT_MAT_ALG, double p=DEFAULT_GREEDY_P);
 }
 
 #endif //__CRISGRAPH_H__

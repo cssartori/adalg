@@ -6,13 +6,6 @@ timestamp() {
 
 idir="../instances/"
 
-odir="../data/"
-mkdir $odir
-bodir=$odir"blossom/"
-godir=$odir"greedy/"
-mkdir $bodir
-mkdir $godir
-
 unzip -d $idir $idir"instances.zip" 
 #gunzip $idir"*.gz"
 

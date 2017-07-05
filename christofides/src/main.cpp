@@ -50,7 +50,7 @@ int main(int argc, char **argv){
 void read_parameters(int argc, char **argv, int *opmat, double *p, bool *time_info){
 
     //default values
-	*opmat = BLOSSOM_COMPLETE_MAT_ALG;
+	*opmat = DEFAULT_MAT_ALG;
 	*time_info = false;
 	*p = 1.5;
 	

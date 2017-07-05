@@ -397,7 +397,7 @@ namespace Christofides{
                             const std::vector<unsigned int>& mates, 
                             const std::vector<unsigned int>& oddn, 
                             const ChrisGraph& g,
-                            double p=1.5){
+                            double p=DEFAULT_GREEDY_P){
                             
         static const unsigned int NE = p*oddn.size();            
         maxed = vector< pair<unsigned,unsigned> >();
@@ -433,7 +433,7 @@ namespace Christofides{
     	}                              
     }
     
-    MST greedy_matching(const std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g, double p = 1.5){
+    MST greedy_matching(const std::vector<unsigned int>& oddn, const MST& mt, const ChrisGraph& g, double p = DEFAULT_GREEDY_P){
         vector<unsigned int> mates(g.dim, NULL_NODE);
         unsigned int matched = 0;
                 
@@ -524,7 +524,7 @@ namespace Christofides{
     }
     
     //find an Eulerian Graph with the mst generated from the input graph and a matching subgraph
-    MST find_eulerian_graph(const MST& mt, const ChrisGraph& g, int opmat = BLOSSOM_COMPLETE_MAT_ALG, double p = 1.5){
+    MST find_eulerian_graph(const MST& mt, const ChrisGraph& g, int opmat = DEFAULT_MAT_ALG, double p = DEFAULT_GREEDY_P){
         std::vector<unsigned int> oddn; // nodes with odd number of neighbors
         //by the handshaking lemma, oddn has even size
         for(unsigned int u=0;u<mt.g.size();u++){
