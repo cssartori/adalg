@@ -92,9 +92,12 @@ def __proc_table_file__(dirname, outfname, rfext):
     c = 0
     avn = 0
     avv = 0
-    bavv = 0
-    bavd = 0.0
-    bavt = 0.0
+    bcavv = 0
+    bcavd = 0.0
+    bcavt = 0.0
+    bsavv = 0
+    bsavd = 0.0
+    bsavt = 0.0
     gavv = 0
     gavd = 0.0
     gavt = 0.0
@@ -111,19 +114,16 @@ def __proc_table_file__(dirname, outfname, rfext):
         
         #print Blossom complete
         outf.write("%u & %.2f & %.2Le & " % (lr[i][4], lr[i][6], lr[i][3]))
-        bavv += lr[i][4]
-        bavd += lr[i][6]
-        bavt += lr[i][3]        
+        bcavv += lr[i][4]
+        bcavd += lr[i][6]
+        bcavt += lr[i][3]        
         
-        if(lr[i+1][1] == 2):
-            #print Blossom solve
-            i+=1
-            outf.write("%u & %.2f & %.2Le & " % (lr[i][4], lr[i][6], lr[i][3]))
-            gavv += lr[i][4]
-            gavd += lr[i][6]
-            gavt += lr[i][3]    
-        else:
-            outf.write(" - & - & - & ")
+        #print Blossom solve
+        i+=1
+        outf.write("%u & %.2f & %.2Le & " % (lr[i][4], lr[i][6], lr[i][3]))
+        bsavv += lr[i][4]
+        bsavd += lr[i][6]
+        bsavt += lr[i][3]    
             
         #print Greedy
         i+=1
@@ -135,7 +135,7 @@ def __proc_table_file__(dirname, outfname, rfext):
         i+=1    
     
     #print average data
-    #outf.write("\\textbf{M\'edia} & & %.1f & %.1f & %.1f &")                
+    outf.write("\n\\textbf{M\\'edia} & & %.1f & %.1f & %.2f & %.2f & %.2Le & %.2f & %.2f & %.2Le & %.2f & %.2f & %.2Le\\\\" % (avn/c, avv/c, bcavv/c, bcavd/c, bcavt/c, bsavv/c, bsavd/c, bsavt/c, gavv/c, gavd/c, gavt/c))                
     outf.close()                
             
     
