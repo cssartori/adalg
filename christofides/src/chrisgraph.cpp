@@ -650,7 +650,7 @@ namespace Christofides{
         //(4): Extract a hamiltonian tour from the eulerian tour given
         sol = extract_hamiltonian_tour(sol, g);
         
-        print_tsp(sol);
+        //print_tsp(sol);
         //return approximated solution        
         return sol.cost;
     }

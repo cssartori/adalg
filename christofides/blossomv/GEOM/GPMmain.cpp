@@ -18,7 +18,7 @@ GeomPerfectMatching::REAL GeomPerfectMatching::SolveComplete()
 	{
 		for (q=p+1; q<node_num; q++)
 		{
-			pm->AddEdge(p, q, Dist(p, q));
+			pm->AddEdge(p, q, lrint(Dist(p, q)));
 		}
 	}
 	pm->options = options;
@@ -114,7 +114,7 @@ GeomPerfectMatching::REAL GeomPerfectMatching::Solve()
 			for (e=edges->ScanFirst(); e; e=edges->ScanNext())
 			{
 				p = e->head[1]; q = e->head[0];
-				pm->AddEdge(p, q, Dist(p, q));
+				pm->AddEdge(p, q, lrint(Dist(p, q)));
 			}
 		}
 		if (options.verbose) printf("iter %d: ", iter+1);
