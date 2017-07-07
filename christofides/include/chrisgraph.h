@@ -49,6 +49,9 @@ namespace Christofides{
     //read the input stream into a graph for chirstofides algorithm    
     unsigned int read_instance(ChrisGraph& g, std::istream& f);
     
+    //Function to print a TSP solution
+    void print_tsp(const TSPSolution& sol);
+    
     //runs christofides algorithm to get an approximation of a TSP solution
     Distance run_christofides(const ChrisGraph& g, int opmat=DEFAULT_MAT_ALG, double p=DEFAULT_GREEDY_P);
 }

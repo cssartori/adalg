@@ -32,9 +32,9 @@ set ylabel "tempo (s)"
 
 
 #times
-plot "../data/graphics/gbc.dat" u 3:4 w lp pt 7 lw 3 title "Blossom Complete"
-replot "../data/graphics/gbs.dat" u 3:4 w lp pt 7 lw 3 title "Blossom"
-replot "../data/graphics/ggc.dat" u 3:4 w lp pt 7 lw 3 title "Greedy"
+plot "../data/graphics/gbc.dat" u 3:4 w lp pt 7 lw 3 title "BC"
+replot "../data/graphics/gbs.dat" u 3:4 w lp pt 7 lw 3 title "BS"
+replot "../data/graphics/ggc.dat" u 3:4 w lp pt 7 lw 3 title "GR"
 set output "../data/graphics/gTime.eps"
 replot
 unset output
@@ -42,9 +42,9 @@ unset output
 #deviation
 set ylabel "desvio ((v-b)/b)"
 set xrange[20:22000]
-plot "../data/graphics/gbc.dat" u 3:7 w lp pt 7 lw 3 title "Blossom Complete"
-replot "../data/graphics/gbs.dat" u 3:7 w lp pt 7 lw 3 title "Blossom"
-replot "../data/graphics/ggc.dat" u 3:7 w lp pt 7 lw 3 title "Greedy"
+plot "../data/graphics/gbc.dat" u 3:7 w lp pt 7 lw 3 title "BC"
+replot "../data/graphics/gbs.dat" u 3:7 w lp pt 7 lw 3 title "BS"
+replot "../data/graphics/ggc.dat" u 3:7 w lp pt 7 lw 3 title "GR"
 replot 0.5 notitle w l lt 0 # limit line
 set output "../data/graphics/gDev.eps"
 replot

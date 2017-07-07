@@ -18,6 +18,9 @@ GeomPerfectMatching::REAL GeomPerfectMatching::SolveComplete()
 	{
 		for (q=p+1; q<node_num; q++)
 		{
+			//Changed the distance to be the nearest integer, in order to avoid
+			//a possible bug in the Perfect Matching.
+			//pm->AddEdge(p, q, Dist(p, q));
 			pm->AddEdge(p, q, lrint(Dist(p, q)));
 		}
 	}
@@ -114,6 +117,9 @@ GeomPerfectMatching::REAL GeomPerfectMatching::Solve()
 			for (e=edges->ScanFirst(); e; e=edges->ScanNext())
 			{
 				p = e->head[1]; q = e->head[0];
+				//Changed the distance to be the nearest integer, in order to avoid
+				//a possible bug in the Perfect Matching.
+				//pm->AddEdge(p, q, Dist(p, q));
 				pm->AddEdge(p, q, lrint(Dist(p, q)));
 			}
 		}

@@ -37,6 +37,7 @@
 
 
 // if defined, edge costs are of type 'double', otherwise 'int'
+// Note: turned off in order to use integer edge wheigts, avoiding possible bug
 //#define PERFECT_MATCHING_DOUBLE
 
 // Note: with floating point numbers polynomial complexity is not guaranteed;

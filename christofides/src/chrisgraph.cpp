@@ -358,7 +358,9 @@ namespace Christofides{
             oddn[i] = NULL_NODE;
             oddn[j] = NULL_NODE;
             delete [] ps[i];
+            delete [] ps[j];
             ps[i] = nullptr;
+            ps[j] = nullptr;
         }        
 
 //        //Old code: uses the PerfectMatching struct only, adding
