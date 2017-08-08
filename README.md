@@ -1,6 +1,6 @@
 # Implementation of Algorithms  #
 
-This repository contains the implementation of several different algorithms that come up in Computer Science. Most of them are well known, while some might be more rare/obscure.
+This repository contains the implementation of well known algorithms from Computer Science.
 
 ## Development ##
 
