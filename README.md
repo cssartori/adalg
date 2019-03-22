@@ -16,4 +16,4 @@ The language of choice is C++(11) for performance.
 ## About ##
 Done by Carlo S. Sartori
 
-Mostly done in "CMP 588 - Advanced Algorithms" class, at UFRGS, 2017/1.
+Mostly for "CMP 588 - Advanced Algorithms" course, at UFRGS - 2017/1.
